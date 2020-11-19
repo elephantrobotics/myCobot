@@ -1,2 +1,2 @@
 # myCobot
-myCobot is worlds smallest collaborative robot arm. Launch soon. 
+myCobot is the worlds smallest collaborative robot arm. Launch soon. 
