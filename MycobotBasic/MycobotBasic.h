@@ -13,7 +13,9 @@
 #define ITR_TIMES_MAX		4
 
 #define SEND_DATA_GAP 		4
-#define WRITE_TIME_GAP		5		// every 8 ms to play one data
+#define WRITE_SERVO_GAP		20
+#define WRITE_TIME_GAP		20		// every 8 ms to play one data
+#define WRITE_SIGLE_SERVO_GAP 50
 #define REC_TIME_DELAY		20		// every 20 ms to store one dat
 
 #define error_angle 		-1000
@@ -43,6 +45,7 @@ public:
 	// set data 
 	void setServoEncoder(byte servo_no, int servo_encoder, int servo_sp);
 	void setAngle(byte servo_no, int angle , int sp);
+	void setServosEncoder(int servo_encoder_1, int servo_encoder_2, int servo_encoder_3, int servo_encoder_4, int servo_encoder_5, int servo_encoder_6, int servo_sp );
 	void calibrateServo(byte servo_no);
 	void setServoData(byte servo_no,byte servo_state, byte servo_data);
 	void releaseAllServos();
