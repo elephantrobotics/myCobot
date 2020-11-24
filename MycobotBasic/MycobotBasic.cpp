@@ -91,12 +91,13 @@ void MycobotBasic::setAngle(byte servo_no, int angle , int sp)
 
 void MycobotBasic::setServoEncoder(byte servo_no, int servo_encoder, int servo_sp)
 {
+    if (servo_encoder == -1) return;
     byte angle_low = lowByte(servo_encoder);
     byte angle_high = highByte(servo_encoder);
 
     byte speed_low = lowByte(servo_sp);
     byte speed_high = highByte(servo_sp);
-    
+
     Serial2.write(header);
     Serial2.write(header);
     Serial2.write(0x07);
@@ -109,10 +110,58 @@ void MycobotBasic::setServoEncoder(byte servo_no, int servo_encoder, int servo_s
     Serial2.write(speed_high);      // data5
 
     Serial2.write(footer);
-    delay(WRITE_TIME_GAP);
+    delay(WRITE_SIGLE_SERVO_GAP);
 }
 
 
+void MycobotBasic::setServosEncoder(int servo_encoder_1, int servo_encoder_2, int servo_encoder_3,
+int servo_encoder_4, int servo_encoder_5, int servo_encoder_6, int servo_sp )
+{
+    byte angle_1_low = lowByte(servo_encoder_1);
+    byte angle_1_high = highByte(servo_encoder_1);
+
+    byte angle_2_low = lowByte(servo_encoder_2);
+    byte angle_2_high = highByte(servo_encoder_2);
+
+    byte angle_3_low = lowByte(servo_encoder_3);
+    byte angle_3_high = highByte(servo_encoder_3);
+
+    byte angle_4_low = lowByte(servo_encoder_4);
+    byte angle_4_high = highByte(servo_encoder_4);
+
+    byte angle_5_low = lowByte(servo_encoder_5);
+    byte angle_5_high = highByte(servo_encoder_5);
+
+    byte angle_6_low = lowByte(servo_encoder_6);
+    byte angle_6_high = highByte(servo_encoder_6);
+
+    byte speed_low = lowByte(servo_sp);
+    byte speed_high = highByte(servo_sp);
+
+    Serial2.write(header);
+    Serial2.write(header);
+    Serial2.write(16);
+    Serial2.write(0x21);
+
+    Serial2.write(angle_1_low);
+    Serial2.write(angle_1_high);
+    Serial2.write(angle_2_low);
+    Serial2.write(angle_2_high);
+    Serial2.write(angle_3_low);
+    Serial2.write(angle_3_high);
+    Serial2.write(angle_4_low);
+    Serial2.write(angle_4_high);
+    Serial2.write(angle_5_low);
+    Serial2.write(angle_5_high);
+    Serial2.write(angle_6_low);
+    Serial2.write(angle_6_high);
+
+    Serial2.write(speed_low);       // data4
+    Serial2.write(speed_high);      // data5
+
+    Serial2.write(footer);
+    delay(WRITE_SERVO_GAP);
+}
 
 
 void MycobotBasic::setServoData(byte servo_no,byte servo_state, byte servo_data)
@@ -126,6 +175,7 @@ void MycobotBasic::setServoData(byte servo_no,byte servo_state, byte servo_data)
     Serial2.write(servo_state);
     Serial2.write(servo_data);
     Serial2.write(footer);
+    delay(WRITE_TIME_GAP);
 }
 
 
@@ -137,6 +187,7 @@ void MycobotBasic::calibrateServo(byte servo_no)
     Serial2.write(SET_CALIBRATAION);
     Serial2.write(servo_no);
     Serial2.write(footer);
+    delay(WRITE_TIME_GAP);
 }
 
 
@@ -151,6 +202,7 @@ int MycobotBasic::getAngleEncoder(byte joint_no)
     Serial2.write(footer);
 
     rFlushSerial();
+    delay(1);
 
     if(!checkHeader())
     {
@@ -164,6 +216,11 @@ int MycobotBasic::getAngleEncoder(byte joint_no)
             return -1;
         }
         int encoder_data = data_len[0] + data_len[1]*256;
+
+        if ((encoder_data > 4100)||(encoder_data < 0))
+        {
+            return -1;
+        }
         return encoder_data;
       }
       return -1;
@@ -231,12 +288,13 @@ void MycobotBasic::setColor(byte color)
 
 void MycobotBasic::releaseAllServos()
 {
-  for (int i = 1; i < 7; i ++)
+  for (int i = 0; i < 7; i ++)
   {
     // relase all servos
     setServoData(i, 40 , 0);
     delay(10);
   }
+
 }
 
 void MycobotBasic::setAtomPinMode(byte pin, byte mode)
@@ -248,6 +306,7 @@ void MycobotBasic::setAtomPinMode(byte pin, byte mode)
     Serial2.write(pin);
     Serial2.write(mode);
     Serial2.write(footer);
+    delay(5);
 }
 
 
@@ -260,6 +319,7 @@ void MycobotBasic::setAtomDigitalWrite(byte pin, byte data)
     Serial2.write(pin);
     Serial2.write(data);
     Serial2.write(footer);
+    delay(5);
 
 }
 

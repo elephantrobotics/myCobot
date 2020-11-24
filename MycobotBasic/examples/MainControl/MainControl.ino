@@ -9,7 +9,7 @@ typedef struct{
 int data_len_max = 1000;
 joint_angles_enc jae[1000];
 
-byte control_pin = 1;   // PIN 1 high -> loop play data from Flash
+byte control_pin = 26;   // PIN 26 high -> loop play data from Flash
 
 int rec_data_len = 0;
 byte mycobot_mode = 0; 
@@ -80,7 +80,7 @@ void updateMode(byte btn_pressed)
         play(); // play loop from ram
         break;
       case 2:
-        mycobot_mode = 12;
+        mycobot_mode = 11;  // only for flash now
         play(); // play loop from flash
         break;
       case 3:
@@ -102,7 +102,7 @@ void updateMode(byte btn_pressed)
         record();
         break;
       case 2:
-        mycobot_mode = 22;
+        mycobot_mode = 21;  // record into ram as well
         displayInfo(mycobot_mode);
         record();
         break;
@@ -352,9 +352,7 @@ void displayInfo(byte mc_mode)
       M5.Lcd.print("Empty data!");
       break; 
     }
-
   }
-  
 }
 
 void record()  // is stop
@@ -371,23 +369,17 @@ void record()  // is stop
     for (int i = 0 ; i < 6; i ++)
     {
       jae[data_index].joint_angle[i] = myCobot.getAngleEncoder(i+1);
+      Serial.println(jae[data_index].joint_angle[i]);
     }
 
     delay(REC_TIME_DELAY - SEND_DATA_GAP);
 
     rec_data_len++;
-
     if (M5.BtnA.wasPressed()||M5.BtnB.wasPressed()||M5.BtnC.wasPressed()) break;
   }
 
-   if (mycobot_mode == 22)  // record into flash
-  {
-    M5.update(); 
-    displayInfo(42);
-  }
-  
   displayInfo(33);
-  delay(1000);
+  delay(2000);
   
   mycobot_mode = 0;
   displayInfo(mycobot_mode);
@@ -412,25 +404,14 @@ void play()  // is stop  is pause
   
   while(1)
   {
-    if(checkDataLen()) break;
-
     // play once
     for (int index = 0 ; index < rec_data_len; index++)
     {
       M5.update(); 
 
-      // set data from jae
-      for (int i = 0 ; i < 6; i ++)
-      {
-        int sp = 4000;
-        int a_data = jae[index].joint_angle[i];
-  
-        if (a_data != -1)
-        {
-          myCobot.setServoEncoder(i+1,a_data , sp );
-        }
-      }
-
+      myCobot.setServosEncoder(jae[index].joint_angle[0],jae[index].joint_angle[1],jae[index].joint_angle[2],
+      jae[index].joint_angle[3],jae[index].joint_angle[4],jae[index].joint_angle[5],1000);
+      
       // check pause button
       if (M5.BtnB.wasPressed())
       {
@@ -548,21 +529,23 @@ void recordIntoFlash()
 
 void checkIO()
 {
-  bool pin_data = digitalRead(control_pin);
-  
-  displayInfo(51);
-  delay(error_display_time);
-   
-  if (pin_data)
+  int pin_data = digitalRead(control_pin);
+
+  return;
+  if (pin_data == 1)
   {
+    displayInfo(51);
+    delay(error_display_time);
+    
     mycobot_mode = 12;
     play();
   }
-  
+
 }
 
 bool checkDataLen()
 {
+
   if (rec_data_len == 0){
     displayInfo(53);
     delay(error_display_time);
