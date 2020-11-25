@@ -7,6 +7,8 @@ This is for M5 Basic Board to use only !
 M5Stack Basic 的基本应用与烧录可以参考以下链接
 https://docs.m5stack.com/#/zh_CN/core/basic
 
+# Library & Example 
+如果您在使用案例，请先测试 SimpleTest.ino 文件验证通讯，该程序应烧录到底层Basic中
 
 # API
 ## setServoEncoder (byte servo_no, int servo_encoder, int servo_sp);
