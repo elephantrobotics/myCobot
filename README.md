@@ -11,3 +11,5 @@ https://docs.m5stack.com/#/zh_CN/core/basic
 如果您在使用案例，请先测试 SimpleTest.ino 文件验证通讯，该程序应烧录到底层Basic中
 请查看Arduino目录下的API
 
+# Software
+新版本的固件烧录器新增ROS与Python驱动固件，使用时请注意烧录终端与固件版本号
