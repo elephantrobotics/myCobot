@@ -14,8 +14,9 @@ void setup() {
   //赋值容器内部元素
   for(auto &val : angles)       
     val = 0.0;
-  //舵机回到原点
+  //关节回到原点
   myCobot.WriteAngles(angles, 50);
+  delay(5000);
 }
 
 void loop() {

@@ -66,7 +66,7 @@ void BtnAPressOnce()
     return;
   }
   
-  myCobot.setServoCalibration(static_cast<Joint>(calibrate_servo_no));
+  myCobot.setServoCalibration(calibrate_servo_no);
 
   M5.Lcd.print("Calibrating\nServo\n\n");
   M5.Lcd.setTextSize(8);
@@ -75,7 +75,7 @@ void BtnAPressOnce()
   
   delay(100);
 
-  myCobot.SetEncoder(static_cast<Joint>(calibrate_servo_no), 2048);
+  myCobot.SetEncoder(calibrate_servo_no, 2047);
   delay(400);
 
   calibrate_servo_no ++;
