@@ -1,4 +1,5 @@
 #include <MycobotBasic.h>
+#include <ParameterList.h>
 
 MycobotBasic myCobot;
 int calibrate_servo_no = 1;
@@ -6,6 +7,8 @@ int calibrate_servo_no = 1;
 void setup() {
   myCobot.setup();
   M5.Lcd.setTextSize(3);
+  myCobot.powerOn();
+  myCobot.setLEDRGB(255, 255, 255);
 
   info();
 }
@@ -17,23 +20,38 @@ void loop() {
    // M5.Lcd.clear(BLACK);
   
      if (M5.BtnA.wasPressed()) {
+      myCobot.setLEDRGB(255, 0, 0);
       BtnAPressOnce();
       } 
     if (M5.BtnB.wasPressed()) {
+        myCobot.setLEDRGB(0, 255, 0);
         BtnBPressOnce();
       }
 
    if (M5.BtnC.wasPressed()) {
+      myCobot.setLEDRGB(0, 0, 255);
       BtnCPressOnce();
       }
 
    if(M5.BtnB.wasReleasefor(800)){  // force to test the servos
-      calibrate_servo_no = 7;
+      calibrate_servo_no = 6;
       BtnBPressOnce();
      }
   
 
 }
+
+void info()
+{
+  M5.Lcd.clear(BLACK);
+  delay(50);
+  M5.Lcd.setCursor(0,0);
+  delay(50);
+  
+  M5.Lcd.print("Press A - Cablibrate Servo 1~6 \n\n");
+  M5.Lcd.print("Press B - Test Servos (long press to force testing)\n\n");
+  M5.Lcd.print("Press C - Restart Calibaration");
+} 
 
 void BtnAPressOnce()
 {
@@ -48,7 +66,7 @@ void BtnAPressOnce()
     return;
   }
   
-  myCobot.calibrateServo(calibrate_servo_no);
+  myCobot.setServoCalibration(static_cast<Joint>(calibrate_servo_no));
 
   M5.Lcd.print("Calibrating\nServo\n\n");
   M5.Lcd.setTextSize(8);
@@ -57,7 +75,7 @@ void BtnAPressOnce()
   
   delay(100);
 
-  myCobot.setServoEncoder(calibrate_servo_no,2048,1000);
+  myCobot.SetEncoder(static_cast<Joint>(calibrate_servo_no), 2048);
   delay(400);
 
   calibrate_servo_no ++;
@@ -69,28 +87,23 @@ void BtnBPressOnce()
 {
   M5.Lcd.clear(BLACK);
   delay(50);
-  
+  // move all servos
   if (calibrate_servo_no > 6)
   {
      for (int i = 1; i < 7; i ++)
     {
       M5.Lcd.printf("Move servo %d \n",i);
-      
-      // relase all servos
-      myCobot.setServoEncoder(i, 2148 , 1000);
-      delay(500);
-      myCobot.setServoEncoder(i, 1948 , 1000);
-      delay(500);
-      myCobot.setServoEncoder(i, 2048 , 1000);
-      delay(500);
-      
+
+      myCobot.SetEncoder(i, 1848);
+      delay(2500);
+      myCobot.SetEncoder(i, 2248);
+      delay(3000);
+      myCobot.SetEncoder(i, 2048);
+      delay(2500);
     }
-    
-    delay(1000);
     info();
   }
-  else
-  {
+  else{
     M5.Lcd.print("Only move after all servo calibrated");
     return;
   }
@@ -102,20 +115,9 @@ void BtnCPressOnce()
   delay(50);
   
   M5.Lcd.print("Restart to calibrate");
-  calibrate_servo_no = 1;
-  myCobot.releaseAllServos();
+  calibrate_servo_no = 0;
+  //关闭扭力输出
+  myCobot.setFreeMove();
   delay(1000);
   info();
-}
-
-void info()
-{
-  M5.Lcd.clear(BLACK);
-  delay(50);
-  M5.Lcd.setCursor(0,0);
-  delay(50);
-  
-  M5.Lcd.print("Press A - Cablibrate Servo 1~6 \n\n");
-  M5.Lcd.print("Press B - Test Servos (long press to force testing)\n\n");
-  M5.Lcd.print("Press C - Restart Calibaration");
 }
