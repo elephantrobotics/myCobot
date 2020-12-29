@@ -21,17 +21,13 @@ void setup() {
 
 void loop() {
   Serial.println("point 0");
-
-  int sp = 60;
-
+  int sp = 60;                //set move speed
   // Move to Angle
   Angles angles;
   for ( auto &val : angles)
     val = 0.0;
   myCobot.WriteAngles(angles, sp);
-
   delay(5000);
- 
   // Move to Coords 6 points
   for(int j = 0; j < 6; ++j)
   {
