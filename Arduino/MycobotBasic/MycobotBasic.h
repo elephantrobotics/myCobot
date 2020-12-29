@@ -4,11 +4,13 @@
 #include <Arduino.h>
 #include <M5Stack.h>
 #include <MycobotSaver.h>
+#include <ParameterList.h>
+#include <CommunicateDefine.h>
 
 #define BAUD_RATE 			1000000
 #define IORecWrong			-1
-#define	header				0xfa
-#define footer				0xfe
+#define	header				0xfe
+#define footer				0xfa
 #define IOTimeOut			30
 #define ITR_TIMES_MAX		4
 
@@ -23,14 +25,8 @@
 #define angle_to_encoder	11.3777777
 #define encoder_cal_point 	2048
 
-#define GET_ANGLE_ENCODER	0x11
-#define SET_SERVO_ANGLE		0x20
-#define SET_SERVO_DATA		0x24
-#define SET_CALIBRATAION	0x25
-#define SET_ATOM_PIN_MODE	0x30
-#define SET_ATOM_DIGITAL	0X31
-#define SET_RGB				0x33
 
+using namespace myCobotDefine;
 
 class MycobotBasic
 {
@@ -42,25 +38,77 @@ public:
 
 	void setup();
 
-	// set data 
-	void setServoEncoder(byte servo_no, int servo_encoder, int servo_sp);
-	void setAngle(byte servo_no, int angle , int sp);
-	void setServosEncoder(int servo_encoder_1, int servo_encoder_2, int servo_encoder_3, int servo_encoder_4, int servo_encoder_5, int servo_encoder_6, int servo_sp );
-	void calibrateServo(byte servo_no);
-	void setServoData(byte servo_no,byte servo_state, byte servo_data);
-	void releaseAllServos();
+	// Overall Status
+	void powerOn();
+	void powerOff();
+	bool isPoweredOn();
 
-	// get data
-	int getAngleEncoder(byte joint_no);
-	double getAngle(byte joint_no);
 
-	// led
-	void setRGB(byte R, byte G, byte B);
-	void setColor(byte color);
+	// MDI mode and operation
+	Angles GetAngles();
+	void WriteAngle(int joint, float value, int speed);
+	void WriteAngles(Angles angles, int speed);
+	Coords GetCoords();
+	void WriteCoord(Axis axis, float value, int speed);
+	void WriteCoords(Coords coords, int speed);
+	int isInPosition(Coords coord, bool is_linear);
+	bool CheckRunning();
 
-	// atom pin mode changes
-	void setAtomPinMode(byte pin, byte mode);
-	void setAtomDigitalWrite(byte pin, byte data);
+
+
+
+	// JOG mode and operation
+	void JogAngle(int joint, int direction, int speed);
+	void JogCoord(Axis axis, int direction, int speed);
+	void JogStop();
+	void SetEncoder(int joint, int encoder);
+	int GetEncoder(int joint);
+	void SetEncoders(Angles angleEncoders, int speed);
+
+
+
+	// Running Status and Settings
+	int GetSpeed();
+	void SetSpeed(int percentage);
+	float GetFeedOverride();
+	void SendFeedOverride(float feedOverride);
+	float GetAcceleration();
+	void SetAcceleration(float acceleration);
+	float getJointMin(int joint);
+	float getJointMax(int joint);
+	void setJointMin(int joint, float angle);
+	void setJointMax(int joint, float angle);
+
+
+
+	// Servo Control
+	bool isServoEnabled(int joint);
+	bool isAllServoEnabled();
+
+	byte getServoData(int joint, byte data_id);
+	void setServoCalibration(int joint);
+	void JointBrake(int joint);
+
+
+
+	// Atom IO
+	void setPinMode(byte pin_no, byte pin_mode);
+
+
+	
+
+	// function
+	void pause();
+	void resume();
+	void stop();
+
+	void setServoData(byte servo_no, byte servo_state, byte servo_data);
+	void setFreeMove();
+
+	void setLEDRGB(byte r, byte g, byte b);
+	void setGripper(int data);
+
+
 
 private:
 	
@@ -68,9 +116,14 @@ private:
 	bool checkHeader();
 	int readSerial(unsigned char *nDat, int nLen);
 
+
+	void* readData();
+
 	void rFlushSerial();
 	byte itr_time = 0;
 	
+	Angles errorAngles;
+	Coords errorCoords;
 };
 
 

@@ -22,19 +22,26 @@ void setup() {
 void loop() {
   Serial.println("point 0");
 
-  int sp = 600;
+  int sp = 60;
 
   // Move to Angle
-  myCobot.moveToAngle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, sp);
+  Angles angles;
+  for ( auto &val : angles)
+    val = 0.0;
+  myCobot.WriteAngles(angles, sp);
 
   delay(5000);
  
   // Move to Coords 6 points
-  for(int i = 0; i < 6; ++i)
+  for(int j = 0; j < 6; ++j)
   {
     Serial.print("point ");
-    Serial.println(i + 1);
-    myCobot.moveToCoord(points[i][0], points[i][1], points[i][2], points[i][3], points[i][4], points[i][5], 1, sp);
+    Serial.println(j + 1);
+    Coords coords;
+    for(int i = 0; i < 6; ++i){
+      coords[i] = points[j][i];
+    }
+    myCobot.WriteCoords(coords, sp);
     delay(3000);
   }
 

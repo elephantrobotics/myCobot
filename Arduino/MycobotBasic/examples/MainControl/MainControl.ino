@@ -20,18 +20,17 @@ void setup() {
   myCobot.setup();
   M5.Lcd.setTextSize(3);
   Serial.begin(9600);
-
+  myCobot.powerOn();
+  
   pinMode(control_pin, INPUT);
-
+  myCobot.setLEDRGB(0,255,0);
   updateMode(mycobot_mode);
 }
 
 void loop() {
    M5.update(); 
    byte btn_pressed = 0;
-
-   myCobot.setRGB(0,255,0);
-
+   
    if (M5.BtnA.wasPressed()) {
         btn_pressed = 1;
         updateMode(btn_pressed);
@@ -59,7 +58,7 @@ void updateMode(byte btn_pressed)
         mycobot_mode = 1;
         break;
       case 2:
-        myCobot.releaseAllServos();
+        myCobot.setFreeMove();
         mycobot_mode = 0;
         break;
       case 3:
@@ -357,7 +356,7 @@ void displayInfo(byte mc_mode)
 
 void record()  // is stop
 {
-  myCobot.setRGB(255,255,0);
+  myCobot.setLEDRGB(255,255,0);
 
   // record mode : 1- record to ram;  2- record to flash
   rec_data_len = 0;
@@ -368,7 +367,7 @@ void record()  // is stop
 
     for (int i = 0 ; i < 6; i ++)
     {
-      jae[data_index].joint_angle[i] = myCobot.getAngleEncoder(i+1);
+      jae[data_index].joint_angle[i] = myCobot.GetEncoder(i);
       Serial.println(jae[data_index].joint_angle[i]);
     }
 
@@ -387,7 +386,7 @@ void record()  // is stop
 
 void play()  // is stop  is pause
 {
-  myCobot.setRGB(0,255,0);
+  myCobot.setLEDRGB(0,255,0);
  
   bool is_stop = 0;
   bool is_pause = 0;
@@ -408,9 +407,11 @@ void play()  // is stop  is pause
     for (int index = 0 ; index < rec_data_len; index++)
     {
       M5.update(); 
-
-      myCobot.setServosEncoder(jae[index].joint_angle[0],jae[index].joint_angle[1],jae[index].joint_angle[2],
-      jae[index].joint_angle[3],jae[index].joint_angle[4],jae[index].joint_angle[5],1000);
+      Angles encoders;
+      for(int i = 0; i<6; i++){
+        encoders[i] = jae[index].joint_angle[i];
+      }
+      myCobot.SetEncoders(encoders, 50);
       
       // check pause button
       if (M5.BtnB.wasPressed())
