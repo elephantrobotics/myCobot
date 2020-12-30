@@ -6,8 +6,9 @@ if (2, 7) != sys.version_info[:2] < (3, 5):
 
 import setuptools
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+long_description = '''
+
+'''
 
 setuptools.setup(
     name="pymycobot", # Replace with your own username
