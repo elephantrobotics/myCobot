@@ -95,7 +95,8 @@ class MyCobot():
 
         '''
         _hex = self._angle_to_hex(degree)
-        command = 'fefe0621{}{}{}fa'.format(id, _hex, hex(speed)[2:])
+        speed = self._complement_zero(hex(speed)[2:], digit=2)
+        command = 'fefe0621{}{}{}fa'.format(id, _hex, speed)
         # print(command)  
         self._write(command)
 
@@ -231,7 +232,7 @@ class MyCobot():
 
     def pause(self):
         self._write('fefe0226fa')
-    
+
     def resume(self):
         self._write('fefe0228fa')
 
@@ -243,7 +244,7 @@ class MyCobot():
         data = self._read()
         flag = int(data.hex(), 16)
         return False if flag else True
-    
+
     def is_in_position(self, coords):
         if len(coords) != 6:
             print('The lenght of coords is not right')
@@ -308,8 +309,8 @@ class MyCobot():
 
     def _hex_to_degree(self, _hex):
         _int = self._hex_to_int(_hex)
-        return  _int * 18 / 314
-    
+        return _int * 18 / 314
+
     def _hex_to_int(self, _hex):
         _int = int(_hex, 16)
         if _int > 0x8000:
@@ -327,7 +328,7 @@ class MyCobot():
         radian = round(radian)
         s = str(hex(int(radian)))[2:] 
         s = self._complement_zero(s)
-        return  s
+        return s
 
     def _coord_to_hex(self, coord):
         coord *= 10
@@ -337,14 +338,14 @@ class MyCobot():
         s = str(hex(int(coord)))[2:]
         s = self._complement_zero(s)
         return s
-    
+
     def _complement_zero(self, s, digit=4):
         s_len = len(s)
         if s_len == digit:
             return s
         need_len = digit - s_len
         s = ''.join(['0' for _ in range(need_len)] + [s])
-        return  s
+        return s
 
     def _write(self, data):
         # print(data)
