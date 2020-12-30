@@ -6,7 +6,7 @@ class MyCobot():
     '''MyCobot Python API
 
     Possessed function:
-        power_on()              : 
+        power_on()              :
         power_off()             :
         get_angles()            :
         get_angles_of_radian()  :
@@ -25,10 +25,11 @@ class MyCobot():
         set_speed()             :
     '''
 
-    def __init__(self):
-        _prot = subprocess.run(['echo -n /dev/ttyUSB*'], 
-                                    stdout=subprocess.PIPE, 
-                                    shell=True).stdout.decode('utf-8')
+    def __init__(self, port):
+        _prot = port
+        # _prot = subprocess.run(['echo -n /dev/ttyUSB*'], 
+                                    # stdout=subprocess.PIPE, 
+                                    # shell=True).stdout.decode('utf-8')
         _boudrate = '115200'
         _timeout = 0.1
 
