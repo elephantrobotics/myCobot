@@ -1,9 +1,11 @@
-import time, random
+import time, random, subprocess
 from pymycobot.mycobot import MyCobot
 from pymycobot.common import Angle, Coord
 
 if __name__ == '__main__':
-    mycobot = MyCobot()
+    port = subprocess.check_output(['echo -n /dev/ttyUSB*'], 
+                                    shell=True)
+    mycobot = MyCobot(port)
 
     print('Start check api\n')
     # print()
@@ -23,7 +25,7 @@ if __name__ == '__main__':
     print('::get_angles_of_radian()')
     print('==> radians: {}\n'.format(mycobot.get_angles_of_radian()))
     time.sleep(0.5)
-    
+
     print('::send_angles()')
     mycobot.send_angles([0,0,0,0,0,0], 80)
     print('==> set angles [0,0,0,0,0,0], speed 80\n')
