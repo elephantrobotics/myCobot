@@ -412,7 +412,7 @@ void play()  // is stop  is pause
       for(int i = 0; i<6; i++){
         encoders[i] = jae[index].joint_angle[i];
       }
-      myCobot.SetEncoders(encoders, 50);
+      myCobot.SetEncoders(encoders, 100);
       
       // check pause button
       if (M5.BtnB.wasPressed())
@@ -444,7 +444,7 @@ void play()  // is stop  is pause
 
       // check stop button
       if(is_stop == 1) break;
-      delay(WRITE_TIME_GAP*5.6); 
+      delay(WRITE_TIME_GAP*6); 
     }
 
     // stop button will also end loop
