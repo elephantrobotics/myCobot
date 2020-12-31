@@ -153,198 +153,198 @@ void* MycobotBasic::readData()
 
 	switch (static_cast<int>(data_len[0]))
 	{
-	case 3:
-		readSerial(r_data_3, 3);
-		switch (int(r_data_3[0]))
-		{
-			case IS_IN_POSITION:
+		case 3:
+			readSerial(r_data_3, 3);
+			switch (int(r_data_3[0]))
 			{
-				int* pInt = new int;
-				*pInt = r_data_3[1];
-				return pInt;
+				case IS_IN_POSITION:
+				{
+					int* pInt = new int;
+					*pInt = r_data_3[1];
+					return pInt;
+				}
+
+				case CHECK_RUNNING:
+				{
+					bool* pRunningState = new bool;
+					*pRunningState = bool(r_data_3[1]);
+					return pRunningState;
+				}
+
+				case GET_SPEED:
+				{
+					int* pSpeed = new int;
+					*pSpeed = r_data_3[1];
+					return pSpeed;
+				}
+				case IS_SERVO_ENABLED:
+				{
+					bool* pServoState = new bool;
+					*pServoState = bool(r_data_3[1]);
+					return pServoState;
+				}
+				case IS_ALL_SERVO_ENABLED:
+				{
+					bool* pServoState = new bool;
+					*pServoState = bool(r_data_3[1]);
+					return pServoState;
+				}
+				case IS_POWERED_ON:
+				{
+					bool* pPowerState = new bool;
+					*pPowerState = bool(r_data_3[1]);
+					return pPowerState;
+				}
+				case GET_SERVO_DATA:
+				{
+					byte* pServoData = new byte;
+					*pServoData = r_data_3[1];
+					return pServoData;
+				}
 			}
 
-			case CHECK_RUNNING:
+		case 4:
+			readSerial(r_data_4, 4);
+			switch (int(r_data_4[0]))
 			{
-				bool* pRunningState = new bool;
-				*pRunningState = bool(r_data_3[1]);
-				return pRunningState;
-			}
-
-			case GET_SPEED:
-			{
-				int* pSpeed = new int;
-				*pSpeed = r_data_3[1];
-				return pSpeed;
-			}
-			case IS_SERVO_ENABLED:
-			{
-				bool* pServoState = new bool;
-				*pServoState = bool(r_data_3[1]);
-				return pServoState;
-			}
-			case IS_ALL_SERVO_ENABLED:
-			{
-				bool* pServoState = new bool;
-				*pServoState = bool(r_data_3[1]);
-				return pServoState;
-			}
-			case IS_POWERED_ON:
-			{
-				bool* pPowerState = new bool;
-				*pPowerState = bool(r_data_3[1]);
-				return pPowerState;
-			}
-			case GET_SERVO_DATA:
-			{
-				byte* pServoData = new byte;
-				*pServoData = r_data_3[1];
-				return pServoData;
-			}
-		}
-
-	case 4:
-		readSerial(r_data_4, 4);
-		switch (int(r_data_4[0]))
-		{
-			case GET_FEED_OVERRIDE:
-			{
-				float* pFeedOverride = new float;
-				byte feedOverride_high = r_data_4[1];
-				byte feedOverride_low = r_data_4[2];
-				float temp = 0.0;
-				temp = feedOverride_low + feedOverride_high * 256;
-				*pFeedOverride = (temp > 60000 ? (temp - 65536) : temp) / 10;
-				return pFeedOverride;
-			}
-
-			case GET_ACCELERATION:
-			{
-				float* pAcceleration = new float;
-				byte acceleration_high = r_data_4[1];
-				byte acceleration_low = r_data_4[2];
-				float temp = 0.0;
-				temp = acceleration_low + acceleration_high * 256;
-				*pAcceleration = (temp > 60000 ? (temp - 65536) : temp) / 10;
-				return pAcceleration;
-			}
-			case GET_JOINT_MIN:
-			{
-				float* pJointMin = new float;
-				byte jointMin_high = r_data_4[1];
-				byte jointMin_low = r_data_4[2];
-				float temp = 0.0;
-				temp = jointMin_low + jointMin_high * 256;
-				*pJointMin = (temp > 60000 ? (temp - 65536) : temp) / 10;
-				return pJointMin;
-			}
-			case GET_JOINT_MAX:
-			{
-				float* pJointMax = new float;
-				byte jointMax_high = r_data_4[1];
-				byte jointMax_low = r_data_4[2];
-				float temp = 0.0;
-				temp = jointMax_low + jointMax_high * 256;
-				*pJointMax = (temp > 60000 ? (temp - 65536) : temp) / 10;
-				return pJointMax;
-			}
-			case GET_ENCODER:
-			{
-				int* pEncoder = new int;
-				byte encoder_high = r_data_4[1];
-				byte encoder_low = r_data_4[2];
-				*pEncoder = encoder_low + encoder_high * 256;
-				return pEncoder;
-			}
-		}
-
-	case 14:
-		readSerial(r_data_14, 14);
-		switch (int(r_data_14[0]))
-		{
-			case GET_ANGLES:
-			{
-					byte angle_1_high = r_data_14[1];
-					byte angle_1_low = r_data_14[2];
-
-					byte angle_2_high = r_data_14[3];
-					byte angle_2_low = r_data_14[4];
-
-					byte angle_3_high = r_data_14[5];
-					byte angle_3_low = r_data_14[6];
-
-					byte angle_4_high = r_data_14[7];
-					byte angle_4_low = r_data_14[8];
-
-					byte angle_5_high = r_data_14[9];
-					byte angle_5_low = r_data_14[10];
-
-					byte angle_6_high = r_data_14[11];
-					byte angle_6_low = r_data_14[12];
-
-					Angles* pAngles = new Angles;
+				case GET_FEED_OVERRIDE:
+				{
+					float* pFeedOverride = new float;
+					byte feedOverride_high = r_data_4[1];
+					byte feedOverride_low = r_data_4[2];
 					float temp = 0.0;
-					temp = angle_1_low + angle_1_high * 256;
-					pAngles->at(0) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
-					temp = angle_2_low + angle_2_high * 256;
-					pAngles->at(1) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
-					temp = angle_3_low + angle_3_high * 256;
-					pAngles->at(2) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
-					temp = angle_4_low + angle_4_high * 256;
-					pAngles->at(3) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
-					temp = angle_5_low + angle_5_high * 256;
-					pAngles->at(4) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
-					temp = angle_6_low + angle_6_high * 256;
-					pAngles->at(5) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+					temp = feedOverride_low + feedOverride_high * 256;
+					*pFeedOverride = (temp > 60000 ? (temp - 65536) : temp) / 10;
+					return pFeedOverride;
+				}
 
-					return pAngles;
+				case GET_ACCELERATION:
+				{
+					float* pAcceleration = new float;
+					byte acceleration_high = r_data_4[1];
+					byte acceleration_low = r_data_4[2];
+					float temp = 0.0;
+					temp = acceleration_low + acceleration_high * 256;
+					*pAcceleration = (temp > 60000 ? (temp - 65536) : temp) / 10;
+					return pAcceleration;
+				}
+				case GET_JOINT_MIN:
+				{
+					float* pJointMin = new float;
+					byte jointMin_high = r_data_4[1];
+					byte jointMin_low = r_data_4[2];
+					float temp = 0.0;
+					temp = jointMin_low + jointMin_high * 256;
+					*pJointMin = (temp > 60000 ? (temp - 65536) : temp) / 10;
+					return pJointMin;
+				}
+				case GET_JOINT_MAX:
+				{
+					float* pJointMax = new float;
+					byte jointMax_high = r_data_4[1];
+					byte jointMax_low = r_data_4[2];
+					float temp = 0.0;
+					temp = jointMax_low + jointMax_high * 256;
+					*pJointMax = (temp > 60000 ? (temp - 65536) : temp) / 10;
+					return pJointMax;
+				}
+				case GET_ENCODER:
+				{
+					int* pEncoder = new int;
+					byte encoder_high = r_data_4[1];
+					byte encoder_low = r_data_4[2];
+					*pEncoder = encoder_low + encoder_high * 256;
+					return pEncoder;
+				}
 			}
 
-			case GET_COORDS:
+		case 14:
+			readSerial(r_data_14, 14);
+			switch (int(r_data_14[0]))
 			{
-				byte x_high = r_data_14[1];
-				byte x_low = r_data_14[2];
+				case GET_ANGLES:
+				{
+						byte angle_1_high = r_data_14[1];
+						byte angle_1_low = r_data_14[2];
 
-				byte y_high = r_data_14[3];
-				byte y_low = r_data_14[4];
+						byte angle_2_high = r_data_14[3];
+						byte angle_2_low = r_data_14[4];
 
-				byte z_high = r_data_14[5];
-				byte z_low = r_data_14[6];
+						byte angle_3_high = r_data_14[5];
+						byte angle_3_low = r_data_14[6];
 
-				byte rx_high = r_data_14[7];
-				byte rx_low = r_data_14[8];
+						byte angle_4_high = r_data_14[7];
+						byte angle_4_low = r_data_14[8];
 
-				byte ry_high = r_data_14[9];
-				byte ry_low = r_data_14[10];
+						byte angle_5_high = r_data_14[9];
+						byte angle_5_low = r_data_14[10];
 
-				byte rz_high = r_data_14[11];
-				byte rz_low = r_data_14[12];
+						byte angle_6_high = r_data_14[11];
+						byte angle_6_low = r_data_14[12];
 
-				Coords* pCoords = new Coords;
-				float temp = 0.0;
+						Angles* pAngles = new Angles;
+						float temp = 0.0;
+						temp = angle_1_low + angle_1_high * 256;
+						pAngles->at(0) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+						temp = angle_2_low + angle_2_high * 256;
+						pAngles->at(1) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+						temp = angle_3_low + angle_3_high * 256;
+						pAngles->at(2) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+						temp = angle_4_low + angle_4_high * 256;
+						pAngles->at(3) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+						temp = angle_5_low + angle_5_high * 256;
+						pAngles->at(4) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+						temp = angle_6_low + angle_6_high * 256;
+						pAngles->at(5) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
 
-				temp = x_low + x_high * 256;
-				pCoords->at(0) = (temp > 60000 ? (temp - 65536) : temp) / 10;
-				temp = y_low + y_high * 256;
-				pCoords->at(1) = (temp > 60000 ? (temp - 65536) : temp) / 10;
-				temp = z_low + z_high * 256;
-				pCoords->at(2) = (temp > 60000 ? (temp - 65536) : temp) / 10;
-				temp = rx_low + rx_high * 256;
-				pCoords->at(3) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
-				temp = ry_low + ry_high * 256;
-				pCoords->at(4) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
-				temp = rz_low + rz_high * 256;
-				pCoords->at(5) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+						return pAngles;
+				}
 
-				return pCoords;
+				case GET_COORDS:
+				{
+					byte x_high = r_data_14[1];
+					byte x_low = r_data_14[2];
+
+					byte y_high = r_data_14[3];
+					byte y_low = r_data_14[4];
+
+					byte z_high = r_data_14[5];
+					byte z_low = r_data_14[6];
+
+					byte rx_high = r_data_14[7];
+					byte rx_low = r_data_14[8];
+
+					byte ry_high = r_data_14[9];
+					byte ry_low = r_data_14[10];
+
+					byte rz_high = r_data_14[11];
+					byte rz_low = r_data_14[12];
+
+					Coords* pCoords = new Coords;
+					float temp = 0.0;
+
+					temp = x_low + x_high * 256;
+					pCoords->at(0) = (temp > 60000 ? (temp - 65536) : temp) / 10;
+					temp = y_low + y_high * 256;
+					pCoords->at(1) = (temp > 60000 ? (temp - 65536) : temp) / 10;
+					temp = z_low + z_high * 256;
+					pCoords->at(2) = (temp > 60000 ? (temp - 65536) : temp) / 10;
+					temp = rx_low + rx_high * 256;
+					pCoords->at(3) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+					temp = ry_low + ry_high * 256;
+					pCoords->at(4) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+					temp = rz_low + rz_high * 256;
+					pCoords->at(5) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+
+					return pCoords;
+				}
+
+
 			}
-
-
-		}
-
-
 
 	}
+
+	return nullptr;
 }
 
 Angles MycobotBasic::GetAngles()
