@@ -368,10 +368,11 @@ void record()  // is stop
     for (int i = 0 ; i < 6; i ++)
     {
       jae[data_index].joint_angle[i] = myCobot.GetEncoder(i);
-      Serial.println(jae[data_index].joint_angle[i]);
+      //Serial.println(jae[data_index].joint_angle[i]);
+      delay(REC_TIME_DELAY - SEND_DATA_GAP);
     }
 
-    delay(REC_TIME_DELAY - SEND_DATA_GAP);
+    
 
     rec_data_len++;
     if (M5.BtnA.wasPressed()||M5.BtnB.wasPressed()||M5.BtnC.wasPressed()) break;
@@ -411,7 +412,7 @@ void play()  // is stop  is pause
       for(int i = 0; i<6; i++){
         encoders[i] = jae[index].joint_angle[i];
       }
-      myCobot.SetEncoders(encoders, 50);
+      myCobot.SetEncoders(encoders, 100);
       
       // check pause button
       if (M5.BtnB.wasPressed())
@@ -443,7 +444,7 @@ void play()  // is stop  is pause
 
       // check stop button
       if(is_stop == 1) break;
-      delay(WRITE_TIME_GAP); 
+      delay(WRITE_TIME_GAP*6); 
     }
 
     // stop button will also end loop
