@@ -345,6 +345,8 @@ void* MycobotBasic::readData()
 
 
 	}
+	
+	return nullptr;
 }
 
 Angles MycobotBasic::GetAngles()
