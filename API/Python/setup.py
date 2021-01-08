@@ -1,13 +1,14 @@
 import sys
 
-if (3, 5) != sys.version_info[:2] < (3, 5):
-    print("This mycobot version requires Python 3.5 or later.")
+if (2, 7) != sys.version_info[:2] < (3, 5):
+    print("This mycobot version requires Python2.7, 3.5 or later.")
     sys.exit(1)
 
 import setuptools
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+long_description = '''
+
+'''
 
 setuptools.setup(
     name="pymycobot",
@@ -27,4 +28,5 @@ setuptools.setup(
     install_requires=['pyserial'],
     python_requires='2.7, >=3.5',
 )
+
 

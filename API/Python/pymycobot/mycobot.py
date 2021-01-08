@@ -98,7 +98,8 @@ class MyCobot():
 
         '''
         _hex = self._angle_to_hex(degree)
-        command = 'fefe0621{}{}{}fa'.format(id, _hex, hex(speed)[2:])
+        speed = self._complement_zero(hex(speed)[2:], digit=2)
+        command = 'fefe0621{}{}{}fa'.format(id, _hex, speed)
         # print(command)  
         self._write(command)
 
@@ -267,7 +268,7 @@ class MyCobot():
 
     def pause(self):
         self._write('fefe0226fa')
-    
+
     def resume(self):
         self._write('fefe0228fa')
 
@@ -279,7 +280,7 @@ class MyCobot():
         data = self._read()
         flag = int(data.hex(), 16)
         return False if flag else True
-    
+
     def is_in_position(self, coords):
         if len(coords) != 6:
             print('The lenght of coords is not right')
@@ -376,7 +377,7 @@ class MyCobot():
         s = str(hex(int(coord)))[2:]
         s = self._complement_zero(s)
         return s
-    
+
     def _complement_zero(self, s, digit=4):
         s_len = len(s)
         if s_len == digit:
@@ -394,3 +395,4 @@ class MyCobot():
     def _read(self, size=1024):
         data = self.serial_port.read(size)
         return data
+
