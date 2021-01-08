@@ -10,7 +10,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="pymycobot", # Replace with your own username
+    name="pymycobot",
     version="0.0.1",
     author="Zachary Zhang",
     author_email="lijun.zhang@elephantrobotics.com",
@@ -25,5 +25,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=['pyserial'],
-    python_requires='>=3.5',
+    python_requires='2.7, >=3.5',
 )
+
