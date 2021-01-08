@@ -26,5 +26,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=['pyserial'],
-    python_requires='>=3.5',
+    python_requires='2.7, >=3.5',
 )
