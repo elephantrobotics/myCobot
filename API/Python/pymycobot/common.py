@@ -1,6 +1,7 @@
 import enum
 
 class Angle(enum.Enum):
+
     J1 = '01'
     J2 = '02'
     J3 = '03'
@@ -10,6 +11,7 @@ class Angle(enum.Enum):
 
 
 class Coord(enum.Enum):
+
     X  = '01'
     Y  = '02'
     Z  = '03'
@@ -17,4 +19,3 @@ class Coord(enum.Enum):
     Ry = '05'
     Rz = '06'
 
-#

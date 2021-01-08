@@ -11,7 +11,7 @@ long_description = '''
 '''
 
 setuptools.setup(
-    name="pymycobot", # Replace with your own username
+    name="pymycobot",
     version="0.0.1",
     author="Zachary Zhang",
     author_email="lijun.zhang@elephantrobotics.com",
@@ -28,3 +28,4 @@ setuptools.setup(
     install_requires=['pyserial'],
     python_requires='2.7, >=3.5',
 )
+
