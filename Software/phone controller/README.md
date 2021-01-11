@@ -4,6 +4,12 @@
 
 - Please make sure flash `myCobotBLE` to your Basic.
 
+You can choose to scan the **QR code** below to download the app:
+
+![download](./res/qrcode.png)
+
+## Screenshot
+
 > It's only a preview at the moment.
 
 ![Screenshot-1](./res/Screenshot_phone_1.jpg)
