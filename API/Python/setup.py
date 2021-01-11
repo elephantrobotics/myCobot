@@ -7,6 +7,27 @@ if (2, 7) != sys.version_info[:2] < (3, 5):
 import setuptools
 
 long_description = '''
+# 2021.1.9
+
+Fix the API problem that `is_moving()` and other methods of mycobot cannot be used.
+
+# 2021.1.8
+
+Python API add new methods:
+
+- `jog_angle()`
+- `jog_coord()`
+- `jog_stop()`
+
+# 2020.12.30
+
+Adding usage documents to Python API.
+
+# 2020.12.29
+
+Python API supports python2.7
+
+Modify the serial port to manual setting, support the use of window.
 
 '''
 
@@ -26,7 +47,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=['pyserial'],
-    python_requires='2.7, >=3.5',
+    python_requires='=2.7, >=3.5',
 )
 
 
