@@ -18,6 +18,4 @@ https://docs.m5stack.com/#/zh_CN/core/basic
 
 新版本的固件烧录器新增 ROS 与 Python 驱动固件，使用时请注意烧录终端与固件版本号
 
-**myCobot phone controller** : a phone app.
-
-- Please make sure flash `myCobotBLE` to your Basic.
+**myCobot phone controller** : a phone app. [detial](https://github.com/elephantrobotics/myCobot/tree/main/Software/phone%20controller)
