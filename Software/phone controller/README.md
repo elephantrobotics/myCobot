@@ -1,6 +1,6 @@
 # ![icon](./res/phone-icon.png)myCobot phone controller
 
-**This is a mobile app, used to simply control the mycobot.**
+**This is a mobile app, used to simply control the mycobot.**[Download](https://github.com/elephantrobotics/myCobot/releases/tag/0.0.1)
 
 - Please make sure flash `myCobotBLE` to your Basic.
 
