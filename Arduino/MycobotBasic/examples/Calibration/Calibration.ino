@@ -48,9 +48,9 @@ void info()
   M5.Lcd.setCursor(0,0);
   delay(50);
   
-  M5.Lcd.print("Press A - Cablibrate Servo 1~6 \n\n");
+  M5.Lcd.print("Press A - Calibrate Servo 1~6 \n\n");
   M5.Lcd.print("Press B - Test Servos (long press to force testing)\n\n");
-  M5.Lcd.print("Press C - Restart Calibaration");
+  M5.Lcd.print("Press C - Restart Calibration");
 } 
 
 void BtnAPressOnce()
