@@ -3,6 +3,7 @@
 
 MycobotBasic myCobot;
 int calibrate_servo_no = 1;
+bool btn_b_long_pressed = false;
 
 void setup() {
   myCobot.setup();
@@ -18,27 +19,31 @@ void loop() {
     M5.update(); // need to call update()  
     M5.Lcd.setCursor(0,0);
    // M5.Lcd.clear(BLACK);
-  
+
      if (M5.BtnA.wasPressed()) {
       myCobot.setLEDRGB(255, 0, 0);
       BtnAPressOnce();
-      } 
-    if (M5.BtnB.wasPressed()) {
+      }
+
+    if (!btn_b_long_pressed && M5.BtnB.pressedFor(800)) {  // force to test the servos
+      btn_b_long_pressed = true;
+      calibrate_servo_no = 7;
+      BtnBPressOnce();
+      }
+    if (M5.BtnB.wasReleased()) {
+      if (btn_b_long_pressed) {
+        btn_b_long_pressed = false;
+      }
+      else {
         myCobot.setLEDRGB(0, 255, 0);
         BtnBPressOnce();
+        }
       }
 
    if (M5.BtnC.wasPressed()) {
       myCobot.setLEDRGB(0, 0, 255);
       BtnCPressOnce();
       }
-
-   if(M5.BtnB.wasReleasefor(800)){  // force to test the servos
-      calibrate_servo_no = 6;
-      BtnBPressOnce();
-     }
-  
-
 }
 
 void info()
