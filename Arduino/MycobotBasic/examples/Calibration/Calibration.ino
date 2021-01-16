@@ -115,7 +115,7 @@ void BtnCPressOnce()
   delay(50);
   
   M5.Lcd.print("Restart to calibrate");
-  calibrate_servo_no = 0;
+  calibrate_servo_no = 1;
   //关闭扭力输出
   myCobot.setFreeMove();
   delay(1000);
