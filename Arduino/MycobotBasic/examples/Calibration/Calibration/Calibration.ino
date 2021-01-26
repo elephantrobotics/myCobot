@@ -39,11 +39,7 @@ void loop() {
       myCobot.setLEDRGB(0, 0, 255);
       BtnCPressOnce();
       }
-
-   if(M5.BtnB.wasReleasefor(800)){  // force to test the servos
-      calibrate_servo_no = 6;
-      BtnBPressOnce();
-     }
+      
    if(M5.BtnC.wasReleasefor(2000)){  // force to test the servos
       mcLan.clearLanguage();
       resetFunc();
@@ -116,7 +112,8 @@ void BtnAPressOnce()
   
   delay(100);
 
-  myCobot.setEncoder(calibrate_servo_no, 2047);
+  myCobot.SetEncoder(calibrate_servo_no, 2047);
+  
   delay(400);
 
   calibrate_servo_no ++;
@@ -133,24 +130,32 @@ void BtnBPressOnce()
   {
      for (int i = 1; i < 7; i ++)
     {
+       M5.Lcd.clear(BLACK);
       if(lan == 2){
-       M5.Lcd.drawString("已设置舵机零位 ", 20, 20, 1); 
+       M5.Lcd.setTextSize(1);
+       M5.Lcd.drawString("正在测试关节 ", 20, 20, 1); 
+        M5.Lcd.setTextSize(3);
+        M5.Lcd.setCursor(0, 150);
+        M5.Lcd.printf("%d",i);
+        M5.Lcd.setTextSize(1); 
       }
       if(lan == 1){
        M5.Lcd.setCursor(0, 30);
        M5.Lcd.printf("Move servo %d \n",i);  
       }
-
-      myCobot.setEncoder(i, 1848);
+      myCobot.SetEncoder(i, 1848);
       delay(2500);
-      myCobot.setEncoder(i, 2248);
+      myCobot.SetEncoder(i, 2248);
       delay(3000);
-      myCobot.setEncoder(i, 2048);
+      myCobot.SetEncoder(i, 2048);
       delay(2500);
     }
     info();
+   Serial.println(calibrate_servo_no);
   }
   else{
+    Serial.println(calibrate_servo_no);
+    M5.Lcd.clear(BLACK);
     if(lan == 2){
      M5.Lcd.drawString("请先设定关节零位", 20, 20, 1);     
     }
@@ -158,6 +163,8 @@ void BtnBPressOnce()
      M5.Lcd.setCursor(0, 30);
      M5.Lcd.print("Only move after all servo calibrated");
     }
+    delay(1000);
+    info();
     return;
   }
 }

@@ -2,10 +2,13 @@
 
 MycobotBasic::MycobotBasic()
 {
-	for (auto &val : errorAngles)
-		val = -5.0;
-	for (auto &val : errorCoords)
+	for (auto &val : error_angles)
 		val = -1000.0;
+	for (auto &val : error_coords)
+		val = -1000.0;
+
+	for (auto val : printList)
+		messages_map.insert(val);
 }    
 
 void MycobotBasic::setup()
@@ -73,7 +76,7 @@ int MycobotBasic::readSerial(unsigned char *nDat, int nLen)
     }
     // check time out
     t_use = millis() - t_begin;
-    if (t_use > IOTimeOut){ 
+    if (t_use > IOTimeOut_1){ 
       break;
     }
   }
@@ -166,9 +169,9 @@ void* MycobotBasic::readData()
 
 			case CHECK_RUNNING:
 			{
-				bool* pRunningState = new bool;
-				*pRunningState = bool(r_data_3[1]);
-				return pRunningState;
+				bool* prunning_state = new bool;
+				*prunning_state = bool(r_data_3[1]);
+				return prunning_state;
 			}
 
 			case GET_SPEED:
@@ -201,6 +204,30 @@ void* MycobotBasic::readData()
 				*pServoData = r_data_3[1];
 				return pServoData;
 			}
+			case GET_REF_FRAME:
+			{
+				RFType* pRftype = new RFType;
+				*pRftype = RFType(r_data_3[1]);
+				return pRftype;
+			}
+			case GET_MOVEMENT_TYPE:
+			{
+				MovementType* pMovementType = new MovementType;
+				*pMovementType = MovementType(r_data_3[1]);
+				return pMovementType;
+			}
+			case GET_END_TYPE:
+			{
+				EndType* pEndType = new EndType;
+				*pEndType = EndType(r_data_3[1]);
+				return pEndType;
+			}
+			case ROBOTIC_MESSAGE:
+			{
+				byte* pMessage = new byte;
+				*pMessage = r_data_3[1];
+				return pMessage;
+			}
 		}
 
 	case 4:
@@ -209,13 +236,13 @@ void* MycobotBasic::readData()
 		{
 			case GET_FEED_OVERRIDE:
 			{
-				float* pFeedOverride = new float;
-				byte feedOverride_high = r_data_4[1];
-				byte feedOverride_low = r_data_4[2];
+				float* pfeed_override = new float;
+				byte feed_override_high = r_data_4[1];
+				byte feed_override_low = r_data_4[2];
 				float temp = 0.0;
-				temp = feedOverride_low + feedOverride_high * 256;
-				*pFeedOverride = (temp > 60000 ? (temp - 65536) : temp) / 10;
-				return pFeedOverride;
+				temp = feed_override_low + feed_override_high * 256;
+				*pfeed_override = (temp > 33000 ? (temp - 65536) : temp) / 10;
+				return pfeed_override;
 			}
 
 			case GET_ACCELERATION:
@@ -225,7 +252,7 @@ void* MycobotBasic::readData()
 				byte acceleration_low = r_data_4[2];
 				float temp = 0.0;
 				temp = acceleration_low + acceleration_high * 256;
-				*pAcceleration = (temp > 60000 ? (temp - 65536) : temp) / 10;
+				*pAcceleration = (temp > 33000 ? (temp - 65536) : temp) / 10;
 				return pAcceleration;
 			}
 			case GET_JOINT_MIN:
@@ -235,7 +262,7 @@ void* MycobotBasic::readData()
 				byte jointMin_low = r_data_4[2];
 				float temp = 0.0;
 				temp = jointMin_low + jointMin_high * 256;
-				*pJointMin = (temp > 60000 ? (temp - 65536) : temp) / 10;
+				*pJointMin = (temp > 33000 ? (temp - 65536) : temp) / 10;
 				return pJointMin;
 			}
 			case GET_JOINT_MAX:
@@ -245,7 +272,7 @@ void* MycobotBasic::readData()
 				byte jointMax_low = r_data_4[2];
 				float temp = 0.0;
 				temp = jointMax_low + jointMax_high * 256;
-				*pJointMax = (temp > 60000 ? (temp - 65536) : temp) / 10;
+				*pJointMax = (temp > 33000 ? (temp - 65536) : temp) / 10;
 				return pJointMax;
 			}
 			case GET_ENCODER:
@@ -285,17 +312,17 @@ void* MycobotBasic::readData()
 					Angles* pAngles = new Angles;
 					float temp = 0.0;
 					temp = angle_1_low + angle_1_high * 256;
-					pAngles->at(0) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+					pAngles->at(0) = (temp > 33000 ? (temp - 65536) : temp) / 100;
 					temp = angle_2_low + angle_2_high * 256;
-					pAngles->at(1) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+					pAngles->at(1) = (temp > 33000 ? (temp - 65536) : temp) / 100;
 					temp = angle_3_low + angle_3_high * 256;
-					pAngles->at(2) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+					pAngles->at(2) = (temp > 33000 ? (temp - 65536) : temp) / 100;
 					temp = angle_4_low + angle_4_high * 256;
-					pAngles->at(3) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+					pAngles->at(3) = (temp > 33000 ? (temp - 65536) : temp) / 100;
 					temp = angle_5_low + angle_5_high * 256;
-					pAngles->at(4) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+					pAngles->at(4) = (temp > 33000 ? (temp - 65536) : temp) / 100;
 					temp = angle_6_low + angle_6_high * 256;
-					pAngles->at(5) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+					pAngles->at(5) = (temp > 33000 ? (temp - 65536) : temp) / 100;
 
 					return pAngles;
 			}
@@ -324,32 +351,108 @@ void* MycobotBasic::readData()
 				float temp = 0.0;
 
 				temp = x_low + x_high * 256;
-				pCoords->at(0) = (temp > 60000 ? (temp - 65536) : temp) / 10;
+				pCoords->at(0) = (temp > 33000 ? (temp - 65536) : temp) / 10;
 				temp = y_low + y_high * 256;
-				pCoords->at(1) = (temp > 60000 ? (temp - 65536) : temp) / 10;
+				pCoords->at(1) = (temp > 33000 ? (temp - 65536) : temp) / 10;
 				temp = z_low + z_high * 256;
-				pCoords->at(2) = (temp > 60000 ? (temp - 65536) : temp) / 10;
+				pCoords->at(2) = (temp > 33000 ? (temp - 65536) : temp) / 10;
 				temp = rx_low + rx_high * 256;
-				pCoords->at(3) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+				pCoords->at(3) = (temp > 33000 ? (temp - 65536) : temp) / 100;
 				temp = ry_low + ry_high * 256;
-				pCoords->at(4) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+				pCoords->at(4) = (temp > 33000 ? (temp - 65536) : temp) / 100;
 				temp = rz_low + rz_high * 256;
-				pCoords->at(5) = (temp > 60000 ? (temp - 65536) : temp) / 1000 * COEFFICIENT;
+				pCoords->at(5) = (temp > 33000 ? (temp - 65536) : temp) / 100;
 
 				return pCoords;
 			}
 
+			case GET_TOOL_REF:
+			{
+				byte x_high = r_data_14[1];
+				byte x_low = r_data_14[2];
 
+				byte y_high = r_data_14[3];
+				byte y_low = r_data_14[4];
+
+				byte z_high = r_data_14[5];
+				byte z_low = r_data_14[6];
+
+				byte rx_high = r_data_14[7];
+				byte rx_low = r_data_14[8];
+
+				byte ry_high = r_data_14[9];
+				byte ry_low = r_data_14[10];
+
+				byte rz_high = r_data_14[11];
+				byte rz_low = r_data_14[12];
+
+				Coords* pCoords = new Coords;
+				float temp = 0.0;
+
+				temp = x_low + x_high * 256;
+				pCoords->at(0) = (temp > 33000 ? (temp - 65536) : temp) / 10;
+				temp = y_low + y_high * 256;
+				pCoords->at(1) = (temp > 33000 ? (temp - 65536) : temp) / 10;
+				temp = z_low + z_high * 256;
+				pCoords->at(2) = (temp > 33000 ? (temp - 65536) : temp) / 10;
+				temp = rx_low + rx_high * 256;
+				pCoords->at(3) = (temp > 33000 ? (temp - 65536) : temp) / 100;
+				temp = ry_low + ry_high * 256;
+				pCoords->at(4) = (temp > 33000 ? (temp - 65536) : temp) / 100;
+				temp = rz_low + rz_high * 256;
+				pCoords->at(5) = (temp > 33000 ? (temp - 65536) : temp) / 100;
+
+				return pCoords;
+			}
+
+			case GET_WORLD_REF:
+			{
+				byte x_high = r_data_14[1];
+				byte x_low = r_data_14[2];
+
+				byte y_high = r_data_14[3];
+				byte y_low = r_data_14[4];
+
+				byte z_high = r_data_14[5];
+				byte z_low = r_data_14[6];
+
+				byte rx_high = r_data_14[7];
+				byte rx_low = r_data_14[8];
+
+				byte ry_high = r_data_14[9];
+				byte ry_low = r_data_14[10];
+
+				byte rz_high = r_data_14[11];
+				byte rz_low = r_data_14[12];
+
+				Coords* pCoords = new Coords;
+				float temp = 0.0;
+
+				temp = x_low + x_high * 256;
+				pCoords->at(0) = (temp > 33000 ? (temp - 65536) : temp) / 10;
+				temp = y_low + y_high * 256;
+				pCoords->at(1) = (temp > 33000 ? (temp - 65536) : temp) / 10;
+				temp = z_low + z_high * 256;
+				pCoords->at(2) = (temp > 33000 ? (temp - 65536) : temp) / 10;
+				temp = rx_low + rx_high * 256;
+				pCoords->at(3) = (temp > 33000 ? (temp - 65536) : temp) / 100;
+				temp = ry_low + ry_high * 256;
+				pCoords->at(4) = (temp > 33000 ? (temp - 65536) : temp) / 100;
+				temp = rz_low + rz_high * 256;
+				pCoords->at(5) = (temp > 33000 ? (temp - 65536) : temp) / 100;
+
+				return pCoords;
+			}
 		}
 
 
 
 	}
-	
+
 	return nullptr;
 }
 
-Angles MycobotBasic::GetAngles()
+Angles MycobotBasic::getAngles()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -378,15 +481,14 @@ Angles MycobotBasic::GetAngles()
 			return angles;
 		}
 	}
-	return errorAngles;
+	return error_angles;
 }
 
-void MycobotBasic::WriteAngle(int joint, float value, int speed)
+void MycobotBasic::writeAngle(int joint, float value, int speed)
 {
 	byte joint_number = byte(joint - 1);
-	value = value / COEFFICIENT;
-	byte angle_low = lowByte(static_cast<int>(value * 1000));
-	byte angle_high = highByte(static_cast<int>(value * 1000));
+	byte angle_low = lowByte(static_cast<int>(value * 100));
+	byte angle_high = highByte(static_cast<int>(value * 100));
 
 	byte sp = speed;
 
@@ -403,27 +505,25 @@ void MycobotBasic::WriteAngle(int joint, float value, int speed)
 	delay(WRITE_SERVO_GAP);
 }
 
-void MycobotBasic::WriteAngles(Angles angles, int speed)
+void MycobotBasic::writeAngles(Angles angles, int speed)
 {
-	for (auto &val : angles)
-		val = val / COEFFICIENT;
-	byte angle_1_low = lowByte(static_cast<int>(angles[0] * 1000));
-	byte angle_1_high = highByte(static_cast<int>(angles[0] * 1000));
+	byte angle_1_low = lowByte(static_cast<int>(angles[0] * 100));
+	byte angle_1_high = highByte(static_cast<int>(angles[0] * 100));
 
-	byte angle_2_low = lowByte(static_cast<int>(angles[1] * 1000));
-	byte angle_2_high = highByte(static_cast<int>(angles[1] * 1000));
+	byte angle_2_low = lowByte(static_cast<int>(angles[1] * 100));
+	byte angle_2_high = highByte(static_cast<int>(angles[1] * 100));
 
-	byte angle_3_low = lowByte(static_cast<int>(angles[2] * 1000));
-	byte angle_3_high = highByte(static_cast<int>(angles[2] * 1000));
+	byte angle_3_low = lowByte(static_cast<int>(angles[2] * 100));
+	byte angle_3_high = highByte(static_cast<int>(angles[2] * 100));
 
-	byte angle_4_low = lowByte(static_cast<int>(angles[3] * 1000));
-	byte angle_4_high = highByte(static_cast<int>(angles[3] * 1000));
+	byte angle_4_low = lowByte(static_cast<int>(angles[3] * 100));
+	byte angle_4_high = highByte(static_cast<int>(angles[3] * 100));
 
-	byte angle_5_low = lowByte(static_cast<int>(angles[4] * 1000));
-	byte angle_5_high = highByte(static_cast<int>(angles[4] * 1000));
+	byte angle_5_low = lowByte(static_cast<int>(angles[4] * 100));
+	byte angle_5_high = highByte(static_cast<int>(angles[4] * 100));
 
-	byte angle_6_low = lowByte(static_cast<int>(angles[5] * 1000));
-	byte angle_6_high = highByte(static_cast<int>(angles[5] * 1000));
+	byte angle_6_low = lowByte(static_cast<int>(angles[5] * 100));
+	byte angle_6_high = highByte(static_cast<int>(angles[5] * 100));
 
 	byte sp = speed;
 
@@ -451,7 +551,7 @@ void MycobotBasic::WriteAngles(Angles angles, int speed)
 	delay(WRITE_SERVO_GAP);
 }
 
-Coords MycobotBasic::GetCoords()
+Coords MycobotBasic::getCoords()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -480,17 +580,17 @@ Coords MycobotBasic::GetCoords()
 			return tempCoords;
 		}
 	}
-	return errorCoords;
+	return error_coords;
 }
 
-void MycobotBasic::WriteCoord(Axis axis, float value, int speed)
+void MycobotBasic::writeCoord(Axis axis, float value, int speed)
 {
 	byte axis_number = byte(axis);
 	int temp_value = 0;
 	if (axis == Axis::X || axis == Axis::Y || axis == Axis::Z)
 		temp_value = value * 10;
 	else
-		temp_value = value / COEFFICIENT * 1000;
+		temp_value = value * 100;
 	byte value_high = highByte(temp_value);
 	byte value_low = lowByte(temp_value);
 
@@ -505,10 +605,12 @@ void MycobotBasic::WriteCoord(Axis axis, float value, int speed)
 	Serial2.write(value_low);
 	Serial2.write(sp);
 	Serial2.write(footer);
-	delay(WRITE_SERVO_GAP);
+	//delay(WRITE_SERVO_GAP);
+
+	receiveMessages();
 }
 
-void MycobotBasic::WriteCoords(Coords coord, int speed)
+void MycobotBasic::writeCoords(Coords coord, int speed)
 {
 	byte coord_x_low = lowByte(static_cast<int>(coord[0] * 10));
 	byte coord_x_high = highByte(static_cast<int>(coord[0] * 10));
@@ -519,14 +621,14 @@ void MycobotBasic::WriteCoords(Coords coord, int speed)
 	byte coord_z_low = lowByte(static_cast<int>(coord[2] * 10));
 	byte coord_z_high = highByte(static_cast<int>(coord[2] * 10));
 
-	byte coord_rx_low = lowByte(static_cast<int>(coord[3] / COEFFICIENT * 1000));
-	byte coord_rx_high = highByte(static_cast<int>(coord[3] / COEFFICIENT * 1000));
+	byte coord_rx_low = lowByte(static_cast<int>(coord[3] * 100));
+	byte coord_rx_high = highByte(static_cast<int>(coord[3] * 100));
 
-	byte coord_ry_low = lowByte(static_cast<int>(coord[4] / COEFFICIENT * 1000));
-	byte coord_ry_high = highByte(static_cast<int>(coord[4] / COEFFICIENT * 1000));
+	byte coord_ry_low = lowByte(static_cast<int>(coord[4] * 100));
+	byte coord_ry_high = highByte(static_cast<int>(coord[4] * 100));
 
-	byte coord_rz_low = lowByte(static_cast<int>(coord[5] / COEFFICIENT * 1000));
-	byte coord_rz_high = highByte(static_cast<int>(coord[5] / COEFFICIENT * 1000));
+	byte coord_rz_low = lowByte(static_cast<int>(coord[5] * 100));
+	byte coord_rz_high = highByte(static_cast<int>(coord[5] * 100));
 
 	byte sp = speed;
 	byte mode = 1;
@@ -550,7 +652,9 @@ void MycobotBasic::WriteCoords(Coords coord, int speed)
 	Serial2.write(sp);
 	Serial2.write(mode);
 	Serial2.write(footer);
-	delay(WRITE_SERVO_GAP);
+	//delay(WRITE_SERVO_GAP);
+
+	receiveMessages();
 }
 
 int MycobotBasic::isInPosition(Coords coord, bool is_linear)
@@ -564,14 +668,16 @@ int MycobotBasic::isInPosition(Coords coord, bool is_linear)
 	byte coord_z_low = lowByte(static_cast<int>(coord[2] * 10));
 	byte coord_z_high = highByte(static_cast<int>(coord[2] * 10));
 
-	byte coord_rx_low = lowByte(static_cast<int>(coord[3] / COEFFICIENT * 1000));
-	byte coord_rx_high = highByte(static_cast<int>(coord[3] / COEFFICIENT * 1000));
+	byte coord_rx_low = lowByte(static_cast<int>(coord[3] * 100));
+	byte coord_rx_high = highByte(static_cast<int>(coord[3] * 100));
 
-	byte coord_ry_low = lowByte(static_cast<int>(coord[4] / COEFFICIENT * 1000));
-	byte coord_ry_high = highByte(static_cast<int>(coord[4] / COEFFICIENT * 1000));
+	byte coord_ry_low = lowByte(static_cast<int>(coord[4] * 100));
+	byte coord_ry_high = highByte(static_cast<int>(coord[4] * 100));
 
-	byte coord_rz_low = lowByte(static_cast<int>(coord[5] / COEFFICIENT * 1000));
-	byte coord_rz_high = highByte(static_cast<int>(coord[5] / COEFFICIENT * 1000));
+	byte coord_rz_low = lowByte(static_cast<int>(coord[5] * 100));
+	byte coord_rz_high = highByte(static_cast<int>(coord[5] * 100));
+
+	byte type = byte(is_linear);
 
 	Serial2.write(header);
 	Serial2.write(header);
@@ -587,8 +693,9 @@ int MycobotBasic::isInPosition(Coords coord, bool is_linear)
 	Serial2.write(coord_rx_low);
 	Serial2.write(coord_ry_high);
 	Serial2.write(coord_ry_low);
-	Serial2.write(coord_rz_low);
 	Serial2.write(coord_rz_high);
+	Serial2.write(coord_rz_low);
+	Serial2.write(type);
 	Serial2.write(footer);
 
 
@@ -615,7 +722,7 @@ int MycobotBasic::isInPosition(Coords coord, bool is_linear)
 	return -1;
 }
 
-bool MycobotBasic::CheckRunning()
+bool MycobotBasic::checkRunning()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -625,8 +732,8 @@ bool MycobotBasic::CheckRunning()
 
 	unsigned long t_begin = millis();
 	void* tempPtr = nullptr;
-	bool* pRunningState = nullptr;
-	bool runningState;
+	bool* prunning_state = nullptr;
+	bool running_state;
 
 	while (true)
 	{
@@ -637,17 +744,17 @@ bool MycobotBasic::CheckRunning()
 			continue;
 		else
 		{
-			pRunningState = (bool*)tempPtr;
-			runningState = *pRunningState;
-			delete pRunningState;
-			return runningState;
+			prunning_state = (bool*)tempPtr;
+			running_state = *prunning_state;
+			delete prunning_state;
+			return running_state;
 		}
 	}
 	return false;
 }
 
 
-void MycobotBasic::JogAngle(int joint, int direction, int speed)
+void MycobotBasic::jogAngle(int joint, int direction, int speed)
 {
 	byte joint_number = joint;
 	byte di = direction;
@@ -664,7 +771,7 @@ void MycobotBasic::JogAngle(int joint, int direction, int speed)
 	delay(WRITE_SERVO_GAP);
 }
 
-void MycobotBasic::JogCoord(Axis axis, int direction, int speed)
+void MycobotBasic::jogCoord(Axis axis, int direction, int speed)
 {
 	byte axis_number = axis + 1;
 	byte di = direction;
@@ -681,7 +788,7 @@ void MycobotBasic::JogCoord(Axis axis, int direction, int speed)
 	delay(WRITE_SERVO_GAP);
 }
 
-void MycobotBasic::JogStop()
+void MycobotBasic::jogStop()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -690,7 +797,7 @@ void MycobotBasic::JogStop()
 	Serial2.write(footer);
 }
 
-void MycobotBasic::SetEncoder(int joint, int encoder)
+void MycobotBasic::setEncoder(int joint, int encoder)
 {
 	byte joint_number = joint - 1;
 	byte encoder_high = highByte(encoder);
@@ -706,7 +813,7 @@ void MycobotBasic::SetEncoder(int joint, int encoder)
 	Serial2.write(footer);
 }
 
-int MycobotBasic::GetEncoder(int joint)
+int MycobotBasic::getEncoder(int joint)
 {
 	byte joint_number = joint - 1;
 	Serial2.write(header);
@@ -740,7 +847,7 @@ int MycobotBasic::GetEncoder(int joint)
 	return -1;
 }
 
-void MycobotBasic::SetEncoders(Angles angleEncoders, int speed)
+void MycobotBasic::setEncoders(Angles angleEncoders, int speed)
 {
 	byte angle_1_high = highByte(static_cast<int>(angleEncoders[0]));
 	byte angle_1_low = lowByte(static_cast<int>(angleEncoders[0]));
@@ -776,7 +883,7 @@ void MycobotBasic::SetEncoders(Angles angleEncoders, int speed)
 	Serial2.write(footer);
 }
 
-int MycobotBasic::GetSpeed()
+int MycobotBasic::getSpeed()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -808,7 +915,7 @@ int MycobotBasic::GetSpeed()
 	return -1;
 }
 
-void MycobotBasic::SetSpeed(int percentage)
+void MycobotBasic::setSpeed(int percentage)
 {
 	byte speed = percentage;
 	Serial2.write(header);
@@ -819,7 +926,7 @@ void MycobotBasic::SetSpeed(int percentage)
 	Serial2.write(footer);
 }
 
-float MycobotBasic::GetFeedOverride()
+float MycobotBasic::getFeedOverride()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -829,8 +936,8 @@ float MycobotBasic::GetFeedOverride()
 
 	unsigned long t_begin = millis();
 	void* tempPtr = nullptr;
-	float* pFeedOverride = nullptr;
-	float feedOverride;
+	float* pfeed_override = nullptr;
+	float feed_override;
 
 	while (true)
 	{
@@ -841,31 +948,31 @@ float MycobotBasic::GetFeedOverride()
 			continue;
 		else
 		{
-			pFeedOverride = (float*)tempPtr;
-			feedOverride = *pFeedOverride;
-			delete pFeedOverride;
-			return feedOverride;
+			pfeed_override = (float*)tempPtr;
+			feed_override = *pfeed_override;
+			delete pfeed_override;
+			return feed_override;
 		}
 	}
 
 	return -1.0;
 }
 
-void MycobotBasic::SendFeedOverride(float feedOverride)
+void MycobotBasic::sendFeedOverride(float feed_override)
 {
-	byte feedOverride_high = highByte(static_cast<int>(feedOverride * 10));
-	byte feedOverride_low = lowByte(static_cast<int>(feedOverride * 10));
+	byte feed_override_high = highByte(static_cast<int>(feed_override * 10));
+	byte feed_override_low = lowByte(static_cast<int>(feed_override * 10));
 
 	Serial2.write(header);
 	Serial2.write(header);
 	Serial2.write(SEND_OVERRIDE_LEN);
 	Serial2.write(SEND_OVERRIDE);
-	Serial2.write(feedOverride_high);
-	Serial2.write(feedOverride_low);
+	Serial2.write(feed_override_high);
+	Serial2.write(feed_override_low);
 	Serial2.write(footer);
 }
 
-float MycobotBasic::GetAcceleration()
+float MycobotBasic::getAcceleration()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -897,7 +1004,7 @@ float MycobotBasic::GetAcceleration()
 	return -1.0;
 }
 
-void MycobotBasic::SetAcceleration(float acceleration)
+void MycobotBasic::setAcceleration(float acceleration)
 {
 	byte acceleration_high = highByte(static_cast<int>(acceleration * 10));
 	byte acceleration_low = lowByte(static_cast<int>(acceleration * 10));
@@ -1202,5 +1309,307 @@ void MycobotBasic::setFreeMove()
 	Serial2.write(SET_FREE_MOVE_LEN);
 	Serial2.write(SET_FREE_MOVE);
 	Serial2.write(footer);
-	delay(500);  //wait for servo relass
+}
+
+void MycobotBasic::receiveMessages()
+{
+	unsigned long t_begin = millis();
+	void* tempPtr = nullptr;
+	byte* pMessage = nullptr;
+	int message;
+
+	while (true)
+	{
+		if (millis() - t_begin > 40)
+			break;
+		tempPtr = readData();
+		if (tempPtr == nullptr)
+			continue;
+		else
+		{
+			pMessage = (byte*)tempPtr;
+			message = static_cast<int>(*pMessage);
+			delete pMessage;
+
+			std::map<int, std::string>::iterator iter = messages_map.find(message);
+			char* pChar = (char*)iter->second.c_str();
+			if (iter != messages_map.end())
+				Serial.println(pChar);
+		}
+	}
+
+}
+
+void MycobotBasic::setMovementType(MovementType movement_type)
+{
+	byte mt = movement_type;
+
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(SET_MOVEMENT_TYPE_LEN);
+	Serial2.write(SET_MOVEMENT_TYPE);
+	Serial2.write(mt);
+	Serial2.write(footer);
+}
+
+MovementType MycobotBasic::getMovementType()
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(GET_MOVEMENT_TYPE_LEN);
+	Serial2.write(GET_MOVEMENT_TYPE);
+	Serial2.write(footer);
+
+	unsigned long t_begin = millis();
+	void* tempPtr = nullptr;
+	MovementType* pMovementType = nullptr;
+	MovementType movement_type;
+
+	while (true)
+	{
+		if (millis() - t_begin > 40)
+			break;
+		tempPtr = readData();
+		if (tempPtr == nullptr)
+			continue;
+		else
+		{
+			pMovementType = (MovementType*)tempPtr;
+			movement_type = *pMovementType;
+			delete pMovementType;
+			return movement_type;
+		}
+	}
+
+	return ERROR_MOVEMENT;
+}
+
+void MycobotBasic::setToolReference(Coords coord)
+{
+	byte coord_x_low = lowByte(static_cast<int>(coord[0] * 10));
+	byte coord_x_high = highByte(static_cast<int>(coord[0] * 10));
+
+	byte coord_y_low = lowByte(static_cast<int>(coord[1] * 10));
+	byte coord_y_high = highByte(static_cast<int>(coord[1] * 10));
+
+	byte coord_z_low = lowByte(static_cast<int>(coord[2] * 10));
+	byte coord_z_high = highByte(static_cast<int>(coord[2] * 10));
+
+	byte coord_rx_low = lowByte(static_cast<int>(coord[3] * 100));
+	byte coord_rx_high = highByte(static_cast<int>(coord[3] * 100));
+
+	byte coord_ry_low = lowByte(static_cast<int>(coord[4] * 100));
+	byte coord_ry_high = highByte(static_cast<int>(coord[4] * 100));
+
+	byte coord_rz_low = lowByte(static_cast<int>(coord[5] * 100));
+	byte coord_rz_high = highByte(static_cast<int>(coord[5] * 100));
+
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(SET_TOOL_REF_LEN);
+	Serial2.write(SET_TOOL_REF);
+	Serial2.write(coord_x_high);
+	Serial2.write(coord_x_low);
+	Serial2.write(coord_y_high);
+	Serial2.write(coord_y_low);
+	Serial2.write(coord_z_high);
+	Serial2.write(coord_z_low);
+	Serial2.write(coord_rx_high);
+	Serial2.write(coord_rx_low);
+	Serial2.write(coord_ry_high);
+	Serial2.write(coord_ry_low);
+	Serial2.write(coord_rz_high);
+	Serial2.write(coord_rz_low);
+	Serial2.write(footer);
+}
+
+void MycobotBasic::setWorldReference(Coords coord)
+{
+	byte coord_x_low = lowByte(static_cast<int>(coord[0] * 10));
+	byte coord_x_high = highByte(static_cast<int>(coord[0] * 10));
+
+	byte coord_y_low = lowByte(static_cast<int>(coord[1] * 10));
+	byte coord_y_high = highByte(static_cast<int>(coord[1] * 10));
+
+	byte coord_z_low = lowByte(static_cast<int>(coord[2] * 10));
+	byte coord_z_high = highByte(static_cast<int>(coord[2] * 10));
+
+	byte coord_rx_low = lowByte(static_cast<int>(coord[3] * 100));
+	byte coord_rx_high = highByte(static_cast<int>(coord[3] * 100));
+
+	byte coord_ry_low = lowByte(static_cast<int>(coord[4] * 100));
+	byte coord_ry_high = highByte(static_cast<int>(coord[4] * 100));
+
+	byte coord_rz_low = lowByte(static_cast<int>(coord[5] * 100));
+	byte coord_rz_high = highByte(static_cast<int>(coord[5] * 100));
+
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(SET_WORLD_REF_LEN);
+	Serial2.write(SET_WORLD_REF);
+	Serial2.write(coord_x_high);
+	Serial2.write(coord_x_low);
+	Serial2.write(coord_y_high);
+	Serial2.write(coord_y_low);
+	Serial2.write(coord_z_high);
+	Serial2.write(coord_z_low);
+	Serial2.write(coord_rx_high);
+	Serial2.write(coord_rx_low);
+	Serial2.write(coord_ry_high);
+	Serial2.write(coord_ry_low);
+	Serial2.write(coord_rz_high);
+	Serial2.write(coord_rz_low);
+	Serial2.write(footer);
+}
+
+Coords MycobotBasic::getToolReference()
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(GET_TOOL_REF_LEN);
+	Serial2.write(GET_TOOL_REF);
+	Serial2.write(footer);
+
+	unsigned long t_begin = millis();
+	void* tempPtr = nullptr;
+	Coords* pCoords = nullptr;
+	Coords tempCoords;
+
+	while (true)
+	{
+		if (millis() - t_begin > 40)
+			break;
+		tempPtr = readData();
+		if (tempPtr == nullptr)
+			continue;
+		else
+		{
+			pCoords = (Coords*)tempPtr;
+			for (int i = 0; i < 6; ++i)
+				tempCoords[i] = pCoords->at(i);
+			delete pCoords;
+			return tempCoords;
+		}
+	}
+	return error_coords;
+}
+
+Coords MycobotBasic::getWorldReference()
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(GET_WORLD_REF_LEN);
+	Serial2.write(GET_WORLD_REF);
+	Serial2.write(footer);
+
+	unsigned long t_begin = millis();
+	void* tempPtr = nullptr;
+	Coords* pCoords = nullptr;
+	Coords tempCoords;
+
+	while (true)
+	{
+		if (millis() - t_begin > 40)
+			break;
+		tempPtr = readData();
+		if (tempPtr == nullptr)
+			continue;
+		else
+		{
+			pCoords = (Coords*)tempPtr;
+			for (int i = 0; i < 6; ++i)
+				tempCoords[i] = pCoords->at(i);
+			delete pCoords;
+			return tempCoords;
+		}
+	}
+	return error_coords;
+}
+
+void MycobotBasic::setReferenceFrame(RFType rftype)
+{
+	byte rt = rftype;
+
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(SET_REF_FRAME_LEN);
+	Serial2.write(SET_REF_FRAME);
+	Serial2.write(rt);
+	Serial2.write(footer);
+}
+
+RFType MycobotBasic::getReferenceFrame()
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(GET_REF_FRAME_LEN);
+	Serial2.write(GET_REF_FRAME);
+	Serial2.write(footer);
+
+	unsigned long t_begin = millis();
+	void* tempPtr = nullptr;
+	RFType* pRFType = nullptr;
+	RFType rftype;
+
+	while (true)
+	{
+		if (millis() - t_begin > 40)
+			break;
+		tempPtr = readData();
+		if (tempPtr == nullptr)
+			continue;
+		else
+		{
+			pRFType = (RFType*)tempPtr;
+			rftype = *pRFType;
+			delete pRFType;
+			return rftype;
+		}
+	}
+
+	return ERROR_RF;
+}
+
+void MycobotBasic::setEndType(EndType end_type)
+{
+	byte et = end_type;
+
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(SET_END_TYPE_LEN);
+	Serial2.write(SET_END_TYPE);
+	Serial2.write(et);
+	Serial2.write(footer);
+}
+
+EndType MycobotBasic::getEndType()
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(GET_END_TYPE_LEN);
+	Serial2.write(GET_END_TYPE);
+	Serial2.write(footer);
+
+	unsigned long t_begin = millis();
+	void* tempPtr = nullptr;
+	EndType* pEndType = nullptr;
+	EndType end_type;
+
+	while (true)
+	{
+		if (millis() - t_begin > 40)
+			break;
+		tempPtr = readData();
+		if (tempPtr == nullptr)
+			continue;
+		else
+		{
+			pEndType = (EndType*)tempPtr;
+			end_type = *pEndType;
+			delete pEndType;
+			return end_type;
+		}
+	}
+
+	return ERROR_END;
 }

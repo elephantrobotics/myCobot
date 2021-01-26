@@ -2,8 +2,8 @@
 
 MycobotBasic myCobot;
 
-double one_PI = 3.142;  // 180 degree
-double half_PI = 1.571; // 90 degree
+double one_PI = 90;  // 180 degree
+double half_PI = 45; // 90 degree
 
 // setup 6 points with coords - xyz(mm) and euler angles(radian)
 double points[6][6] = {{-80.2,  -100.8, 260.3,  0.0,0.0,0.0},
@@ -26,7 +26,7 @@ void loop() {
   Angles angles;
   for ( auto &val : angles)
     val = 0.0;
-  myCobot.WriteAngles(angles, sp);
+  myCobot.writeAngles(angles, sp);
   delay(5000);
   // Move to Coords 6 points
   for(int j = 0; j < 6; ++j)
@@ -37,7 +37,7 @@ void loop() {
     for(int i = 0; i < 6; ++i){
       coords[i] = points[j][i];
     }
-    myCobot.WriteCoords(coords, sp);
+    myCobot.writeCoords(coords, sp);
     delay(3000);
   }
 

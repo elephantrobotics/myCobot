@@ -3,6 +3,8 @@
 
 MycobotBasic myCobot;
 
+Encoders encoders;
+
 void setup() {
   // 打开Atom链接
   myCobot.setup();
@@ -10,19 +12,15 @@ void setup() {
   Serial.begin(9600);
 }
 void loop() {
-  Serial.println("check setEncoder()...");
-  myCobot.SetEncoder(Joint::J1, 2048);
-  delay(5000);
-
-  Serial.println("check getEncoder()...");
-  Serial.print("current J1 encoder is: ");
-  Serial.println(myCobot.GetEncoder(Joint::J1));
-  delay(5000);
-
-  Serial.println("check setEncoders()...");
-  Angles encoders;
+  Serial.println("check to pos1...");
   for(auto &val : encoders)
     val = 2048;
-  myCobot.SetEncoders(encoders, 50);
+  myCobot.setEncoders(encoders, 50);
+  delay(5000);
+  
+  Serial.println("check to pos2...");
+  for(auto &val : encoders)
+    val = 1048;
+  myCobot.setEncoders(encoders, 50);
   delay(5000);
 }

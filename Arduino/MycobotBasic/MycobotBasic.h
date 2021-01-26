@@ -6,12 +6,14 @@
 #include <MycobotSaver.h>
 #include <ParameterList.h>
 #include <CommunicateDefine.h>
+#include <string>
+#include <map>
 
-#define BAUD_RATE 			1000000
+#define BAUD_RATE 			115200
 #define IORecWrong			-1
 #define	header				0xfe
 #define footer				0xfa
-#define IOTimeOut			30
+#define IOTimeOut_1			30
 #define ITR_TIMES_MAX		4
 
 #define SEND_DATA_GAP 		4
@@ -27,6 +29,7 @@
 
 
 using namespace myCobotDefine;
+using namespace roboticMessages;
 
 class MycobotBasic
 {
@@ -45,40 +48,40 @@ public:
 
 
 	// MDI mode and operation
-	Angles GetAngles();
-	void WriteAngle(int joint, float value, int speed);
-	void WriteAngles(Angles angles, int speed);
-	Coords GetCoords();
-	void WriteCoord(Axis axis, float value, int speed);
-	void WriteCoords(Coords coords, int speed);
+	Angles getAngles();
+	void writeAngle(int joint, float value, int speed);
+	void writeAngles(Angles angles, int speed);
+	
+	Coords getCoords();
+	void writeCoord(Axis axis, float value, int speed);   		//must write x/y/z
+	void writeCoords(Coords coords, int speed);
 	int isInPosition(Coords coord, bool is_linear);
-	bool CheckRunning();
+	bool checkRunning();
 
 
 
 
 	// JOG mode and operation
-	void JogAngle(int joint, int direction, int speed);
-	void JogCoord(Axis axis, int direction, int speed);
-	void JogStop();
-	void SetEncoder(int joint, int encoder);
-	int GetEncoder(int joint);
-	void SetEncoders(Angles angleEncoders, int speed);
+	void jogAngle(int joint, int direction, int speed);
+	void jogCoord(Axis axis, int direction, int speed);
+	void jogStop();
+	void setEncoder(int joint, int encoder);
+	int getEncoder(int joint);
+	void setEncoders(Angles angleEncoders, int speed);
 
 
 
 	// Running Status and Settings
-	int GetSpeed();
-	void SetSpeed(int percentage);
-	float GetFeedOverride();
-	void SendFeedOverride(float feedOverride);
-	float GetAcceleration();
-	void SetAcceleration(float acceleration);
+	int getSpeed();
+	void setSpeed(int percentage);
+	float getFeedOverride();
+	void sendFeedOverride(float feed_override);
+	float getAcceleration();
+	void setAcceleration(float acceleration);
 	float getJointMin(int joint);
 	float getJointMax(int joint);
 	void setJointMin(int joint, float angle);
 	void setJointMax(int joint, float angle);
-
 
 
 	// Servo Control
@@ -87,15 +90,12 @@ public:
 
 	byte getServoData(int joint, byte data_id);
 	void setServoCalibration(int joint);
-	void JointBrake(int joint);
-
+	void jointBrake(int joint);
 
 
 	// Atom IO
 	void setPinMode(byte pin_no, byte pin_mode);
 
-
-	
 
 	// function
 	void pause();
@@ -109,6 +109,19 @@ public:
 	void setGripper(int data);
 
 
+	void receiveMessages();
+	void setMovementType(MovementType movement_type);
+	MovementType getMovementType();
+
+	void setToolReference(Coords coords);
+	void setWorldReference(Coords coords);
+	Coords getToolReference();
+	Coords getWorldReference();
+	void setReferenceFrame(RFType rftype);
+	RFType getReferenceFrame();
+
+	void setEndType(EndType end_type);
+	EndType getEndType();
 
 private:
 	
@@ -122,8 +135,10 @@ private:
 	void rFlushSerial();
 	byte itr_time = 0;
 	
-	Angles errorAngles;
-	Coords errorCoords;
+	Angles error_angles;
+	Coords error_coords;
+
+	std::map<int, std::string> messages_map;
 };
 
 

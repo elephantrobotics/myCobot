@@ -78,7 +78,7 @@
 #define TASK_STOP_LEN				2
 
 #define IS_IN_POSITION				0x2A
-#define IS_IN_POSITION_LEN			14
+#define IS_IN_POSITION_LEN			15
 #define IS_IN_POSITION_RETURN_LEN	3
 
 #define CHECK_RUNNING				0x2B
@@ -202,5 +202,45 @@
 //// Base basic and IO control
 //#define								0x70
 //#define								
+
+#define ROBOTIC_MESSAGE				0x80
+#define ROBOTIC_MESSAGE_LEN			2
+#define ROBOTIC_MESSAGE_RETURN_LEN	3
+
+#define SET_TOOL_REF				0x81
+#define SET_TOOL_REF_LEN			14
+
+#define GET_TOOL_REF				0x82
+#define GET_TOOL_REF_LEN			2
+#define GET_TOOL_REF_RETURN_LEN		14
+
+#define SET_WORLD_REF				0x83
+#define SET_WORLD_REF_LEN			14
+
+#define GET_WORLD_REF				0x84
+#define GET_WORLD_REF_LEN			2
+#define GET_WORLD_REF_RETURN_LEN	14
+
+#define SET_REF_FRAME				0x85
+#define SET_REF_FRAME_LEN			3
+
+#define GET_REF_FRAME				0x86
+#define GET_REF_FRAME_LEN			2
+#define GET_REF_FRAME_RETURN_LEN	3
+
+#define SET_MOVEMENT_TYPE			0x87
+#define SET_MOVEMENT_TYPE_LEN		3
+
+#define GET_MOVEMENT_TYPE			0x88
+#define GET_MOVEMENT_TYPE_LEN		2
+#define GET_MOVEMNET_TYPE_RETURN_LEN	3
+
+#define SET_END_TYPE				0x89
+#define SET_END_TYPE_LEN			3
+
+#define GET_END_TYPE				0x8A
+#define GET_END_TYPE_LEN			2
+#define GET_END_TYPE_RETURN_LEN		3
+
 
 #endif // !COMMUNICATEDEFINE_H
