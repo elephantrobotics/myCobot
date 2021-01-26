@@ -9,7 +9,7 @@
 #include <string>
 #include <map>
 
-#define BAUD_RATE 			115200
+#define BAUD_RATE 			1000000
 #define IORecWrong			-1
 #define	header				0xfe
 #define footer				0xfa
