@@ -76,7 +76,7 @@ int MycobotBasic::readSerial(unsigned char *nDat, int nLen)
     }
     // check time out
     t_use = millis() - t_begin;
-    if (t_use > IOTimeOut_1){ 
+    if (t_use > IOTimeOut){ 
       break;
     }
   }
@@ -228,6 +228,21 @@ void* MycobotBasic::readData()
 				*pMessage = r_data_3[1];
 				return pMessage;
 			}
+
+			case GET_DIGITAL_INPUT:
+			{
+				int* returnValue = new int;
+				*returnValue = r_data_3[1];
+				return returnValue;
+			}
+
+			case IS_GRIPPER_MOVING:
+			{
+				int* pState = new int;
+				*pState = r_data_3[1];
+				return pState;
+			}
+
 		}
 
 	case 4:
@@ -283,6 +298,16 @@ void* MycobotBasic::readData()
 				*pEncoder = encoder_low + encoder_high * 256;
 				return pEncoder;
 			}
+
+			case GET_GRIPPER_VALUE:
+			{
+				int* returnValue = new int;
+				byte gripper_high = r_data_4[1];
+				byte gripper_low = r_data_4[2];
+				*returnValue = gripper_low + gripper_high * 256;
+				return returnValue;
+			}
+
 		}
 
 	case 14:
@@ -820,7 +845,7 @@ int MycobotBasic::getEncoder(int joint)
 	Serial2.write(header);
 	Serial2.write(GET_ENCODER_LEN);
 	Serial2.write(GET_ENCODER);
-	Serial2.write(joint);
+	Serial2.write(joint_number);
 	Serial2.write(footer);
 
 	unsigned long t_begin = millis();
@@ -1612,4 +1637,362 @@ EndType MycobotBasic::getEndType()
 	}
 
 	return ERROR_END;
+}
+
+void MycobotBasic::setDigitalOutput(byte pin_no, byte pin_state)
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(SET_DIGITAL_OUTPUT_LEN);
+	Serial2.write(SET_DIGITAL_OUTPUT);
+	Serial2.write(pin_no);
+	Serial2.write(pin_state);
+	Serial2.write(footer);
+}
+
+int MycobotBasic::getDigitalInput(byte pin_no)
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(GET_DIGITAL_INPUT_LEN);
+	Serial2.write(GET_DIGITAL_INPUT);
+	Serial2.write(pin_no);
+	Serial2.write(footer);
+
+	unsigned long t_begin = millis();
+	void* tempPtr = nullptr;
+	int* pReturnValue = nullptr;
+	int returnValue;
+
+	while (true)
+	{
+		if (millis() - t_begin > 40)
+			break;
+		tempPtr = readData();
+		if (tempPtr == nullptr)
+			continue;
+		else
+		{
+			pReturnValue = (int*)tempPtr;
+			returnValue = *pReturnValue;
+			delete pReturnValue;
+			return returnValue;
+		}
+	}
+
+	return -1;
+}
+
+void MycobotBasic::setPWMMode(byte pin_no, byte channel)
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(SET_PWM_MODE_LEN);
+	Serial2.write(SET_PWM_MODE);
+	Serial2.write(pin_no);
+	Serial2.write(channel);
+	Serial2.write(footer);
+}
+
+void MycobotBasic::setPWMOutput(byte channel, byte pin_write)
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(SET_PWM_OUTPUT_LEN);
+	Serial2.write(SET_PWM_OUTPUT);
+	Serial2.write(channel);
+	Serial2.write(pin_write);
+	Serial2.write(footer);
+}
+
+void MycobotBasic::releaseServo(byte servo_no)
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(RELEASE_SERVO_LEN);
+	Serial2.write(RELEASE_SERVO);
+	Serial2.write(servo_no);
+	Serial2.write(footer);
+}
+
+void MycobotBasic::focusServo(byte servo_no)
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(FOCUS_SERVO_LEN);
+	Serial2.write(FOCUS_SERVO);
+	Serial2.write(servo_no);
+	Serial2.write(footer);
+}
+
+void MycobotBasic::setGripperState(byte mode, int sp)
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(SET_GRIPPER_STATE_LEN);
+	Serial2.write(SET_GRIPPER_STATE);
+	Serial2.write(mode);
+	Serial2.write(sp);
+	Serial2.write(footer);
+}
+
+void MycobotBasic::setGripperValue(int data, int sp)
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(SET_GRIPPER_VALUE_LEN);
+	Serial2.write(SET_GRIPPER_VALUE);
+
+	byte data_high = highByte(data);
+	byte data_low = lowByte(data);
+
+	Serial2.write(data_high);
+	Serial2.write(data_low);
+	Serial2.write(sp);
+	Serial2.write(footer);
+}
+
+void MycobotBasic::setGripperIni()
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(SET_GRIPPER_INI_LEN);
+	Serial2.write(SET_GRIPPER_INI);
+	Serial2.write(footer);
+}
+
+int MycobotBasic::getGripperValue()
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(GET_GRIPPER_VALUE_LEN);
+	Serial2.write(GET_GRIPPER_VALUE);
+	Serial2.write(footer);
+
+	unsigned long t_begin = millis();
+	void* tempPtr = nullptr;
+	int* pReturnValue = nullptr;
+	int returnValue;
+
+	while (true)
+	{
+		if (millis() - t_begin > 40)
+			break;
+		tempPtr = readData();
+		if (tempPtr == nullptr)
+			continue;
+		else
+		{
+			pReturnValue = (int*)tempPtr;
+			returnValue = *pReturnValue;
+			delete pReturnValue;
+			return returnValue;
+		}
+	}
+
+	return -1;
+}
+
+bool MycobotBasic::isGripperMoving()
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(IS_GRIPPER_MOVING_LEN);
+	Serial2.write(IS_GRIPPER_MOVING);
+	Serial2.write(footer);
+
+	unsigned long t_begin = millis();
+	void* tempPtr = nullptr;
+	bool* pState = nullptr;
+	bool state;
+
+	while (true)
+	{
+		if (millis() - t_begin > 40)
+			break;
+		tempPtr = readData();
+		if (tempPtr == nullptr)
+			continue;
+		else
+		{
+			pState = (bool*)tempPtr;
+			state = *pState;
+			delete pState;
+			return state;
+		}
+	}
+	return false;
+}
+
+void MycobotBasic::moveCCoords(Coords begin_coord, Coords middle_coord, Coords end_coord)
+{
+	// begin_coord
+	byte begin_x_low = lowByte(static_cast<int>(begin_coord[0] * 10));
+	byte begin_x_high = highByte(static_cast<int>(begin_coord[0] * 10));
+
+	byte begin_y_low = lowByte(static_cast<int>(begin_coord[1] * 10));
+	byte begin_y_high = highByte(static_cast<int>(begin_coord[1] * 10));
+
+	byte begin_z_low = lowByte(static_cast<int>(begin_coord[2] * 10));
+	byte begin_z_high = highByte(static_cast<int>(begin_coord[2] * 10));
+
+	byte begin_rx_low = lowByte(static_cast<int>(begin_coord[3] * 100));
+	byte begin_rx_high = highByte(static_cast<int>(begin_coord[3] * 100));
+
+	byte begin_ry_low = lowByte(static_cast<int>(begin_coord[4] * 100));
+	byte begin_ry_high = highByte(static_cast<int>(begin_coord[4] * 100));
+
+	byte begin_rz_low = lowByte(static_cast<int>(begin_coord[5] * 100));
+	byte begin_rz_high = highByte(static_cast<int>(begin_coord[5] * 100));
+
+	// middle_coord
+	byte middle_x_low = lowByte(static_cast<int>(middle_coord[0] * 10));
+	byte middle_x_high = highByte(static_cast<int>(middle_coord[0] * 10));
+
+	byte middle_y_low = lowByte(static_cast<int>(middle_coord[1] * 10));
+	byte middle_y_high = highByte(static_cast<int>(middle_coord[1] * 10));
+
+	byte middle_z_low = lowByte(static_cast<int>(middle_coord[2] * 10));
+	byte middle_z_high = highByte(static_cast<int>(middle_coord[2] * 10));
+
+	byte middle_rx_low = lowByte(static_cast<int>(middle_coord[3] * 100));
+	byte middle_rx_high = highByte(static_cast<int>(middle_coord[3] * 100));
+
+	byte middle_ry_low = lowByte(static_cast<int>(middle_coord[4] * 100));
+	byte middle_ry_high = highByte(static_cast<int>(middle_coord[4] * 100));
+
+	byte middle_rz_low = lowByte(static_cast<int>(middle_coord[5] * 100));
+	byte middle_rz_high = highByte(static_cast<int>(middle_coord[5] * 100));
+
+	// end_coord
+	byte end_x_low = lowByte(static_cast<int>(end_coord[0] * 10));
+	byte end_x_high = highByte(static_cast<int>(end_coord[0] * 10));
+
+	byte end_y_low = lowByte(static_cast<int>(end_coord[1] * 10));
+	byte end_y_high = highByte(static_cast<int>(end_coord[1] * 10));
+
+	byte end_z_low = lowByte(static_cast<int>(end_coord[2] * 10));
+	byte end_z_high = highByte(static_cast<int>(end_coord[2] * 10));
+
+	byte end_rx_low = lowByte(static_cast<int>(end_coord[3] * 100));
+	byte end_rx_high = highByte(static_cast<int>(end_coord[3] * 100));
+
+	byte end_ry_low = lowByte(static_cast<int>(end_coord[4] * 100));
+	byte end_ry_high = highByte(static_cast<int>(end_coord[4] * 100));
+
+	byte end_rz_low = lowByte(static_cast<int>(end_coord[5] * 100));
+	byte end_rz_high = highByte(static_cast<int>(end_coord[5] * 100));
+
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(MOVEC_COORDS_DEFAULT_LEN);
+	Serial2.write(MOVEC_COORDS_DEFAULT);
+	Serial2.write(begin_x_high);
+	Serial2.write(begin_x_low);
+	Serial2.write(begin_y_high);
+	Serial2.write(begin_y_low);
+	Serial2.write(begin_z_high);
+	Serial2.write(begin_z_low);
+	Serial2.write(begin_rx_high);
+	Serial2.write(begin_rx_low);
+	Serial2.write(begin_ry_high);
+	Serial2.write(begin_ry_low);
+	Serial2.write(begin_rz_high);
+	Serial2.write(begin_rz_low);
+	Serial2.write(middle_x_high);
+	Serial2.write(middle_x_low);
+	Serial2.write(middle_y_high);
+	Serial2.write(middle_y_low);
+	Serial2.write(middle_z_high);
+	Serial2.write(middle_z_low);
+	Serial2.write(middle_rx_high);
+	Serial2.write(middle_rx_low);
+	Serial2.write(middle_ry_high);
+	Serial2.write(middle_ry_low);
+	Serial2.write(middle_rz_high);
+	Serial2.write(middle_rz_low);
+	Serial2.write(end_x_high);
+	Serial2.write(end_x_low);
+	Serial2.write(end_y_high);
+	Serial2.write(end_y_low);
+	Serial2.write(end_z_high);
+	Serial2.write(end_z_low);
+	Serial2.write(end_rx_high);
+	Serial2.write(end_rx_low);
+	Serial2.write(end_ry_high);
+	Serial2.write(end_ry_low);
+	Serial2.write(end_rz_high);
+	Serial2.write(end_rz_low);
+	Serial2.write(footer);
+}
+
+void MycobotBasic::moveCCoords(Coords middle_coord, Coords end_coord)
+{
+	// middle_coord
+	byte middle_x_low = lowByte(static_cast<int>(middle_coord[0] * 10));
+	byte middle_x_high = highByte(static_cast<int>(middle_coord[0] * 10));
+
+	byte middle_y_low = lowByte(static_cast<int>(middle_coord[1] * 10));
+	byte middle_y_high = highByte(static_cast<int>(middle_coord[1] * 10));
+
+	byte middle_z_low = lowByte(static_cast<int>(middle_coord[2] * 10));
+	byte middle_z_high = highByte(static_cast<int>(middle_coord[2] * 10));
+
+	byte middle_rx_low = lowByte(static_cast<int>(middle_coord[3] * 100));
+	byte middle_rx_high = highByte(static_cast<int>(middle_coord[3] * 100));
+
+	byte middle_ry_low = lowByte(static_cast<int>(middle_coord[4] * 100));
+	byte middle_ry_high = highByte(static_cast<int>(middle_coord[4] * 100));
+
+	byte middle_rz_low = lowByte(static_cast<int>(middle_coord[5] * 100));
+	byte middle_rz_high = highByte(static_cast<int>(middle_coord[5] * 100));
+
+	// end_coord
+	byte end_x_low = lowByte(static_cast<int>(end_coord[0] * 10));
+	byte end_x_high = highByte(static_cast<int>(end_coord[0] * 10));
+
+	byte end_y_low = lowByte(static_cast<int>(end_coord[1] * 10));
+	byte end_y_high = highByte(static_cast<int>(end_coord[1] * 10));
+
+	byte end_z_low = lowByte(static_cast<int>(end_coord[2] * 10));
+	byte end_z_high = highByte(static_cast<int>(end_coord[2] * 10));
+
+	byte end_rx_low = lowByte(static_cast<int>(end_coord[3] * 100));
+	byte end_rx_high = highByte(static_cast<int>(end_coord[3] * 100));
+
+	byte end_ry_low = lowByte(static_cast<int>(end_coord[4] * 100));
+	byte end_ry_high = highByte(static_cast<int>(end_coord[4] * 100));
+
+	byte end_rz_low = lowByte(static_cast<int>(end_coord[5] * 100));
+	byte end_rz_high = highByte(static_cast<int>(end_coord[5] * 100));
+
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(MOVEC_COORDS_LEN);
+	Serial2.write(MOVEC_COORDS);
+	Serial2.write(middle_x_high);
+	Serial2.write(middle_x_low);
+	Serial2.write(middle_y_high);
+	Serial2.write(middle_y_low);
+	Serial2.write(middle_z_high);
+	Serial2.write(middle_z_low);
+	Serial2.write(middle_rx_high);
+	Serial2.write(middle_rx_low);
+	Serial2.write(middle_ry_high);
+	Serial2.write(middle_ry_low);
+	Serial2.write(middle_rz_high);
+	Serial2.write(middle_rz_low);
+	Serial2.write(end_x_high);
+	Serial2.write(end_x_low);
+	Serial2.write(end_y_high);
+	Serial2.write(end_y_low);
+	Serial2.write(end_z_high);
+	Serial2.write(end_z_low);
+	Serial2.write(end_rx_high);
+	Serial2.write(end_rx_low);
+	Serial2.write(end_ry_high);
+	Serial2.write(end_ry_low);
+	Serial2.write(end_rz_high);
+	Serial2.write(end_rz_low);
+	Serial2.write(footer);
 }

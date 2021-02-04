@@ -13,7 +13,7 @@
 #define IORecWrong			-1
 #define	header				0xfe
 #define footer				0xfa
-#define IOTimeOut_1			30
+#define IOTimeOut			30
 #define ITR_TIMES_MAX		4
 
 #define SEND_DATA_GAP 		4
@@ -51,12 +51,13 @@ public:
 	Angles getAngles();
 	void writeAngle(int joint, float value, int speed);
 	void writeAngles(Angles angles, int speed);
-	
 	Coords getCoords();
-	void writeCoord(Axis axis, float value, int speed);   		//must write x/y/z
+	void writeCoord(Axis axis, float value, int speed);
 	void writeCoords(Coords coords, int speed);
 	int isInPosition(Coords coord, bool is_linear);
 	bool checkRunning();
+	void moveCCoords(Coords begin_coord, Coords middle_coord, Coords end_coord);
+	void moveCCoords(Coords middle_coord, Coords end_coord);
 
 
 
@@ -84,6 +85,7 @@ public:
 	void setJointMax(int joint, float angle);
 
 
+
 	// Servo Control
 	bool isServoEnabled(int joint);
 	bool isAllServoEnabled();
@@ -93,9 +95,25 @@ public:
 	void jointBrake(int joint);
 
 
+
 	// Atom IO
 	void setPinMode(byte pin_no, byte pin_mode);
+	void setDigitalOutput(byte pin_no, byte pin_state);
+	int getDigitalInput(byte pin_no);
 
+	void setPWMMode(byte pin_no, byte channel);
+	void setPWMOutput(byte channel, byte pin_write);
+
+	void releaseServo(byte servo_no);
+	void focusServo(byte servo_no);
+
+	void setGripperState(byte mode, int sp);
+	void setGripperValue(int data, int sp);
+	void setGripperIni();
+	int getGripperValue();
+	bool isGripperMoving();
+
+	
 
 	// function
 	void pause();

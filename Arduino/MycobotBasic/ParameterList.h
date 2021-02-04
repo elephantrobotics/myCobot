@@ -48,7 +48,7 @@ namespace myCobotDefine {
 
 	// servo speed
 	const float maximum_large_servo_speed = 1000;	//2000?
-	const float maximum_small_servo_speed = 1000; // 3000?
+	const float maximum_small_servo_speed = 1400; // 3000?
 
 	// isInPosition offset
 	const float is_in_position_offset = 5;

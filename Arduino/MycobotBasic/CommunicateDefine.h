@@ -172,32 +172,51 @@
 #define VOID_JOINT_BRAKE			0x55
 #define VOID_JOINT_BRAKE_LEN		3
 
-//
+#define RELEASE_SERVO				0x56
+#define RELEASE_SERVO_LEN			3
+
+#define FOCUS_SERVO					0x57
+#define FOCUS_SERVO_LEN				3
+
+
 //// ATOM IO
 #define	SET_PIN_MODE				0x60
 #define	SET_PIN_MODE_LEN			4
 //
-#define	SET_PIN_DATA				0x61
+#define	SET_DIGITAL_OUTPUT			0x61
+#define	SET_DIGITAL_OUTPUT_LEN		4
 					
 //
-#define	GET_PIN_INPUT				0x62
-#define	GET_PIN_INPUT_LEN			3					
-#define GET_PIN_INPUT_RETURN_LEN	3
+#define	GET_DIGITAL_INPUT				0x62
+#define	GET_DIGITAL_INPUT_LEN			3					
+#define GET_DIGITAL_INPUT_RETURN_LEN	3
 //
-//#define								0x63
-//#define								
+#define	SET_PWM_MODE					0x63
+#define	SET_PWM_MODE_LEN				4	
 //
-//#define								0x65
-//#define								2
+#define	SET_PWM_OUTPUT					0x64
+#define	SET_PWM_OUTPUT_LEN				4
+
+//
+#define	GET_GRIPPER_VALUE				0x65
+#define	GET_GRIPPER_VALUE_LEN			2
+#define GET_GRIPPER_VALUE_RETURN_LEN	4
 //
 #define	SET_GRIPPER_STATE				0x66
-#define	SET_GRIPPER_STATE_LEN			3
+#define	SET_GRIPPER_STATE_LEN			4
 //
-//#define								0x67
-//#define								2
+#define	SET_GRIPPER_VALUE				0x67
+#define	SET_GRIPPER_VALUE_LEN			4
+
+#define	SET_GRIPPER_INI					0x68
+#define	SET_GRIPPER_INI_LEN				2
+
+#define	IS_GRIPPER_MOVING				0x69
+#define	IS_GRIPPER_MOVING_LEN			2
+#define IS_GRIPPER_MOVING_RETURN_LEN	3
 //
-#define	SET_LED						0x6A
-#define	SET_LED_LEN					5
+#define	SET_LED							0x6A
+#define	SET_LED_LEN						5
 //
 //// Base basic and IO control
 //#define								0x70
@@ -241,6 +260,12 @@
 #define GET_END_TYPE				0x8A
 #define GET_END_TYPE_LEN			2
 #define GET_END_TYPE_RETURN_LEN		3
+
+#define MOVEC_COORDS_DEFAULT		0x8B
+#define MOVEC_COORDS_DEFAULT_LEN	38
+
+#define MOVEC_COORDS				0x8C
+#define MOVEC_COORDS_LEN			26
 
 
 #endif // !COMMUNICATEDEFINE_H
