@@ -11,6 +11,8 @@ https://docs.m5stack.com/#/zh_CN/core/basic
 Should directly read MycobotBasic.h and MycobotBasic.cpp
 
 # Update on 4th Feb
+Can only be used with AtomMain2.5 in myStudio0.05
+https://github.com/elephantrobotics/myStudio/releases
 
 setGripperValue() 	// the gripper encoder number(from 0 to 4096) get gripper value before use
 setGripperIni() 	// set gripper encode initial center point(to be 2048)
