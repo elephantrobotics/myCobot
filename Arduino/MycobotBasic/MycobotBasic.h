@@ -101,8 +101,8 @@ public:
 	void setDigitalOutput(byte pin_no, byte pin_state);
 	int getDigitalInput(byte pin_no);
 
-	void setPWMMode(byte pin_no, byte channel);
-	void setPWMOutput(byte channel, byte pin_write);
+	//void setPWMMode(int freq, byte pin_no, byte channel);
+	void setPWMOutput(byte pin_no,  int freq, byte pin_write);
 
 	void releaseServo(byte servo_no);
 	void focusServo(byte servo_no);

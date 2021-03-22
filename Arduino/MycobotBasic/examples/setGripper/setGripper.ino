@@ -1,3 +1,5 @@
+/// 此文件用于mycobot设备控制末端夹爪运动，对应烧录设备为Basic
+///
 #include <MycobotBasic.h>
 #include <ParameterList.h>
 
@@ -5,15 +7,19 @@ MycobotBasic myCobot;
  
 void setup() {
   myCobot.setup();
+  delay(10);
   myCobot.powerOn();
-//  myCobot.setGripperIni(); //init Gripper, must open Gripper
-  delay(2000);
+  delay(10);
+  myCobot.setGripperIni();                          //设定夹爪当前位置电位值为2048
+  delay(20);
   Serial.begin(9600);
 }
 
 void loop() {
-    myCobot.setGripperState(1, 100);       // set Gripper 
+    myCobot.setEncoder(7,2048);                     //设定末端夹爪打开至2048电位值
     delay(2000);
-    myCobot.setGripperState(0, 100);       // set Gripper
+    Serial.println(myCobot.getGripperValue());      //读取末端夹爪电位值
+    myCobot.setEncoder(7,1700);                     //设定末端夹爪打开至2048电位值
     delay(2000);
+    Serial.println(myCobot.getGripperValue());      //读取末端夹爪电位值
 }

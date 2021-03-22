@@ -1683,24 +1683,41 @@ int MycobotBasic::getDigitalInput(byte pin_no)
 	return -1;
 }
 
-void MycobotBasic::setPWMMode(byte pin_no, byte channel)
+/*
+void MycobotBasic::setPWMMode(int freq, byte pin_no, byte channel)
 {
 	Serial2.write(header);
 	Serial2.write(header);
 	Serial2.write(SET_PWM_MODE_LEN);
 	Serial2.write(SET_PWM_MODE);
+
+
+	byte freq_high = highByte(freq);
+	byte freq_low = lowByte(freq);
+
+	Serial2.write(freq_high);
+	Serial2.write(freqa_low);
+
 	Serial2.write(pin_no);
 	Serial2.write(channel);
 	Serial2.write(footer);
-}
+}*/
 
-void MycobotBasic::setPWMOutput(byte channel, byte pin_write)
+void MycobotBasic::setPWMOutput(byte pin_no, int freq,  byte pin_write)
 {
 	Serial2.write(header);
 	Serial2.write(header);
 	Serial2.write(SET_PWM_OUTPUT_LEN);
 	Serial2.write(SET_PWM_OUTPUT);
-	Serial2.write(channel);
+	Serial2.write(pin_no);
+
+	byte freq_high = highByte(freq);
+	byte freq_low = lowByte(freq);
+
+	Serial2.write(freq_high);
+	Serial2.write(freq_low);
+
+
 	Serial2.write(pin_write);
 	Serial2.write(footer);
 }
