@@ -24,7 +24,6 @@ void setup() {
   pinMode(15, OUTPUT); // 1 
   pinMode(5, OUTPUT); // 2
   pinMode(2, OUTPUT); // 2
-  Serial.print(4);
   
   info();
 }
