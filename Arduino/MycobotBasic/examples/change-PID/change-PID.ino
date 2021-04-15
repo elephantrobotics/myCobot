@@ -1,3 +1,6 @@
+// Plase Faist Read README.txt
+// ElephantRobotics
+
 #include <MycobotBasic.h>
 #include <ParameterList.h>
 
@@ -12,25 +15,48 @@ void setup() {
 }
 
 void loop() {
-
   M5.update();
   if (M5.BtnA.wasReleased()) {
-
+    int P,I,D;
    for(int i = 1; i <7 ; i++)
    {
-     myCobot.setServoData(i, 21, 10);//P
-     delay(30);
-     myCobot.setServoData(i, 22, 0);//D
-     delay(30);
-     myCobot.setServoData(i, 23, 2);//I
-     delay(30);
-     Serial.print("servo");
+    if(i < 4){
+       P = 5;
+       I = 0;
+       D = 15;
+    }else{
+         P = 8;
+         I = 0;
+         D = 24;
+    }
+     myCobot.setServoData(i, 21, P);//P
+     delay(50);
+     myCobot.setServoData(i, 22, D);//D
+     delay(50);
+     myCobot.setServoData(i, 23, I);//I
+     delay(50);
+     Serial.print("servo:");
      Serial.print(i);
-     Serial.println("CHACK PID OK");
+     Serial.println(" CHANGE PID");
    }
-   
-
-  } else if (M5.BtnB.wasReleased()) {
+  }else if (M5.BtnB.wasReleased()) {
+    int P,I,D;
+    P = 10;
+    I = 1;
+    D = 0;
+    for(int i = 1; i <7 ; i++){
+      myCobot.setServoData(i, 21, P);//P
+      delay(50);
+      myCobot.setServoData(i, 22, D);//D
+      delay(50);
+      myCobot.setServoData(i, 23, I);//I
+      delay(50);
+     Serial.print("servo:");
+     Serial.print(i);
+     Serial.println("CHANGE PID");
+    }  
+   }
+   else if (M5.BtnC.wasReleased()) {
     for(int i =1; i <7; i++)
     { 
        Serial.print("servo: ");
