@@ -64,12 +64,12 @@ void info()
   }
   if(lan == 1){
     M5.Lcd.setCursor(0, 50);
-    M5.Lcd.print("PressA - Cablibrate Servo ");
+    M5.Lcd.print("PressA - Calibrate Servo ");
     M5.Lcd.setCursor(0, 90);
    // M5.Lcd.print("PressB - Test Servos (long press to force testing)\n\n");
     M5.Lcd.print("PressB - Test Servos ");
     M5.Lcd.setCursor(0, 130);
-    M5.Lcd.print("PressC - Restart Calibaration(long press to return language selection)\n");
+    M5.Lcd.print("PressC - Restart Calibration(long press to return language selection)\n");
 //    M5.Lcd.setCursor(0, 170);
 //    M5.Lcd.print("(long press to return language selection)\n");    
   }
