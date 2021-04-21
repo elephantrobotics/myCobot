@@ -1,5 +1,5 @@
 /// 此文件用于mycobot设备控制末端夹爪运动，对应烧录设备为Basic
-///
+/// 烧炉前请将夹爪张开至最大角度
 #include <MycobotBasic.h>
 #include <ParameterList.h>
 
