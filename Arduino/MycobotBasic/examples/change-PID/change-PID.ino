@@ -37,7 +37,7 @@ void loop() {
      delay(50);
      Serial.print("servo:");
      Serial.print(i);
-     Serial.println(" CHANGE PID");
+     Serial.println(" CHANGE PID to Mode 1");
    }
   }else if (M5.BtnB.wasReleased()) {
     int P,I,D;
@@ -53,7 +53,7 @@ void loop() {
       delay(50);
      Serial.print("servo:");
      Serial.print(i);
-     Serial.println("CHANGE PID");
+     Serial.println("CHANGE PID to Mode 2");
     }  
    }
    else if (M5.BtnC.wasReleased()) {
