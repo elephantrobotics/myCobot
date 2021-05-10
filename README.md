@@ -2,20 +2,22 @@
 
 myCobot is the worlds smallest collaborative robot arm.
 以上程序只适用于 myCobot 底座上的 M5 Basic 控制器进行使用
-This is for M5 Basic Board to use only !
 
-# M5 Stack Basic
+Be sure to review the myCobot GitBook!
 
-M5Stack Basic 的基本应用与烧录可以参考以下链接
-https://docs.m5stack.com/#/zh_CN/core/basic
+- [myCobot (Chinese)](https://www.elephantrobotics.com/docs/myCobot)
+- [myCobot (English)](https://www.elephantrobotics.com/docs/myCobot-en)
 
-# Library & Example
+# Software, Libraries, and Examples
 
-如果您在使用案例，请先测试 SimpleTest.ino 文件验证通讯，该程序应烧录到底层 Basic 中
-请查看 Arduino 目录下的 API
-
-# Software
+- Arduino: [`./Arduino`](./Arduino)
+- Python:
+  [github: pymycobot](https://github.com/elephantrobotics/pymycobot.git) |
+  [pypi: pymycobot](https://pypi.org/project/pymycobot/)
+- ROS: [github: myCobotROS](https://github.com/elephantrobotics/myCobotROS.git)
+- Phone Controller: details for app in [`./Software/phone controller`](https://github.com/elephantrobotics/myCobot/tree/main/Software/phone%20controller)
 
 新版本的固件烧录器新增 ROS 与 Python 驱动固件，使用时请注意烧录终端与固件版本号
 
-**myCobot phone controller** : a phone app. [detial](https://github.com/elephantrobotics/myCobot/tree/main/Software/phone%20controller)
+The new version of the firmware burner (myStudio) adds ROS and Python driver
+firmware. Please review GitBook for which firmware versions to use!
