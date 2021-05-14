@@ -22,7 +22,7 @@ void loop() {
     delay(2000);
     Serial.println(myCobot.getGripperValue());      //读取末端夹爪电位值
     delay(50);
-    myCobot.setEncoder(7,1700);                     //设定末端夹爪打开至2048电位值
+    myCobot.setEncoder(7,1700);                     //设定末端夹爪打开至1700电位值
     delay(2000);
     Serial.println(myCobot.getGripperValue());      //读取末端夹爪电位值
     delay(50);
