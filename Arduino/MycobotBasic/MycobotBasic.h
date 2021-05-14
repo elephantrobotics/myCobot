@@ -13,7 +13,7 @@
 #define IORecWrong			-1
 #define	header				0xfe
 #define footer				0xfa
-#define IOTimeOut			30
+#define IO_TimeOut			30
 #define ITR_TIMES_MAX		4
 
 #define SEND_DATA_GAP 		4

@@ -76,7 +76,7 @@ int MycobotBasic::readSerial(unsigned char *nDat, int nLen)
     }
     // check time out
     t_use = millis() - t_begin;
-    if (t_use > IOTimeOut){ 
+    if (t_use > IO_TimeOut){ 
       break;
     }
   }

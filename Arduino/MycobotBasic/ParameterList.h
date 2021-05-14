@@ -9,7 +9,7 @@ namespace myCobotDefine {
 #define SYSTEM_VERSION		0x01
 
 #define MYCOBOT_500_VERSION			1
-#define PI						3.14159265
+// #define PI						3.14159265
 #define COEFFICIENT				(180.0 / PI)
 
 	// DH parameters
