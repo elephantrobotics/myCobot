@@ -1,26 +1,19 @@
 #include <MycobotBasic.h>
 #include <ParameterList.h>
-
-
 MycobotBasic myCobot;
 
-
 bool Servo_state = 1;
-
 int power_pin = 2;
 int open_pin = 5;
 int out_state = 1;
-                    
-Coords pos_init_1 = {155.10, -55.10, 90.10, -179.10, 0.10, -90.10};
+
+Coords pos_init_1 = {155.10, -55.10, 90.10, -179.10, 0.10, -90.10};   // 初始坐标
 Coords data1;
+Angles angles_0 = {0, 0, 0, 0, 0, 0};             //初始化角度
 
-Angles angles_0 = {0, 0, 0, 0, 0, 0};
-Angles angles_1 = {-90.01, -45, -90.30, 45.09, 90.70, 90.63};
-Angles angles_2 = {-0, -45, -90.30, 45.09, 90.70, 90.63};    
-Angles angles_3 = {-0, -45, -90.30, 45.09, 90.70, 90.63};                 
-void move_coords(int dir = 0, int num = 0);
+void move_coords(int dir = 0, int num = 0);   // 声明可调用函数，无实际意义。
 
-void setup() {
+void setup() {              //初始化函数
   myCobot.setup();
   myCobot.powerOn();
   
@@ -33,20 +26,26 @@ void setup() {
   delay(100);
   myCobot.writeAngles(angles_0,30);
   delay(3000);
+  Serial.printf("A键控制力矩开关         |");
+  Serial.println("");
+  Serial.printf("B键控制移动到初始坐标    |");
+  Serial.println("");
+  Serial.printf("C键控制前后左右上下移动  |");
+  Serial.println("");
 }
 
-void loop() {
+void loop() {               //主函数
   // put your main code here, to run repeatedly:
     M5.update(); // need to call update()  
     M5.Lcd.setCursor(0,0);
     int j = 0;
-     if (M5.BtnA.wasReleased()) {
+     if (M5.BtnA.wasReleased()) {       //控制上下电
       reless();
       } 
-    if (M5.BtnB.wasReleased()) {   
+    if (M5.BtnB.wasReleased()) {        //移动到初始角度
       myCobot.writeCoords(pos_init_1,30);
     }
-    if (M5.BtnC.wasReleased()) {
+    if (M5.BtnC.wasReleased()) {        //前后左右上下移动
       data1 = pos_init_1;
       delay(50);
       move_coords(0, 10);
@@ -64,7 +63,7 @@ void loop() {
 }
 }
 
-void reless()
+void reless()               //控制力矩开关
 {
   for(int i = 1; i<7; i++){
     myCobot.setServoData(i, 40, !Servo_state);
@@ -73,7 +72,7 @@ void reless()
   Servo_state = !Servo_state;
 }
 
-Angles read_Angles()
+Angles read_Angles()        // 读取角度并输出
 {
   Angles data2;
   data2 = myCobot.getAngles();
@@ -86,7 +85,7 @@ Angles read_Angles()
   return data2;
 }
 
-Coords read_pos()
+Coords read_pos()           //读取坐标并输出
 {
   Coords data1;
   data1 = myCobot.getCoords();
@@ -99,7 +98,7 @@ Coords read_pos()
   return data1;
 }
 
-void move_coords(int dir, int num)
+void move_coords(int dir, int num)    //控制移动方向和步数，一步等于10mm
 {
   if (num > 0){
     for(int i = 0; i<num; i++){
@@ -110,7 +109,7 @@ void move_coords(int dir, int num)
     }
     Serial.println("");
     data1[dir] += 10;
-    delay(50);
+    delay(100);
   }
   }else{
     num = 0-num;
@@ -122,13 +121,12 @@ void move_coords(int dir, int num)
     }
     Serial.println("");
     data1[dir] -= 10;
-    delay(50);
+    delay(100);
   }
   } 
 }
 
-
-void set_pump(int out_state){
+void set_pump(int out_state){         //吸泵开关
     digitalWrite(power_pin, out_state);
     digitalWrite(open_pin, out_state);
 }
