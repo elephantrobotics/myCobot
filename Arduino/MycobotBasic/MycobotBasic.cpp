@@ -1207,7 +1207,7 @@ bool MycobotBasic::isAllServoEnabled()
 
 byte MycobotBasic::getServoData(int joint, byte data_id)
 {
-	byte joint_number = joint - 1;
+	byte joint_number = joint;
 	Serial2.write(header);
 	Serial2.write(header);
 	Serial2.write(GET_SERVO_DATA_LEN);
