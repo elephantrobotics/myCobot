@@ -18,18 +18,13 @@ M5Stack:
 
 To start, please see `MycobotBasic.h` and `MycobotBasic.cpp`
 
-## Update on 4th Feb
+## Update
 
-Can only be used with AtomMain2.7 in myStudio1.0
+- Can only be used with AtomMain3.1 in myStudio2.2
 https://github.com/elephantrobotics/myStudio/releases
 
-```cc
-setEncoder(servo_number, encoder)  // can use to set gripper,servo_number should be 7, encoder should be 0-4096, but if you want use gripper, must get Gripper Value and set gripper init.
+- 本次更新修复了大多数角度控制函数的处理方式
 
-getGripperValue() 	// return gripper encdoer value (from 0 to 4096)
-
-setPWMOutput(pin_number, frequency，ratio) // pin_number should be 13/22/23/33, frequency should be 100-100000, ratio should be 0 to 256（128 means 50% pwm）；
-```
 
 # FAQ
 
