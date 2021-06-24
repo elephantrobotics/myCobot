@@ -511,7 +511,7 @@ Angles MycobotBasic::getAngles()
 
 void MycobotBasic::writeAngle(int joint, float value, int speed)
 {
-	byte joint_number = byte(joint - 1);
+	byte joint_number = byte(joint);
 	byte angle_low = lowByte(static_cast<int>(value * 100));
 	byte angle_high = highByte(static_cast<int>(value * 100));
 
@@ -824,7 +824,7 @@ void MycobotBasic::jogStop()
 
 void MycobotBasic::setEncoder(int joint, int encoder)
 {
-	byte joint_number = joint - 1;
+	byte joint_number = joint;
 	byte encoder_high = highByte(encoder);
 	byte encoder_low = lowByte(encoder);
 
@@ -840,7 +840,7 @@ void MycobotBasic::setEncoder(int joint, int encoder)
 
 int MycobotBasic::getEncoder(int joint)
 {
-	byte joint_number = joint - 1;
+	byte joint_number = joint;
 	Serial2.write(header);
 	Serial2.write(header);
 	Serial2.write(GET_ENCODER_LEN);
@@ -1045,7 +1045,7 @@ void MycobotBasic::setAcceleration(float acceleration)
 
 float MycobotBasic::getJointMin(int joint)
 {
-	byte joint_number = joint - 1;
+	byte joint_number = joint;
 	Serial2.write(header);
 	Serial2.write(header);
 	Serial2.write(GET_JOINT_MIN_LEN);
@@ -1079,7 +1079,7 @@ float MycobotBasic::getJointMin(int joint)
 
 float MycobotBasic::getJointMax(int joint)
 {
-	byte joint_number = joint - 1;
+	byte joint_number = joint;
 	Serial2.write(header);
 	Serial2.write(header);
 	Serial2.write(GET_JOINT_MAX_LEN);
@@ -1113,7 +1113,7 @@ float MycobotBasic::getJointMax(int joint)
 
 void MycobotBasic::setJointMin(int joint, float angle)
 {
-	byte joint_number = joint - 1;
+	byte joint_number = joint;
 	byte angle_low = lowByte(static_cast<int>(angle * 10));
 	byte angle_high = highByte(static_cast<int>(angle * 10));
 	Serial2.write(header);
@@ -1128,7 +1128,7 @@ void MycobotBasic::setJointMin(int joint, float angle)
 
 void MycobotBasic::setJointMax(int joint, float angle)
 {
-	byte joint_number = joint - 1;
+	byte joint_number = joint;
 	byte angle_low = lowByte(static_cast<int>(angle * 10));
 	byte angle_high = highByte(static_cast<int>(angle * 10));
 	Serial2.write(header);
@@ -1143,7 +1143,7 @@ void MycobotBasic::setJointMax(int joint, float angle)
 
 bool MycobotBasic::isServoEnabled(int joint)
 {
-	byte joint_number = joint - 1;
+	byte joint_number = joint;
 	Serial2.write(header);
 	Serial2.write(header);
 	Serial2.write(IS_SERVO_ENABLED_LEN);
@@ -1242,7 +1242,7 @@ byte MycobotBasic::getServoData(int joint, byte data_id)
 
 void MycobotBasic::setServoCalibration(int joint)
 {
-	byte joint_number = joint - 1;
+	byte joint_number = joint;
 	Serial2.write(header);
 	Serial2.write(header);
 	Serial2.write(SET_SERVO_CALIBRATION_LEN);

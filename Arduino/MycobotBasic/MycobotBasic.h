@@ -9,7 +9,8 @@
 #include <string>
 #include <map>
 
-#define BAUD_RATE 			1000000
+#define BAUD_RATE 			1000000      //mycobot use
+// #define BAUD_RATE 			115200      //mycobot-pro use
 #define IORecWrong			-1
 #define	header				0xfe
 #define footer				0xfa
