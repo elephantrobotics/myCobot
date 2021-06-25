@@ -9,11 +9,18 @@
 
 ## Libraries
 
-- Arduino ： [`./Arduino`](./Arduino)  
+- Arduino ：
+  [GIT链接](./Arduino) | 
+  [查看API](https://www.elephantrobotics.com/docs/myCobot/3-development/1.1-arduino/1.1-api.html)  | 
+  [下载依赖Library](https://www.elephantrobotics.com/software/libraries/libraries-20210625.zip) 
 
   - 固件需求  
     - basic：无  
     - atom ：AtomMain V3.1  
+
+  - 依赖库安装说明
+    - 依赖库解压后即可使用，仅需要添加开发板即可，添加方式请看[安装说明](https://www.elephantrobotics.com/docs/myCobot/2-preparation/1-background_knowledge/arduino.html)
+    - 解压到 "C:\Users\User\Documents\Arduino" 文件夹中即可，此文件路径为默认路径，如果你正在使用Arduino，请不要覆盖，添加至已有的Library中即可。
 
 - Python ：
   [github: pymycobot](https://github.com/elephantrobotics/pymycobot.git) |
