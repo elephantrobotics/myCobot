@@ -16,7 +16,7 @@
 
   - 固件需求  
     - basic：无  
-    - atom ：AtomMain V3.1  
+    - atom ：AtomMain V2.8  
 
   - 依赖库安装说明
     - 依赖库解压后即可使用，仅需要添加开发板即可，添加方式请看[安装说明](https://www.elephantrobotics.com/docs/myCobot/2-preparation/1-background_knowledge/arduino.html)
@@ -28,24 +28,23 @@
 
   - 固件需求  
     - basic：Transponder  
-    - atom ：AtomMain V3.1  
+    - atom ：AtomMain V2.8  
 
 - C ： [C++](https://github.com/elephantrobotics/myCobotCpp) | [C#](https://github.com/elephantrobotics/Mycobot.csharp)  
 
   - 固件需求  
     - basic：无  
-    - atom ：AtomMain V3.0
+    - atom ：AtomMain V2.8
 
 ## Software
 
-- MyStudio ：
-  [GIT下载](https://www.elephantrobotics.com/software/mystudio/release/) | [官网下载](https://www.elephantrobotics.com/software/mystudio/release/)  
+- MyStudio ：[官网下载](https://www.elephantrobotics.com/software/mystudio/v2.2/)  
   
   官方固件烧录器，机器人使用平台,适用于mycobot系列产品。
 
 - RoboFlow ：
- [Mycobot](https://www.elephantrobotics.com/software/RoboFlow/myCobot/RoboFlow_3.4.0-preview7_mycobot_windows_x86_64.zip) |
- [Mycobot-Pro](https://www.elephantrobotics.com/software/RoboFlow/myCobotPro/3.4.0-preview/RoboFlow_3.4.0-preview7_mycobotpro_windows_x86_64.zip)  
+ [用于Mycobot](https://www.elephantrobotics.com/software/RoboFlow/myCobot/RoboFlow_3.4.0-preview7_mycobot_windows_x86_64.zip) |
+ [用于Mycobot-Pro](https://www.elephantrobotics.com/software/RoboFlow/myCobotPro/3.4.0-preview/RoboFlow_3.4.0-preview7_mycobotpro_windows_x86_64.zip)  
 
   工业机器人控制软件，适用于大象机器人开发的机器人类型设备。
 
@@ -85,10 +84,10 @@
 
   - 固件需求  
     - basic：Transponder  
-    - atom ：AtomMain V3.1  
+    - atom ：AtomMain V2.8  
 
 - Moveit ： [mycobot_moveit](https://github.com/elephantrobotics/mycobot_moveit)
 
   - 固件需求  
     - basic：Transponder  
-    - atom ：AtomMain V3.1 
+    - atom ：AtomMain V2.8 
