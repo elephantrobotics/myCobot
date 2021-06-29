@@ -36,7 +36,10 @@
     - basic：无  
     - atom ：AtomMain V2.8
 
-## Software
+<a name="#software"></a>  <!-- Ensures prior links work -->
+
+## Software and Firmware
+
 
 - MyStudio ：[官网下载](https://www.elephantrobotics.com/software/mystudio/v2.2/)  
   
@@ -58,7 +61,9 @@
 
 - Phone Controller.app ： [GIT下载](https://github.com/elephantrobotics/myCobot/tree/main/Software/phone%20controller)  
 
-    手机控制软件，适用于 [mycobot-280-M5](https://www.elephantrobotics.com/myCobot/) 
+    手机控制软件，适用于 [mycobot-280-M5](https://www.elephantrobotics.com/myCobot/
+
+- minimycobotflasher ： [GIT](https://github.com/zlj-zz/minimycobotflasher)
 
 ## Example 
 
