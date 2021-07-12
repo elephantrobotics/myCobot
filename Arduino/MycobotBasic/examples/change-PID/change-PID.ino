@@ -91,6 +91,12 @@ void change_mode2(){
     delay(50);
     myCobot.setServoData(i, 23, I);//I
     delay(50);
+    myCobot.setServoData(i, 24, 0);//I
+    delay(50);
+    myCobot.setServoData(i, 26, 3);//I
+    delay(50);
+    myCobot.setServoData(i, 27, 3);//I
+    delay(50);
   } 
   M5.Lcd.println("CHANGE PID to Mode 2");
   M5.Lcd.println();
@@ -120,7 +126,12 @@ void change_mode1(){
    delay(50);
    myCobot.setServoData(i, 23, I);//I
    delay(50);
-   
+   myCobot.setServoData(i, 24, 0);//I
+   delay(50);
+   myCobot.setServoData(i, 26, 3);//I
+   delay(50);
+   myCobot.setServoData(i, 27, 3);//I
+   delay(50);
  }
   M5.Lcd.println("Servo CHANGE PID to Mode 1");
   M5.Lcd.println();
