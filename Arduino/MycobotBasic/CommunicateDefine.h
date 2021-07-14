@@ -112,6 +112,11 @@
 #define SET_ENCODERS				0x3C
 #define SET_ENCODERS_LEN			15
 
+#define GET_ENCODERS                 0x3D
+#define GET_ENCODERS_LEN             2
+#define GET_ENCODES_RETURN_LEN       14
+
+
 
 // Running Status and Settings
 #define GET_SPEED					0x40
