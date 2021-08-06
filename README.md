@@ -12,7 +12,7 @@
 - Arduino ：
   [GIT链接](./Arduino) | 
   [查看API](https://www.elephantrobotics.com/docs/myCobot/3-development/1.1-arduino/1.1-api.html)  | 
-  [下载依赖Library](https://www.elephantrobotics.com/software/libraries/libraries-20210625.zip) 
+  [下载依赖Library](https://www.elephantrobotics.com/software/libraries) 
 
   - 固件需求  
     - basic：无  
@@ -55,8 +55,7 @@
     - atom ：AtomMain V3.2
 
 - Myblockly ：
-  [GIT下载](https://github.com/elephantrobotics/myCobot/releases/tag/v0.0.3) |
-  [官网下载](https://www.elephantrobotics.com/software/myblockly/0.0.3/)  
+  [GIT下载](https://github.com/elephantrobotics/myCobot/releases) 
 
     mycobot系列产品图像化控制软件，适用于
       [mycobo-280](https://www.elephantrobotics.com/myCobot/) 和 
