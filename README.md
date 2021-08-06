@@ -95,15 +95,14 @@
 
 ## ROS  
 
-- ROS ：
-[github: myCobotROS](https://github.com/elephantrobotics/myCobotROS.git)
+- ROS ： [github: myCobotROS](https://github.com/elephantrobotics/myCobotROS.git)
 
   - 固件需求  
-    - basic：Transponder  
-    - atom ：AtomMain V2.8  
+    - basic：miniRobotV04  
+    - atom ：AtomMain V3.2 
 
 - Moveit ： [mycobot_moveit](https://github.com/elephantrobotics/mycobot_moveit)
 
   - 固件需求  
-    - basic：Transponder  
-    - atom ：AtomMain V2.8 
+    - basic：miniRobotV04  
+    - atom ：AtomMain V3.2 
