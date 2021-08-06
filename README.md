@@ -16,25 +16,25 @@
 
   - 固件需求  
     - basic：无  
-    - atom ：AtomMain V2.8  
+    - atom ：AtomMain V3.2  
 
   - 依赖库安装说明
     - 依赖库解压后即可使用，仅需要添加开发板即可，添加方式请看[安装说明](https://www.elephantrobotics.com/docs/myCobot/2-preparation/1-background_knowledge/arduino.html)
-    - 解压到 "C:\Users\User\Documents\Arduino" 文件夹中即可，此文件路径为默认路径，如果你正在使用Arduino，请不要覆盖，添加至已有的Library中即可。
+    - 解压到 "C:\Users\User\Documents\Arduino" 文件夹中即可，此文件路径为默认路径，如果你正在使用Arduino，请不要覆盖，添加至已有的文件夹 Librarys 中即可。
 
 - Python ：
   [github: pymycobot](https://github.com/elephantrobotics/pymycobot.git) |
   [pypi: pymycobot](https://pypi.org/project/pymycobot/)  
 
   - 固件需求  
-    - basic：Transponder  
-    - atom ：AtomMain V2.8  
+    - basic：miniRobotV04  
+    - atom ：AtomMain V3.2  
 
 - C ： [C++](https://github.com/elephantrobotics/myCobotCpp) | [C#](https://github.com/elephantrobotics/Mycobot.csharp)  
 
   - 固件需求  
-    - basic：无  
-    - atom ：AtomMain V2.8
+    - basic：miniRobotV04  
+    - atom ：AtomMain V3.2
 
 <a name="#software"></a>  <!-- Ensures prior links work -->
 
@@ -50,6 +50,9 @@
  [用于Mycobot-Pro](https://www.elephantrobotics.com/software/RoboFlow/myCobotPro/3.4.0-preview/RoboFlow_3.4.0-preview7_mycobotpro_windows_x86_64.zip)  
 
   工业机器人控制软件，适用于大象机器人开发的机器人类型设备。
+  - 固件需求  
+    - basic：miniRobotV04  
+    - atom ：AtomMain V3.2
 
 - Myblockly ：
   [GIT下载](https://github.com/elephantrobotics/myCobot/releases/tag/v0.0.3) |
@@ -58,10 +61,18 @@
     mycobot系列产品图像化控制软件，适用于
       [mycobo-280](https://www.elephantrobotics.com/myCobot/) 和 
       [mycobo-320](https://www.elephantrobotics.com/mycobot-pro/)
+      
+    - 固件需求  
+    - basic：miniRobotV04  
+    - atom ：AtomMain V3.2
 
 - Phone Controller.app ： [GIT下载](https://github.com/elephantrobotics/myCobot/tree/main/Software/phone%20controller)  
 
-    手机控制软件，适用于 [mycobot-280-M5](https://www.elephantrobotics.com/myCobot/
+    手机控制软件，适用于 [mycobot-280-M5](https://www.elephantrobotics.com/myCobot/)
+    
+    - 固件需求  
+    - basic：蓝牙固件  
+    - atom ：AtomMain V3.2
 
 - minimycobotflasher ： [GIT](https://github.com/zlj-zz/minimycobotflasher)
 
