@@ -211,7 +211,7 @@
 #define	SET_GRIPPER_STATE_LEN			4
 //
 #define	SET_GRIPPER_VALUE				0x67
-#define	SET_GRIPPER_VALUE_LEN			5
+#define	SET_GRIPPER_VALUE_LEN			4
 
 #define	SET_GRIPPER_INI					0x68
 #define	SET_GRIPPER_INI_LEN				2
@@ -225,7 +225,7 @@
 //
 //// Base basic and IO control
 //#define								0x70
-//#define								
+//#define								   
 
 #define ROBOTIC_MESSAGE				0x80
 #define ROBOTIC_MESSAGE_LEN			2

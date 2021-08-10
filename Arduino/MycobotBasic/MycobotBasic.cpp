@@ -298,6 +298,7 @@ void* MycobotBasic::readData()
 				*pEncoder = encoder_low + encoder_high * 256;
 				return pEncoder;
 			}
+
 			case GET_GRIPPER_VALUE:
 			{
 				int* returnValue = new int;
@@ -1803,6 +1804,9 @@ void MycobotBasic::focusServo(byte servo_no)
 
 void MycobotBasic::setGripperState(byte mode, int sp)
 {
+	if (sp > 100) {
+		sp = 100;
+	}
 	Serial2.write(header);
 	Serial2.write(header);
 	Serial2.write(SET_GRIPPER_STATE_LEN);
@@ -1814,16 +1818,17 @@ void MycobotBasic::setGripperState(byte mode, int sp)
 
 void MycobotBasic::setGripperValue(int data, int sp)
 {
+	if (data > 100) {
+		data = 100;
+	}
+	if (sp > 100) {
+		sp = 100;
+	}
 	Serial2.write(header);
 	Serial2.write(header);
 	Serial2.write(SET_GRIPPER_VALUE_LEN);
 	Serial2.write(SET_GRIPPER_VALUE);
-
-	byte data_high = highByte(data);
-	byte data_low = lowByte(data);
-
-	Serial2.write(data_high);
-	Serial2.write(data_low);
+	Serial2.write(data);
 	Serial2.write(sp);
 	Serial2.write(footer);
 }
@@ -1899,6 +1904,7 @@ bool MycobotBasic::isGripperMoving()
 	}
 	return false;
 }
+
 
 void MycobotBasic::moveCCoords(Coords begin_coord, Coords middle_coord, Coords end_coord)
 {
