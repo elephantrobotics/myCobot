@@ -38,7 +38,7 @@ void loop(){
   
   M5.update(); 
 
-  if ((millis() - t_begin) > 10000) {
+  if ((millis() - t_begin) > 60000) {
     displayScreenProtect();
   }
   if (M5.BtnA.wasReleased()) {
