@@ -2,7 +2,7 @@
 
 int calibrate_servo_no = 1;
 
-void Calibration::bration(MycobotBasic &myCobot){
+void Calibration::run(MycobotBasic &myCobot){
   M5.Lcd.setTextSize(2);
   // EEPROM.begin(EEPROM_SIZE);//new
   myCobot.setLEDRGB(255, 255, 255);
@@ -11,15 +11,15 @@ void Calibration::bration(MycobotBasic &myCobot){
   {
     M5.update(); // need to call update()  
     M5.Lcd.setCursor(0,0);
-    if (M5.BtnA.wasPressed()) {
+    if (M5.BtnA.wasReleased()) {
       myCobot.setLEDRGB(255, 0, 0);
       Calibration::init(myCobot);
       } 
-    if (M5.BtnB.wasPressed()) {
+    if (M5.BtnB.wasReleased()) {
         myCobot.setLEDRGB(0, 255, 0);
         Calibration::test(myCobot);
       }
-    if (M5.BtnC.wasReleasefor(1000)) {
+    if (M5.BtnC.wasReleased()) {
       myCobot.setLEDRGB(0, 0, 255);
       Calibration::reset(myCobot);
       break;
@@ -27,9 +27,11 @@ void Calibration::bration(MycobotBasic &myCobot){
   }
 }
 
-void Calibration::info()
+void Calibration::DisplayHead(bool isClearAll)
 {
-  M5.Lcd.clear(BLACK);
+  if (isClearAll) {
+    M5.Lcd.clear(BLACK);
+  } 
   M5.Lcd.setTextColor(BLACK);
   M5.Lcd.setTextColor(RED);
   M5.Lcd.setTextSize(3);
@@ -39,6 +41,11 @@ void Calibration::info()
   M5.Lcd.drawFastHLine(0,70,320,GREY);
   M5.Lcd.setTextSize(3);
   M5.Lcd.println("Basic Calibration");
+}
+
+void Calibration::info()
+{
+  DisplayHead(true);
   M5.Lcd.setTextSize(2);
   M5.Lcd.setTextColor(WHITE);
   M5.Lcd.setCursor(0, 100);
@@ -54,7 +61,7 @@ void Calibration::info()
    // M5.Lcd.print("PressB - Test Servos (long press to force testing)\n\n");
     M5.Lcd.println("Press B - Test Servos ");
     M5.Lcd.println();
-    M5.Lcd.println("Press C - Exit(1S)\n");
+    M5.Lcd.println("Press C - Exit");
 //    M5.Lcd.setCursor(0, 170);
 //    M5.Lcd.print("(long press to return language selection)\n");    
   }
@@ -72,10 +79,13 @@ void Calibration::init(MycobotBasic &myCobot)
       M5.Lcd.drawString("已经设置好所有舵机", 20, 20, 1);      
     }
     if(lan == 1){
-      M5.Lcd.setCursor(0, 30);   
-      M5.Lcd.print("Already Calibrate all \n");      
+      DisplayHead(true); 
+      M5.Lcd.setCursor(20, 100);  
+      M5.Lcd.setTextColor(WHITE); 
+      M5.Lcd.setTextSize(2);
+      M5.Lcd.print("Already Calibrate all!!\n");      
     }
-    delay(500);
+    delay(2000);
     Calibration::info();
     return;
   }
@@ -83,20 +93,29 @@ void Calibration::init(MycobotBasic &myCobot)
   myCobot.setServoCalibration(calibrate_servo_no);
 
   if(lan ==  2){
-    M5.Lcd.drawString("已设置舵机", 20, 20, 1);
+    M5.Lcd.drawString("已设置舵机", 20, 100, 1);
     M5.Lcd.setTextSize(2);
     M5.Lcd.setCursor(0, 150);
     M5.Lcd.printf("%d",calibrate_servo_no);
     M5.Lcd.setTextSize(2);    
   }
   if(lan == 1){
+    M5.Lcd.setTextSize(3);
+    M5.Lcd.setTextColor(RED);
+    M5.Lcd.setCursor(0, 20);
+    M5.Lcd.print("Calibrating Servo\n");
+    M5.Lcd.setCursor(0, 40);
+    M5.Lcd.drawFastHLine(0,70,320,GREY);
+    M5.Lcd.setTextSize(7);
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.setCursor(140, 125);
+    M5.Lcd.printf("%d",calibrate_servo_no); 
+
     M5.Lcd.setTextSize(2);
-    M5.Lcd.setCursor(0, 30);
-    M5.Lcd.print("Calibrating\nServo\n\n");
-    M5.Lcd.setTextSize(6);
-    M5.Lcd.setCursor(30, 100);
-    M5.Lcd.printf("%d",calibrate_servo_no);
-    M5.Lcd.setTextSize(2); 
+    M5.Lcd.setCursor(35, 210);
+    M5.Lcd.print("NEXT");
+    M5.Lcd.setCursor(235, 210);
+    M5.Lcd.print(" EXIT ");
   }
   
   delay(100);
@@ -120,7 +139,10 @@ void Calibration::test(MycobotBasic &myCobot)
        M5.Lcd.drawString("已设置舵机零位 ", 20, 20, 1); 
       }
       if(lan == 1){
-        M5.Lcd.setCursor(20, 20 + 20*i);
+        DisplayHead(false);
+        M5.Lcd.setTextSize(2);
+        M5.Lcd.setTextColor(WHITE);
+        M5.Lcd.setCursor(20, 80 + 20*i);
         M5.Lcd.print("Move servo -> ");  
         M5.Lcd.println(i);
       }
@@ -140,8 +162,11 @@ void Calibration::test(MycobotBasic &myCobot)
      M5.Lcd.drawString("请先设定关节零位", 20, 20, 1);     
     }
     if(lan == 1){
-     M5.Lcd.setCursor(0, 30);
-     M5.Lcd.print("Only move after all servo calibrated");
+      DisplayHead(true);
+      M5.Lcd.setCursor(0, 100);
+      M5.Lcd.setTextSize(2);
+      M5.Lcd.setTextColor(WHITE);
+      M5.Lcd.print("Only move after all servo calibrated");
     }
     delay(2000);
     Calibration::info();
@@ -157,12 +182,15 @@ void Calibration::reset(MycobotBasic &myCobot)
    M5.Lcd.drawString("重新设置", 20, 20, 1);
   }
   if(lan == 1){
-   M5.Lcd.setCursor(0, 30);
-   M5.Lcd.print("Restart to calibrate");  
+    DisplayHead(true);
+    M5.Lcd.setCursor(0, 100);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.print("Restart to calibrate!!");  
   }
   calibrate_servo_no = 0;
   //关闭扭力输出
   myCobot.setFreeMove();
   delay(1000);
-  Calibration::info();
+  //Calibration::info();
 }

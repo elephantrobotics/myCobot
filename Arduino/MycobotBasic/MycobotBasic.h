@@ -46,6 +46,7 @@ public:
 	void powerOn();
 	void powerOff();
 	bool isPoweredOn();
+	int getAtomVersion();
 
 
 	// MDI mode and operation

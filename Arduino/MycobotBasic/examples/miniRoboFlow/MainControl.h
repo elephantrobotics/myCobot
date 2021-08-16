@@ -3,11 +3,10 @@
 
 #include <MycobotBasic.h>
 #include "config.h"
+#include "ServerBase.h"
 
 
-
-class MainControl
-{
+class MainControl: public ServerBase {
 private:
     void updateMode(MycobotBasic &myCobot, byte btn_pressed);
     void displayInfo(MycobotBasic &myCobot, byte mc_mode);
@@ -18,7 +17,8 @@ private:
     void IO(MycobotBasic &myCobot);
     // bool checkDataLen();
 public:
-    void Control(MycobotBasic &myCobot);
+    void run(MycobotBasic &myCobot);
+    static ServerBase* createInstance() {return new MainControl();}
 };
 
 #endif

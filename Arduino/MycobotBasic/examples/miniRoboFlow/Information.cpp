@@ -20,10 +20,10 @@ void Connect::info(){
   M5.Lcd.println();
   M5.Lcd.println("Press B - Firmware");
   M5.Lcd.println();
-  M5.Lcd.println("Press C - Exit(1S)");
+  M5.Lcd.println("Press C - Exit");
 } 
 
-void Connect::test(MycobotBasic &myCobot){
+void Connect::run(MycobotBasic &myCobot){
     info();
     sm.pSerial = &Serial2;
     while (1)
@@ -37,9 +37,9 @@ void Connect::test(MycobotBasic &myCobot){
       Connect::testServo(myCobot);
       } 
     if (M5.BtnB.wasReleased()) {
-      Connect::ReadConfig();
+      Connect::ReadConfig(myCobot);
       }
-    if (M5.BtnC.wasReleasefor(1000)) {
+    if (M5.BtnC.wasReleased()) {
       break;
     }
 }
@@ -49,11 +49,14 @@ void Connect::testServo(MycobotBasic &myCobot){
     M5.Lcd.clear(BLACK);
     delay(50);
     M5.Lcd.setTextSize(3);
-    M5.Lcd.setCursor(0, 10);
-    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.setCursor(40, 10);
+    M5.Lcd.setTextColor(RED);
+
     M5.Lcd.println("connect test");
     M5.Lcd.setTextSize(2);
-    M5.Lcd.setCursor(0, 40);
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.drawFastHLine(0,50,320,GREY);
+    M5.Lcd.setCursor(0, 70);
     int state = myCobot.isPoweredOn();
     M5.Lcd.print("atom - ");
     if(state == 1){
@@ -64,7 +67,6 @@ void Connect::testServo(MycobotBasic &myCobot){
     M5.Lcd.println("no");
     }
     M5.Lcd.setTextSize(2);
-    M5.Lcd.setCursor(0, 60);
     M5.Lcd.setTextColor(WHITE);
     for(int i = 1; i<7;i++){
       M5.Lcd.setTextColor(WHITE);
@@ -86,15 +88,34 @@ void Connect::testServo(MycobotBasic &myCobot){
 }
 
 
-void Connect::ReadConfig(){
+void Connect::ReadConfig(MycobotBasic &myCobot){
+  char s[10];
   M5.Lcd.clear(BLACK);
   delay(50);
+
   M5.Lcd.setTextSize(3);
   M5.Lcd.setCursor(0, 10);
+  M5.Lcd.setTextColor(RED);
   M5.Lcd.println("connect test");
   M5.Lcd.setTextSize(2);
-  M5.Lcd.setCursor(0, 40);
-  M5.Lcd.println("Waiting for development");
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.drawFastHLine(0,50,320,GREY);
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.setCursor(0, 70);
+  M5.Lcd.printf("robot version :");
+  int version = myCobot.getAtomVersion();
+  sprintf(s,"V%.2f", version/10.0);
+  M5.Lcd.setCursor(200, 70);
+  M5.Lcd.setTextColor(RED);
+  M5.Lcd.println(s);
+
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.setCursor(0, 100);
+  M5.Lcd.println("basic version :");
+
+  M5.Lcd.setCursor(200, 100);
+  M5.Lcd.setTextColor(RED);
+  M5.Lcd.println("V1.0");
   M5.update();
   delay(3000);
   info();

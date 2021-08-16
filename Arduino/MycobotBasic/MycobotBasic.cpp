@@ -24,8 +24,6 @@ void MycobotBasic::setup()
 }
 
 
-
-
 bool MycobotBasic::checkHeader()
 {
   byte bDat;
@@ -141,7 +139,36 @@ bool MycobotBasic::isPoweredOn()
 	}
 	return false;
 }
+int MycobotBasic::getAtomVersion()
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(GET_SYSTEM_VERSION_LEN);
+	Serial2.write(GET_SYSTEM_VERSION);
+	Serial2.write(footer);
 
+	unsigned long t_begin = millis();
+	void* tempPtr = nullptr;
+	int* pReturnVersion = nullptr;
+	int returnVersion;
+
+	while (true)
+	{
+		if (millis() - t_begin > 40)
+			break;
+		tempPtr = readData();
+		if (tempPtr == nullptr)
+			continue;
+		else
+		{
+			pReturnVersion = (int*)tempPtr;
+			returnVersion = *pReturnVersion;
+			delete pReturnVersion;
+			return returnVersion;
+		}
+	}
+
+}
 void* MycobotBasic::readData()
 {
 	rFlushSerial();
@@ -242,7 +269,24 @@ void* MycobotBasic::readData()
 				*pState = r_data_3[1];
 				return pState;
 			}
-
+			case GET_GRIPPER_VALUE:
+			{
+				int* pValue = new int;
+				*pValue = r_data_3[1];
+				return pValue;
+			}
+			case GET_ROBOT_VERSION:
+			{
+				int* pVersion = new int;
+				*pVersion = r_data_3[1];
+				return pVersion;
+			}
+			case GET_SYSTEM_VERSION:
+			{
+				int* pVersion = new int;
+				*pVersion = r_data_3[1];
+				return pVersion;
+			}
 		}
 
 	case 4:
@@ -297,15 +341,6 @@ void* MycobotBasic::readData()
 				byte encoder_low = r_data_4[2];
 				*pEncoder = encoder_low + encoder_high * 256;
 				return pEncoder;
-			}
-
-			case GET_GRIPPER_VALUE:
-			{
-				int* returnValue = new int;
-				byte gripper_high = r_data_4[1];
-				byte gripper_low = r_data_4[2];
-				*returnValue = gripper_low + gripper_high * 256;
-				return returnValue;
 			}
 
 		}

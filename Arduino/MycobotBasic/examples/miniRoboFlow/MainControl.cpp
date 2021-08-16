@@ -16,31 +16,33 @@ int rec_data_len = 0;
 byte mycobot_mode = 0; 
 
 int error_display_time = 3000;
-int EXIT = false;
+static int EXIT = false;
 
 
-void MainControl::Control(MycobotBasic &myCobot){
+void MainControl::run(MycobotBasic &myCobot){
   pinMode(control_pin, INPUT);
   myCobot.setLEDRGB(0,255,0);
   MainControl::updateMode(myCobot, mycobot_mode);
   MainControl::displayInfo(myCobot, 0);
-  EXIT = false;
   while(1){
     M5.update(); 
     byte btn_pressed = 0;   
-    if (M5.BtnA.wasPressed()) {
+    if (M5.BtnA.wasReleased()) {
         btn_pressed = 1;
         MainControl::updateMode(myCobot, btn_pressed);
       } 
-    if(M5.BtnB.wasPressed()){
+    if(M5.BtnB.wasReleased()){
       btn_pressed = 2;
       MainControl::updateMode(myCobot, btn_pressed);
       }
-    if (M5.BtnC.wasPressed()) {
+    if (M5.BtnC.wasReleased()) {
         btn_pressed = 3;
         MainControl::updateMode(myCobot, btn_pressed);
       }
-    if(EXIT){break;}  
+    if (EXIT) {
+      EXIT = false;
+      break;
+    }  
     MainControl::IO(myCobot); 
   }
 }
@@ -53,17 +55,19 @@ void MainControl::updateMode(MycobotBasic &myCobot, byte btn_pressed)
     {
       case 1:
         mycobot_mode = 1;
+        MainControl::displayInfo(myCobot, mycobot_mode);
         break;
       case 2:
         mycobot_mode = 2;
+        MainControl::displayInfo(myCobot, mycobot_mode);
         break;
       case 3:
         myCobot.setFreeMove();
-        mycobot_mode = 0;
+        myCobot.releaseServo(7);
         EXIT = true;
         break;
     } 
-    MainControl::displayInfo(myCobot, mycobot_mode);
+    
   }
   else if(mycobot_mode == 1)
   {    
@@ -448,42 +452,28 @@ void MainControl::record(MycobotBasic &myCobot)  // is stop
   Angles _data;
   int _encoder = myCobot.getEncoder(7);
   delay(35);
-  if (_encoder > 0)
-  {
-    for (int data_index = 0; data_index <data_len_max ; data_index ++)
-  {
+  for (int data_index = 0; data_index <data_len_max ; data_index ++) {
     M5.update(); 
     for(int i= 0; i< 6; i++){
       jae[data_index][i] = myCobot.getEncoder(i+1);
       delay(REC_TIME_DELAY - SEND_DATA_GAP);
 //      Serial.print(String(jae[data_index][i]) + ", ");
     }
-    girrep_data[data_index] = myCobot.getEncoder(7);
-    delay(REC_TIME_DELAY - SEND_DATA_GAP);
-    Serial.println(" ");
-    rec_data_len++;
-    if (M5.BtnA.wasPressed()||M5.BtnB.wasPressed()||M5.BtnC.wasPressed()) break;
-  } 
-  }
-  else{
-    for (int data_index = 0; data_index <data_len_max ; data_index ++)
-  {
-    M5.update(); 
-    for(int i= 0; i< 6; i++){
-      jae[data_index][i] = myCobot.getEncoder(i+1);
+    if (_encoder > 0) {
+      girrep_data[data_index] = myCobot.getEncoder(7);
       delay(REC_TIME_DELAY - SEND_DATA_GAP);
-//      Serial.print(String(jae[data_index][i]) + ", ");
+    }else {
+      girrep_data[data_index] = 2048;
+      delay(20);
     }
-    girrep_data[data_index] = 2048;
-    delay(20);
+    
     Serial.println(" ");
     rec_data_len++;
-    if (M5.BtnA.wasPressed()||M5.BtnB.wasPressed()||M5.BtnC.wasPressed()) break;
+    if (M5.BtnA.wasReleased()||M5.BtnB.wasReleased()||M5.BtnC.wasReleased()) break;
   } 
-  }
-  
   
 }
+
 
 void MainControl::play(MycobotBasic &myCobot)  // is stop  is pause
 {
@@ -503,18 +493,18 @@ void MainControl::play(MycobotBasic &myCobot)  // is stop  is pause
       delay(20);
       myCobot.setEncoders(jae[index], 100);
       // check pause button
-      if (M5.BtnB.wasPressed())
+      if (M5.BtnB.wasReleased())
       {
         MainControl::displayInfo(myCobot, 32);
         while(1)
         {
           M5.update(); 
-          if (M5.BtnA.wasPressed())
+          if (M5.BtnA.wasReleased())
           {
             MainControl::displayInfo(myCobot, 11);
             break;
           }
-          if (M5.BtnC.wasPressed()) 
+          if (M5.BtnC.wasReleased()) 
           {
             is_stop = 1;
             break;
@@ -523,7 +513,7 @@ void MainControl::play(MycobotBasic &myCobot)  // is stop  is pause
       }
 
       // check stop button
-      if (M5.BtnC.wasPressed())
+      if (M5.BtnC.wasReleased())
       {
         M5.update(); 
         is_stop = 1;
@@ -544,7 +534,7 @@ void MainControl::play(MycobotBasic &myCobot)  // is stop  is pause
     if(rec_data_len < 10) break;
 
     // quick loop
-    if (M5.BtnC.wasPressed())break;
+    if (M5.BtnC.wasReleased())break;
   }
 
   // recover to play page

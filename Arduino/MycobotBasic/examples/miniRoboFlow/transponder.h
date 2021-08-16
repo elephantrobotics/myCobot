@@ -3,11 +3,10 @@
 
 #include <MycobotBasic.h>
 #include "config.h"
+#include "ServerBase.h"
 
 
-
-class Transponder
-{
+class Transponder: public ServerBase {
 private:
     bool EXIT = false;
     bool checkHeader(MycobotBasic &myCobot);
@@ -17,9 +16,9 @@ private:
     void connect_ATOM(MycobotBasic &myCobot);
     void info();
 public:
-    void ponder(MycobotBasic &myCobot);
+    void run(MycobotBasic &myCobot);
     void init();
-
+    static ServerBase* createInstance() {return new Transponder();}
 };
 
 #endif

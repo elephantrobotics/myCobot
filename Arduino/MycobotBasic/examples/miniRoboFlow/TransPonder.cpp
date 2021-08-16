@@ -18,7 +18,7 @@ void Transponder::init() {
   info();
 }
   
-void Transponder::ponder(MycobotBasic &myCobot) {
+void Transponder::run(MycobotBasic &myCobot) {
   init();
   EXIT = false;
   while (!EXIT)
@@ -64,7 +64,7 @@ int Transponder::readSerial(MycobotBasic &myCobot, unsigned char* nDat, int nLen
     if (M5.BtnA.wasReleased() || M5.BtnA.pressedFor(1000, 200)) {
         connect_ATOM(myCobot);
     }
-    if(M5.BtnC.wasReleasefor(1000)) { EXIT = true; break;}
+    if(M5.BtnC.wasReleased()) { EXIT = true; break;}
 
     if(Serial.available()>0)
     {
@@ -83,7 +83,7 @@ int Transponder::readSerial(MycobotBasic &myCobot, unsigned char* nDat, int nLen
         break;
       t_use = millis() - t_begin;
 
-      if (t_use > IOTimeOut_1)
+      if (t_use > IO_TimeOut)
         break;
     }
     // read serial 2
@@ -171,20 +171,24 @@ int Transponder::readData(MycobotBasic &myCobot)
 void Transponder::connect_ATOM(MycobotBasic &myCobot){
   M5.Lcd.clear(BLACK);
   delay(50);
-  M5.Lcd.setTextColor(YELLOW);
+  M5.Lcd.setTextColor(RED);
   M5.Lcd.setTextSize(3);
-  M5.Lcd.setCursor(55, 5);
+  M5.Lcd.setCursor(55, 20);
   M5.Lcd.println("Connect test");
-  M5.Lcd.setCursor(5, 40);
+  M5.Lcd.drawFastHLine(0,70,320,GREY);
+  M5.Lcd.setCursor(5, 120);
+  M5.Lcd.setTextSize(3);
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.print("Atom: ");  
+  M5.Lcd.setTextColor(GREEN);
   int state = myCobot.isPoweredOn();
   if(state == 1){
-    M5.Lcd.println("Atom: ok");
+    M5.Lcd.println("ok");
   }else{
-    M5.Lcd.println("Atom: no");
+    M5.Lcd.println("no");
   }
   M5.update();
-  delay(10);
-  delay(2000);
+  delay(1000);
   info();
 }
 
@@ -205,7 +209,7 @@ void Transponder::info()
   M5.Lcd.setCursor(0, 100);
   M5.Lcd.println("Press A - Atom ConnectTest");
   M5.Lcd.println();
-  M5.Lcd.println("Press C - Exit(1S)");
+  M5.Lcd.println("Press C - Exit");
   M5.Lcd.setCursor(40, 210);
   M5.update();
   delay(10);
