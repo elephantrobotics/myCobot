@@ -11,7 +11,7 @@ int baundrate = 1000000;
 void setup() {
   myCobot.setup();
   myCobot.powerOn();
-  Serial.begin(9600);
+  //Serial.begin(9600);
   delay(200);
   info();
 }

@@ -27,8 +27,6 @@
 
 #define angle_to_encoder	11.3777777
 #define encoder_cal_point 	2048
-
-
 using namespace myCobotDefine;
 using namespace roboticMessages;
 
