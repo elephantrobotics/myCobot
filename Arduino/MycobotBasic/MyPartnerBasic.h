@@ -59,9 +59,9 @@ public:
 	void writeCoords(MyPartnerCoords coords, int speed);
 	int isInPosition(MyPartnerCoords coord, bool is_linear);
 	bool checkRunning();
-	void moveCCoords(MyPartnerCoords center_coord, byte direction);
-	void moveCCoords(MyPartnerCoords end_coord, int radius, byte direction);
-	void moveLCoords(MyPartnerCoords end_coord);
+	void moveCCoords(MyPartnerCoords center_coord, byte direction,int speed = 0.2);
+	void moveCCoords(MyPartnerCoords end_coord, int radius, byte direction, int speed = 0.2);
+	void moveLCoords(MyPartnerCoords end_coord, int speed = 0.2);
 
 
 

@@ -46,6 +46,17 @@ namespace myCobotDefine {
 
 	using Encoders = std::array<float, Joints>;
 
+
+	//MyPartner data struct
+	enum MyPartnerAxis : int { P_X = 0, P_Y, P_Z, P_THETA };
+	enum MyPartnerJoint : int { P_J1 = 0, P_J2, P_J3, P_J4 };
+	constexpr const int MyPartnerAxesNum = 4;
+	constexpr const int MyPartnerJointsNum = 4;
+	using MyPartnerCoords = std::array<float, MyPartnerAxesNum>;
+	using MyPartnerAngles = std::array<float, MyPartnerJointsNum>;
+
+	using MyPartnerEncoders = std::array<float, MyPartnerJointsNum>;
+
 	// servo speed
 	const float maximum_large_servo_speed = 1000;	//2000?
 	const float maximum_small_servo_speed = 1400; // 3000?

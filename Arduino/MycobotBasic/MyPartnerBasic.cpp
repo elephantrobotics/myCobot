@@ -1816,7 +1816,7 @@ bool MyPartnerBasic::isGripperMoving()
 }
 
 
-void MyPartnerBasic::moveCCoords(MyPartnerCoords end_coord, int radius, byte direction) //direction:  0-clockwise,1-anticlockwise
+void MyPartnerBasic::moveCCoords(MyPartnerCoords end_coord, int radius, byte direction, int speed) //direction:  0-clockwise,1-anticlockwise
 {
 	// end_coord
 	byte end_x_low = lowByte(static_cast<int>(end_coord[0] * 10));
@@ -1851,10 +1851,12 @@ void MyPartnerBasic::moveCCoords(MyPartnerCoords end_coord, int radius, byte dir
 	Serial2.write(radius_high);
 	Serial2.write(radius_low);
 	Serial2.write(direction);
+	Serial2.write(speed);
+	
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::moveCCoords(MyPartnerCoords center_coord, byte direction) //direction:  0-clockwise,1-anticlockwise
+void MyPartnerBasic::moveCCoords(MyPartnerCoords center_coord, byte direction, int speed) //direction:  0-clockwise,1-anticlockwise
 {
 	// middle_coord
 	byte center_x_low = lowByte(static_cast<int>(center_coord[0] * 10));
@@ -1884,10 +1886,11 @@ void MyPartnerBasic::moveCCoords(MyPartnerCoords center_coord, byte direction) /
 	Serial2.write(center_theta_high);
 	Serial2.write(center_theta_low);
 	Serial2.write(direction);
+	Serial2.write(speed);
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::moveLCoords(MyPartnerCoords end_coord)
+void MyPartnerBasic::moveLCoords(MyPartnerCoords end_coord, int speed)
 {
 	// end_coord
 	byte end_x_low = lowByte(static_cast<int>(end_coord[0] * 10));
@@ -1916,6 +1919,6 @@ void MyPartnerBasic::moveLCoords(MyPartnerCoords end_coord)
 	Serial2.write(end_z_low);
 	Serial2.write(end_theta_high);
 	Serial2.write(end_theta_low);
-
+	Serial2.write(speed);
 	Serial2.write(footer);
 }
