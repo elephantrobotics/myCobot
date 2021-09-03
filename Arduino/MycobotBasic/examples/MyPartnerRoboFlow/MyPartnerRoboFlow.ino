@@ -1,4 +1,4 @@
-#include <MycobotBasic.h>
+#include <MyPartnerBasic.h>
 #include <vector>
 #include <string>
 #include "transponder.h"
@@ -12,7 +12,7 @@
 extern const unsigned char mycobot_start_PIC[29523];
 
 
-MycobotBasic myCobot;
+MyPartnerBasic myCobot;
 
 static int state = 0;
 static int display_start_state = 0;
@@ -78,7 +78,7 @@ void displayScreenProtect()
   }
 }
 
-void program_selection(MycobotBasic &myCobot, int state){
+void program_selection(MyPartnerBasic &myCobot, int state){
   Factory *factory = Factory::getFactoryInstance();
   ServerBase *server = factory->getServerInstance(state); 
   if (server == nullptr) {

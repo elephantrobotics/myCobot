@@ -95,6 +95,30 @@ void MycobotSaver::readFile(fs::FS &fs, const char * path){
     }
 
 }
+void MycobotSaver::MypartnerreadFile(fs::FS &fs, const char * path){
+
+    File file = fs.open(path);
+    if(!file || file.isDirectory()){
+        Serial.println("- failed to open file for reading");
+        return;
+    }
+
+    String this_line = "";
+
+    while(file.available()){
+      char this_char = char(file.read());
+      this_line += this_char;
+      if (this_char == '\n')
+      {
+        saver_mypartner_angles_enc jae_this;
+        jae_this = MyPartnerprocessStringIntoInts(this_line);
+
+        this_line = "";
+      }
+     
+    }
+
+}
 
 
 MycobotSaver::saver_angles_enc MycobotSaver::processStringIntoInts(String string_input)
@@ -107,6 +131,35 @@ MycobotSaver::saver_angles_enc MycobotSaver::processStringIntoInts(String string
     if(string_input[i] == ',')
     {
       if ((data_index < 6)&&(i>1)){
+        sae.joint_angle[data_index] = data_angle_string.toInt();
+      }
+      else
+      {
+        break;
+      }
+      data_angle_string = "";
+      data_index ++;
+      continue;
+    }
+    else
+    {
+      data_angle_string+=string_input[i];
+    }
+  }
+  return sae;
+}
+
+
+MycobotSaver::saver_mypartner_angles_enc MycobotSaver::MyPartnerprocessStringIntoInts(String string_input)
+{
+  saver_mypartner_angles_enc sae;
+  int data_index = 0;
+  String data_angle_string="";
+  for (int i = 0; string_input[i] != '\n'; i++) { 
+    
+    if(string_input[i] == ',')
+    {
+      if ((data_index < 4)&&(i>1)){
         sae.joint_angle[data_index] = data_angle_string.toInt();
       }
       else
