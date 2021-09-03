@@ -63,6 +63,7 @@ void MainControl::updateMode(MyPartnerBasic &myCobot, byte btn_pressed)
         break;
       case 3:
         myCobot.setFreeMove();
+        delay(20);
         myCobot.releaseServo(7);
         EXIT = true;
         break;
