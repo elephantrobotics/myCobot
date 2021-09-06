@@ -95,7 +95,7 @@ void MycobotSaver::readFile(fs::FS &fs, const char * path){
     }
 
 }
-void MycobotSaver::MypartnerreadFile(fs::FS &fs, const char * path){
+void MycobotSaver::MyPalletizerreadFile(fs::FS &fs, const char * path){
 
     File file = fs.open(path);
     if(!file || file.isDirectory()){
@@ -110,8 +110,8 @@ void MycobotSaver::MypartnerreadFile(fs::FS &fs, const char * path){
       this_line += this_char;
       if (this_char == '\n')
       {
-        saver_mypartner_angles_enc jae_this;
-        jae_this = MyPartnerprocessStringIntoInts(this_line);
+        saver_MyPalletizer_angles_enc jae_this;
+        jae_this = MyPalletizerprocessStringIntoInts(this_line);
 
         this_line = "";
       }
@@ -150,9 +150,9 @@ MycobotSaver::saver_angles_enc MycobotSaver::processStringIntoInts(String string
 }
 
 
-MycobotSaver::saver_mypartner_angles_enc MycobotSaver::MyPartnerprocessStringIntoInts(String string_input)
+MycobotSaver::saver_MyPalletizer_angles_enc MycobotSaver::MyPalletizerprocessStringIntoInts(String string_input)
 {
-  saver_mypartner_angles_enc sae;
+  saver_MyPalletizer_angles_enc sae;
   int data_index = 0;
   String data_angle_string="";
   for (int i = 0; string_input[i] != '\n'; i++) { 

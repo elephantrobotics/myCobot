@@ -3,10 +3,10 @@
 
 typedef struct{
   int joint_angle[4];
-} joint_MyPartnerAngles_enc;
+} joint_MyPalletizerAngles_enc;
 
 int data_len_max = 1000;
-MyPartnerAngles jae[1000];
+MyPalletizerAngles jae[1000];
 
 int girrep_data[1000];
 
@@ -19,7 +19,7 @@ int error_display_time = 3000;
 static int EXIT = false;
 
 
-void MainControl::run(MyPartnerBasic &myCobot){
+void MainControl::run(MyPalletizerBasic &myCobot){
   pinMode(control_pin, INPUT);
   myCobot.setLEDRGB(0,255,0);
   MainControl::updateMode(myCobot, mycobot_mode);
@@ -47,7 +47,7 @@ void MainControl::run(MyPartnerBasic &myCobot){
   }
 }
 
-void MainControl::updateMode(MyPartnerBasic &myCobot, byte btn_pressed)
+void MainControl::updateMode(MyPalletizerBasic &myCobot, byte btn_pressed)
 {
   if (mycobot_mode == 0)
   {
@@ -163,7 +163,7 @@ void MainControl::updateMode(MyPartnerBasic &myCobot, byte btn_pressed)
   
 }
 
-void MainControl::displayInfo(MyPartnerBasic &myCobot, byte mc_mode)
+void MainControl::displayInfo(MyPalletizerBasic &myCobot, byte mc_mode)
 {
   M5.Lcd.clear(BLACK);
   delay(50);
@@ -445,12 +445,12 @@ void MainControl::displayInfo(MyPartnerBasic &myCobot, byte mc_mode)
   }
 }
 
-void MainControl::record(MyPartnerBasic &myCobot)  // is stop
+void MainControl::record(MyPalletizerBasic &myCobot)  // is stop
 {
   myCobot.setLEDRGB(255,255,0);
   // record mode : 1- record to ram;  2- record to flash
   rec_data_len = 0;
-  MyPartnerAngles _data;
+  MyPalletizerAngles _data;
   delay(20);
   int _encoder = myCobot.getEncoder(7);
   delay(35);
@@ -459,8 +459,9 @@ void MainControl::record(MyPartnerBasic &myCobot)  // is stop
     for(int i= 0; i< 4; i++){
       jae[data_index][i] = myCobot.getEncoder(i+1);
       delay(REC_TIME_DELAY - SEND_DATA_GAP);
-//      Serial.print(String(jae[data_index][i]) + ", ");
+      
     }
+    Serial.print(String(jae[data_index][3]) + ", ");
     if (_encoder > 0) {
       girrep_data[data_index] = myCobot.getEncoder(7);
       delay(REC_TIME_DELAY - SEND_DATA_GAP);
@@ -477,7 +478,7 @@ void MainControl::record(MyPartnerBasic &myCobot)  // is stop
 }
 
 
-void MainControl::play(MyPartnerBasic &myCobot)  // is stop  is pause
+void MainControl::play(MyPalletizerBasic &myCobot)  // is stop  is pause
 {
   myCobot.setLEDRGB(0,255,0);
  
@@ -494,6 +495,7 @@ void MainControl::play(MyPartnerBasic &myCobot)  // is stop  is pause
       myCobot.setEncoder(7,girrep_data[index]);
       delay(20);
       myCobot.setEncoders(jae[index], 100);
+      Serial.print(String(jae[index][3]) + ", ");
       // check pause button
       if (M5.BtnB.wasReleased())
       {
@@ -545,7 +547,7 @@ void MainControl::play(MyPartnerBasic &myCobot)  // is stop  is pause
   MainControl::displayInfo(myCobot, mycobot_mode);
 }
 
-void MainControl::playFromFlash(MyPartnerBasic &myCobot)
+void MainControl::playFromFlash(MyPalletizerBasic &myCobot)
 {
     M5.update(); 
     MainControl::displayInfo(myCobot, 41);
@@ -572,8 +574,8 @@ void MainControl::playFromFlash(MyPartnerBasic &myCobot)
       this_line += this_char;
       if (this_char == '\n')
       {
-        MycobotSaver::saver_mypartner_angles_enc sae_this;
-        sae_this = myCobot.saver.MyPartnerprocessStringIntoInts(this_line);
+        MycobotSaver::saver_MyPalletizer_angles_enc sae_this;
+        sae_this = myCobot.saver.MyPalletizerprocessStringIntoInts(this_line);
 
         for(int jn = 0; jn<4; jn++)
         {
@@ -595,7 +597,7 @@ void MainControl::playFromFlash(MyPartnerBasic &myCobot)
     MainControl::play(myCobot);
 }
 
-void MainControl::recordIntoFlash(MyPartnerBasic &myCobot)
+void MainControl::recordIntoFlash(MyPalletizerBasic &myCobot)
 {
     // recording data
     MainControl::record(myCobot);
@@ -636,7 +638,7 @@ void MainControl::recordIntoFlash(MyPartnerBasic &myCobot)
    MainControl::displayInfo(myCobot, mycobot_mode);
 }
 
-void MainControl::IO(MyPartnerBasic &myCobot)
+void MainControl::IO(MyPalletizerBasic &myCobot)
 {
   int pin_data = digitalRead(control_pin);
 
@@ -655,7 +657,7 @@ void MainControl::IO(MyPartnerBasic &myCobot)
 
 
 /*
-bool MainControl::checkDataLen(MyPartnerBasic &myCobot)
+bool MainControl::checkDataLen(MyPalletizerBasic &myCobot)
 {
 
   if (rec_data_len == 0){

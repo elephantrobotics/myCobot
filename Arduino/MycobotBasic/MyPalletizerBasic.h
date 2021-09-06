@@ -1,11 +1,11 @@
-#ifndef _MYPARTNERBASIC_H_
-#define _MYPARTNERBASIC_H_
+#ifndef _MyPalletizerBASIC_H_
+#define _MyPalletizerBASIC_H_
 
 #include <Arduino.h>
 #include <M5Stack.h>
 #include <MycobotSaver.h>
 #include <ParameterList.h>
-#include <MyPartnerCommunicateDefine.h>
+#include <MyPalletizerCommunicateDefine.h>
 #include <string> 
 #include <map>
 
@@ -33,11 +33,11 @@
 using namespace myCobotDefine;
 using namespace roboticMessages;
 
-class MyPartnerBasic
+class MyPalletizerBasic
 {
 public:
 
-	MyPartnerBasic();
+	MyPalletizerBasic();
 
 	MycobotSaver saver;
 
@@ -51,30 +51,30 @@ public:
 
 
 	// MDI mode and operation
-	MyPartnerAngles getAngles();
+	MyPalletizerAngles getAngles();
 	void writeAngle(int joint, float value, int speed);
-	void writeAngles(MyPartnerAngles angles, int speed);
-	MyPartnerCoords getCoords();
-	void writeCoord(MyPartnerAxis axis, float value, int speed);
-	void writeCoords(MyPartnerCoords coords, int speed);
-	int isInPosition(MyPartnerCoords coord, bool is_linear);
+	void writeAngles(MyPalletizerAngles angles, int speed);
+	MyPalletizerCoords getCoords();
+	void writeCoord(MyPalletizerAxis axis, float value, int speed);
+	void writeCoords(MyPalletizerCoords coords, int speed);
+	int isInPosition(MyPalletizerCoords coord, bool is_linear);
 	bool checkRunning();
-	void moveCCoords(MyPartnerCoords center_coord, byte direction,int speed = 0.2);
-	void moveCCoords(MyPartnerCoords end_coord, int radius, byte direction, int speed = 0.2);
-	void moveLCoords(MyPartnerCoords end_coord, int speed = 0.2);
+	void moveCCoords(MyPalletizerCoords center_coord, byte direction,int speed = 0.2);
+	void moveCCoords(MyPalletizerCoords end_coord, int radius, byte direction, int speed = 0.2);
+	void moveLCoords(MyPalletizerCoords end_coord, int speed = 0.2);
 
 
 
 	// JOG mode and operation
 	void jogAngle(int joint, int direction, int speed);
-	void jogCoord(MyPartnerAxis axis, int direction, int speed);
+	void jogCoord(MyPalletizerAxis axis, int direction, int speed);
 	void jogStop();
 
 	//Encoder mode and operation
 	void setEncoder(int joint, int encoder);
 	int getEncoder(int joint);
-	void setEncoders(MyPartnerEncoders angleEncoders, int speed);
-	MyPartnerAngles getEncoders();
+	void setEncoders(MyPalletizerEncoders angleEncoders, int speed);
+	MyPalletizerAngles getEncoders();
 
 
 
@@ -137,10 +137,10 @@ public:
 	void setMovementType(MovementType movement_type);
 	MovementType getMovementType();
 
-	void setToolReference(MyPartnerCoords coords);
-	void setWorldReference(MyPartnerCoords coords);
-	MyPartnerCoords getToolReference();
-	MyPartnerCoords getWorldReference();
+	void setToolReference(MyPalletizerCoords coords);
+	void setWorldReference(MyPalletizerCoords coords);
+	MyPalletizerCoords getToolReference();
+	MyPalletizerCoords getWorldReference();
 	void setReferenceFrame(RFType rftype);
 	RFType getReferenceFrame();
 
@@ -159,9 +159,9 @@ private:
 	void rFlushSerial();
 	byte itr_time = 0;
 	
-	MyPartnerAngles error_angles;
-	MyPartnerCoords error_coords;
-	MyPartnerEncoders error_encoders;
+	MyPalletizerAngles error_angles;
+	MyPalletizerCoords error_coords;
+	MyPalletizerEncoders error_encoders;
 
 	std::map<int, std::string> messages_map;
 };

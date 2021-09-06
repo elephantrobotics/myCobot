@@ -1,6 +1,6 @@
-#include "MyPartnerBasic.h"
+#include "MyPalletizerBasic.h"
 
-MyPartnerBasic::MyPartnerBasic()
+MyPalletizerBasic::MyPalletizerBasic()
 {
 	for (auto &val : error_angles)
 		val = -1000.0;
@@ -11,7 +11,7 @@ MyPartnerBasic::MyPartnerBasic()
 		messages_map.insert(val);
 }    
 
-void MyPartnerBasic::setup()
+void MyPalletizerBasic::setup()
 {
     delay(500);
     M5.begin(true, false, true);
@@ -24,7 +24,7 @@ void MyPartnerBasic::setup()
 }
 
 
-bool MyPartnerBasic::checkHeader()
+bool MyPalletizerBasic::checkHeader()
 {
   byte bDat;
   byte bBuf[2] = {0,0};
@@ -50,7 +50,7 @@ bool MyPartnerBasic::checkHeader()
 }
 
 
-int MyPartnerBasic::readSerial(unsigned char *nDat, int nLen)
+int MyPalletizerBasic::readSerial(unsigned char *nDat, int nLen)
 {
   int Size = 0;
   int rec_data;
@@ -82,13 +82,13 @@ int MyPartnerBasic::readSerial(unsigned char *nDat, int nLen)
 }
 
 
-void MyPartnerBasic::rFlushSerial(){
+void MyPalletizerBasic::rFlushSerial(){
     while( Serial2.read() !=-1)
 		;
 }
 
 
-void MyPartnerBasic::powerOn()
+void MyPalletizerBasic::powerOn()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -98,7 +98,7 @@ void MyPartnerBasic::powerOn()
 	delay(WRITE_SERVO_GAP);
 }
 
-void MyPartnerBasic::powerOff()
+void MyPalletizerBasic::powerOff()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -108,7 +108,7 @@ void MyPartnerBasic::powerOff()
 	delay(WRITE_SERVO_GAP);
 }
 
-bool MyPartnerBasic::isPoweredOn()
+bool MyPalletizerBasic::isPoweredOn()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -139,7 +139,7 @@ bool MyPartnerBasic::isPoweredOn()
 	}
 	return false;
 }
-int MyPartnerBasic::getAtomVersion()
+int MyPalletizerBasic::getAtomVersion()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -169,7 +169,7 @@ int MyPartnerBasic::getAtomVersion()
 	}
 
 }
-void* MyPartnerBasic::readData()
+void* MyPalletizerBasic::readData()
 {
 	rFlushSerial();
 	Serial.println("test0000000000");
@@ -365,7 +365,7 @@ void* MyPartnerBasic::readData()
 					byte angle_4_high = r_data_10[7];
 					byte angle_4_low = r_data_10[8];
 
-					MyPartnerAngles* pAngles = new MyPartnerAngles;
+					MyPalletizerAngles* pAngles = new MyPalletizerAngles;
 					float temp = 0.0;
 					temp = angle_1_low + angle_1_high * 256;
 					pAngles->at(0) = (temp > 33000 ? (temp - 65536) : temp) / 100;
@@ -393,7 +393,7 @@ void* MyPartnerBasic::readData()
 				byte rx_high = r_data_10[7];
 				byte rx_low = r_data_10[8];
 
-				MyPartnerCoords* pCoords = new MyPartnerCoords;
+				MyPalletizerCoords* pCoords = new MyPalletizerCoords;
 				float temp = 0.0;
 
 				temp = x_low + x_high * 256;
@@ -421,7 +421,7 @@ void* MyPartnerBasic::readData()
 					byte encode_4_high = r_data_10[7];
 					byte encode_4_low = r_data_10[8];
 
-					MyPartnerEncoders* pEncoders = new MyPartnerEncoders;
+					MyPalletizerEncoders* pEncoders = new MyPalletizerEncoders;
 					pEncoders->at(0) = encode_1_low + encode_1_high * 256;
 					pEncoders->at(1) = encode_2_low + encode_2_high * 256;
 					pEncoders->at(2) = encode_3_low + encode_3_high * 256;
@@ -438,7 +438,7 @@ void* MyPartnerBasic::readData()
 	return nullptr;
 }
 
-MyPartnerAngles MyPartnerBasic::getAngles()
+MyPalletizerAngles MyPalletizerBasic::getAngles()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -448,8 +448,8 @@ MyPartnerAngles MyPartnerBasic::getAngles()
 
 	unsigned long t_begin = millis();
 	void* tempPtr = nullptr;
-	MyPartnerAngles* pAngles = nullptr;
-	MyPartnerAngles angles;
+	MyPalletizerAngles* pAngles = nullptr;
+	MyPalletizerAngles angles;
 
 	while (true)
 	{
@@ -460,7 +460,7 @@ MyPartnerAngles MyPartnerBasic::getAngles()
 			continue;
 		else
 		{
-			pAngles = (MyPartnerAngles*)tempPtr;
+			pAngles = (MyPalletizerAngles*)tempPtr;
 			for (int i = 0; i < 4; ++i)
 				angles[i] = pAngles->at(i);
 			delete pAngles;
@@ -471,7 +471,7 @@ MyPartnerAngles MyPartnerBasic::getAngles()
 }
 
 
-void MyPartnerBasic::writeAngle(int joint, float value, int speed)
+void MyPalletizerBasic::writeAngle(int joint, float value, int speed)
 {
 	byte joint_number = byte(joint);
 	byte angle_low = lowByte(static_cast<int>(value * 100));
@@ -493,7 +493,7 @@ void MyPartnerBasic::writeAngle(int joint, float value, int speed)
 }
 
 
-void MyPartnerBasic::writeAngles(MyPartnerAngles angles, int speed)
+void MyPalletizerBasic::writeAngles(MyPalletizerAngles angles, int speed)
 {
 	byte angle_1_low = lowByte(static_cast<int>(angles[0] * 100));
 	byte angle_1_high = highByte(static_cast<int>(angles[0] * 100));
@@ -530,7 +530,7 @@ void MyPartnerBasic::writeAngles(MyPartnerAngles angles, int speed)
 }
 
 
-MyPartnerCoords MyPartnerBasic::getCoords()
+MyPalletizerCoords MyPalletizerBasic::getCoords()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -540,8 +540,8 @@ MyPartnerCoords MyPartnerBasic::getCoords()
 
 	unsigned long t_begin = millis();
 	void* tempPtr = nullptr;
-	MyPartnerCoords* pCoords = nullptr;
-	MyPartnerCoords tempCoords;
+	MyPalletizerCoords* pCoords = nullptr;
+	MyPalletizerCoords tempCoords;
 
 	while (true)
 	{
@@ -552,7 +552,7 @@ MyPartnerCoords MyPartnerBasic::getCoords()
 			continue;
 		else
 		{
-			pCoords = (MyPartnerCoords*)tempPtr;
+			pCoords = (MyPalletizerCoords*)tempPtr;
 			for (int i = 0; i < 4; ++i)
 				tempCoords[i] = pCoords->at(i);
 			delete pCoords;
@@ -563,11 +563,11 @@ MyPartnerCoords MyPartnerBasic::getCoords()
 }
 
 
-void MyPartnerBasic::writeCoord(MyPartnerAxis axis, float value, int speed)
+void MyPalletizerBasic::writeCoord(MyPalletizerAxis axis, float value, int speed)
 {
 	byte axis_number = byte(axis);
 	int temp_value = 0;
-	if (axis == MyPartnerAxis::P_X || axis == MyPartnerAxis::P_Y || axis == MyPartnerAxis::P_Z)
+	if (axis == MyPalletizerAxis::P_X || axis == MyPalletizerAxis::P_Y || axis == MyPalletizerAxis::P_Z)
 		temp_value = value * 10;
 	else
 		temp_value = value * 100;
@@ -590,7 +590,7 @@ void MyPartnerBasic::writeCoord(MyPartnerAxis axis, float value, int speed)
 	receiveMessages();
 }
 
-void MyPartnerBasic::writeCoords(MyPartnerCoords coord, int speed)
+void MyPalletizerBasic::writeCoords(MyPalletizerCoords coord, int speed)
 {
 	byte coord_x_low = lowByte(static_cast<int>(coord[0] * 10));
 	byte coord_x_high = highByte(static_cast<int>(coord[0] * 10));
@@ -627,7 +627,7 @@ void MyPartnerBasic::writeCoords(MyPartnerCoords coord, int speed)
 	receiveMessages();
 }
 
-int MyPartnerBasic::isInPosition(MyPartnerCoords coord, bool is_linear)
+int MyPalletizerBasic::isInPosition(MyPalletizerCoords coord, bool is_linear)
 {
 	byte coord_x_low = lowByte(static_cast<int>(coord[0] * 10));
 	byte coord_x_high = highByte(static_cast<int>(coord[0] * 10));
@@ -692,7 +692,7 @@ int MyPartnerBasic::isInPosition(MyPartnerCoords coord, bool is_linear)
 	return -1;
 }
 
-bool MyPartnerBasic::checkRunning()
+bool MyPalletizerBasic::checkRunning()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -724,7 +724,7 @@ bool MyPartnerBasic::checkRunning()
 }
 
 
-void MyPartnerBasic::jogAngle(int joint, int direction, int speed)
+void MyPalletizerBasic::jogAngle(int joint, int direction, int speed)
 {
 	byte joint_number = joint;
 	byte di = direction;
@@ -741,7 +741,7 @@ void MyPartnerBasic::jogAngle(int joint, int direction, int speed)
 	delay(WRITE_SERVO_GAP);
 }
 
-void MyPartnerBasic::jogCoord(MyPartnerAxis axis, int direction, int speed)
+void MyPalletizerBasic::jogCoord(MyPalletizerAxis axis, int direction, int speed)
 {
 	byte axis_number = axis + 1;
 	byte di = direction;
@@ -758,7 +758,7 @@ void MyPartnerBasic::jogCoord(MyPartnerAxis axis, int direction, int speed)
 	delay(WRITE_SERVO_GAP);
 }
 
-void MyPartnerBasic::jogStop()
+void MyPalletizerBasic::jogStop()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -767,7 +767,7 @@ void MyPartnerBasic::jogStop()
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::setEncoder(int joint, int encoder)
+void MyPalletizerBasic::setEncoder(int joint, int encoder)
 {
 	byte joint_number = joint;
 	byte encoder_high = highByte(encoder);
@@ -783,7 +783,7 @@ void MyPartnerBasic::setEncoder(int joint, int encoder)
 	Serial2.write(footer);
 }
 
-int MyPartnerBasic::getEncoder(int joint)
+int MyPalletizerBasic::getEncoder(int joint)
 {
 	byte joint_number = joint;
 	Serial2.write(header);
@@ -817,7 +817,7 @@ int MyPartnerBasic::getEncoder(int joint)
 	return -1;
 }
 
-MyPartnerEncoders MyPartnerBasic::getEncoders()
+MyPalletizerEncoders MyPalletizerBasic::getEncoders()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -827,8 +827,8 @@ MyPartnerEncoders MyPartnerBasic::getEncoders()
 
 	unsigned long t_begin = millis();
 	void* tempPtr = nullptr;
-	MyPartnerEncoders* pEncoders = nullptr;
-	MyPartnerEncoders encoders;
+	MyPalletizerEncoders* pEncoders = nullptr;
+	MyPalletizerEncoders encoders;
 
 	while (true)
 	{
@@ -839,7 +839,7 @@ MyPartnerEncoders MyPartnerBasic::getEncoders()
 			continue;
 		else
 		{
-			pEncoders = (MyPartnerEncoders*)tempPtr;
+			pEncoders = (MyPalletizerEncoders*)tempPtr;
 			for (int i = 0; i < 4; ++i)
 				encoders[i] = pEncoders->at(i);
 			delete pEncoders;
@@ -850,7 +850,7 @@ MyPartnerEncoders MyPartnerBasic::getEncoders()
 }
 
 
-void MyPartnerBasic::setEncoders(MyPartnerEncoders angleEncoders, int speed)
+void MyPalletizerBasic::setEncoders(MyPalletizerEncoders angleEncoders, int speed)
 {
 	byte angle_1_high = highByte(static_cast<int>(angleEncoders[0]));
 	byte angle_1_low = lowByte(static_cast<int>(angleEncoders[0]));
@@ -878,7 +878,7 @@ void MyPartnerBasic::setEncoders(MyPartnerEncoders angleEncoders, int speed)
 	Serial2.write(footer);
 }
 
-int MyPartnerBasic::getSpeed()
+int MyPalletizerBasic::getSpeed()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -910,7 +910,7 @@ int MyPartnerBasic::getSpeed()
 	return -1;
 }
 
-void MyPartnerBasic::setSpeed(int percentage)
+void MyPalletizerBasic::setSpeed(int percentage)
 {
 	byte speed = percentage;
 	Serial2.write(header);
@@ -921,7 +921,7 @@ void MyPartnerBasic::setSpeed(int percentage)
 	Serial2.write(footer);
 }
 
-float MyPartnerBasic::getFeedOverride()
+float MyPalletizerBasic::getFeedOverride()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -953,7 +953,7 @@ float MyPartnerBasic::getFeedOverride()
 	return -1.0;
 }
 
-void MyPartnerBasic::sendFeedOverride(float feed_override)
+void MyPalletizerBasic::sendFeedOverride(float feed_override)
 {
 	byte feed_override_high = highByte(static_cast<int>(feed_override * 10));
 	byte feed_override_low = lowByte(static_cast<int>(feed_override * 10));
@@ -967,7 +967,7 @@ void MyPartnerBasic::sendFeedOverride(float feed_override)
 	Serial2.write(footer);
 }
 
-float MyPartnerBasic::getAcceleration()
+float MyPalletizerBasic::getAcceleration()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -999,7 +999,7 @@ float MyPartnerBasic::getAcceleration()
 	return -1.0;
 }
 
-void MyPartnerBasic::setAcceleration(float acceleration)
+void MyPalletizerBasic::setAcceleration(float acceleration)
 {
 	byte acceleration_high = highByte(static_cast<int>(acceleration * 10));
 	byte acceleration_low = lowByte(static_cast<int>(acceleration * 10));
@@ -1013,7 +1013,7 @@ void MyPartnerBasic::setAcceleration(float acceleration)
 	Serial2.write(footer);
 }
 
-float MyPartnerBasic::getJointMin(int joint)
+float MyPalletizerBasic::getJointMin(int joint)
 {
 	byte joint_number = joint;
 	Serial2.write(header);
@@ -1047,7 +1047,7 @@ float MyPartnerBasic::getJointMin(int joint)
 	return -5.0;
 }
 
-float MyPartnerBasic::getJointMax(int joint)
+float MyPalletizerBasic::getJointMax(int joint)
 {
 	byte joint_number = joint;
 	Serial2.write(header);
@@ -1081,7 +1081,7 @@ float MyPartnerBasic::getJointMax(int joint)
 	return -5.0;
 }
 
-void MyPartnerBasic::setJointMin(int joint, float angle)
+void MyPalletizerBasic::setJointMin(int joint, float angle)
 {
 	byte joint_number = joint;
 	byte angle_low = lowByte(static_cast<int>(angle * 10));
@@ -1096,7 +1096,7 @@ void MyPartnerBasic::setJointMin(int joint, float angle)
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::setJointMax(int joint, float angle)
+void MyPalletizerBasic::setJointMax(int joint, float angle)
 {
 	byte joint_number = joint;
 	byte angle_low = lowByte(static_cast<int>(angle * 10));
@@ -1111,7 +1111,7 @@ void MyPartnerBasic::setJointMax(int joint, float angle)
 	Serial2.write(footer);
 }
 
-bool MyPartnerBasic::isServoEnabled(int joint)
+bool MyPalletizerBasic::isServoEnabled(int joint)
 {
 	byte joint_number = joint;
 	Serial2.write(header);
@@ -1144,7 +1144,7 @@ bool MyPartnerBasic::isServoEnabled(int joint)
 	return false;
 }
 
-bool MyPartnerBasic::isAllServoEnabled()
+bool MyPalletizerBasic::isAllServoEnabled()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1175,7 +1175,7 @@ bool MyPartnerBasic::isAllServoEnabled()
 	return false;
 }
 
-byte MyPartnerBasic::getServoData(int joint, byte data_id)
+byte MyPalletizerBasic::getServoData(int joint, byte data_id)
 {
 	byte joint_number = joint;
 	Serial2.write(header);
@@ -1210,7 +1210,7 @@ byte MyPartnerBasic::getServoData(int joint, byte data_id)
 	return -1.0;
 }
 
-void MyPartnerBasic::setServoCalibration(int joint)
+void MyPalletizerBasic::setServoCalibration(int joint)
 {
 	byte joint_number = joint;
 	Serial2.write(header);
@@ -1222,7 +1222,7 @@ void MyPartnerBasic::setServoCalibration(int joint)
 }
 
 
-void MyPartnerBasic::setPinMode(byte pin_no, byte pin_mode)
+void MyPalletizerBasic::setPinMode(byte pin_no, byte pin_mode)
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1233,7 +1233,7 @@ void MyPartnerBasic::setPinMode(byte pin_no, byte pin_mode)
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::pause()
+void MyPalletizerBasic::pause()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1242,7 +1242,7 @@ void MyPartnerBasic::pause()
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::resume()
+void MyPalletizerBasic::resume()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1251,7 +1251,7 @@ void MyPartnerBasic::resume()
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::stop()
+void MyPalletizerBasic::stop()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1261,7 +1261,7 @@ void MyPartnerBasic::stop()
 }
 
 
-void MyPartnerBasic::setLEDRGB(byte r, byte g, byte b)
+void MyPalletizerBasic::setLEDRGB(byte r, byte g, byte b)
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1273,7 +1273,7 @@ void MyPartnerBasic::setLEDRGB(byte r, byte g, byte b)
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::setGripper(int data)
+void MyPalletizerBasic::setGripper(int data)
 {
 	byte gripper_data = data;
 	Serial2.write(header);
@@ -1284,7 +1284,7 @@ void MyPartnerBasic::setGripper(int data)
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::setServoData(byte servo_no, byte servo_state, byte servo_data)
+void MyPalletizerBasic::setServoData(byte servo_no, byte servo_state, byte servo_data)
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1297,7 +1297,7 @@ void MyPartnerBasic::setServoData(byte servo_no, byte servo_state, byte servo_da
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::setFreeMove()
+void MyPalletizerBasic::setFreeMove()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1306,7 +1306,7 @@ void MyPartnerBasic::setFreeMove()
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::receiveMessages()
+void MyPalletizerBasic::receiveMessages()
 {
 	unsigned long t_begin = millis();
 	void* tempPtr = nullptr;
@@ -1335,7 +1335,7 @@ void MyPartnerBasic::receiveMessages()
 
 }
 
-void MyPartnerBasic::setMovementType(MovementType movement_type)
+void MyPalletizerBasic::setMovementType(MovementType movement_type)
 {
 	byte mt = movement_type;
 
@@ -1347,7 +1347,7 @@ void MyPartnerBasic::setMovementType(MovementType movement_type)
 	Serial2.write(footer);
 }
 
-MovementType MyPartnerBasic::getMovementType()
+MovementType MyPalletizerBasic::getMovementType()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1379,7 +1379,7 @@ MovementType MyPartnerBasic::getMovementType()
 	return ERROR_MOVEMENT;
 }
 
-void MyPartnerBasic::setToolReference(MyPartnerCoords coord)
+void MyPalletizerBasic::setToolReference(MyPalletizerCoords coord)
 {
 	byte coord_x_low = lowByte(static_cast<int>(coord[0] * 10));
 	byte coord_x_high = highByte(static_cast<int>(coord[0] * 10));
@@ -1418,7 +1418,7 @@ void MyPartnerBasic::setToolReference(MyPartnerCoords coord)
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::setWorldReference(MyPartnerCoords coord)
+void MyPalletizerBasic::setWorldReference(MyPalletizerCoords coord)
 {
 	byte coord_x_low = lowByte(static_cast<int>(coord[0] * 10));
 	byte coord_x_high = highByte(static_cast<int>(coord[0] * 10));
@@ -1457,7 +1457,7 @@ void MyPartnerBasic::setWorldReference(MyPartnerCoords coord)
 	Serial2.write(footer);
 }
 
-MyPartnerCoords MyPartnerBasic::getToolReference()
+MyPalletizerCoords MyPalletizerBasic::getToolReference()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1467,8 +1467,8 @@ MyPartnerCoords MyPartnerBasic::getToolReference()
 
 	unsigned long t_begin = millis();
 	void* tempPtr = nullptr;
-	MyPartnerCoords* pCoords = nullptr;
-	MyPartnerCoords tempCoords;
+	MyPalletizerCoords* pCoords = nullptr;
+	MyPalletizerCoords tempCoords;
 
 	while (true)
 	{
@@ -1479,7 +1479,7 @@ MyPartnerCoords MyPartnerBasic::getToolReference()
 			continue;
 		else
 		{
-			pCoords = (MyPartnerCoords*)tempPtr;
+			pCoords = (MyPalletizerCoords*)tempPtr;
 			for (int i = 0; i < 4; ++i)
 				tempCoords[i] = pCoords->at(i);
 			delete pCoords;
@@ -1489,7 +1489,7 @@ MyPartnerCoords MyPartnerBasic::getToolReference()
 	return error_coords;
 }
 
-MyPartnerCoords MyPartnerBasic::getWorldReference()
+MyPalletizerCoords MyPalletizerBasic::getWorldReference()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1499,8 +1499,8 @@ MyPartnerCoords MyPartnerBasic::getWorldReference()
 
 	unsigned long t_begin = millis();
 	void* tempPtr = nullptr;
-	MyPartnerCoords* pCoords = nullptr;
-	MyPartnerCoords tempCoords;
+	MyPalletizerCoords* pCoords = nullptr;
+	MyPalletizerCoords tempCoords;
 
 	while (true)
 	{
@@ -1511,7 +1511,7 @@ MyPartnerCoords MyPartnerBasic::getWorldReference()
 			continue;
 		else
 		{
-			pCoords = (MyPartnerCoords*)tempPtr;
+			pCoords = (MyPalletizerCoords*)tempPtr;
 			for (int i = 0; i < 4; ++i)
 				tempCoords[i] = pCoords->at(i);
 			delete pCoords;
@@ -1521,7 +1521,7 @@ MyPartnerCoords MyPartnerBasic::getWorldReference()
 	return error_coords;
 }
 
-void MyPartnerBasic::setReferenceFrame(RFType rftype)
+void MyPalletizerBasic::setReferenceFrame(RFType rftype)
 {
 	byte rt = rftype;
 
@@ -1533,7 +1533,7 @@ void MyPartnerBasic::setReferenceFrame(RFType rftype)
 	Serial2.write(footer);
 }
 
-RFType MyPartnerBasic::getReferenceFrame()
+RFType MyPalletizerBasic::getReferenceFrame()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1565,7 +1565,7 @@ RFType MyPartnerBasic::getReferenceFrame()
 	return ERROR_RF;
 }
 
-void MyPartnerBasic::setEndType(EndType end_type)
+void MyPalletizerBasic::setEndType(EndType end_type)
 {
 	byte et = end_type;
 
@@ -1577,7 +1577,7 @@ void MyPartnerBasic::setEndType(EndType end_type)
 	Serial2.write(footer);
 }
 
-EndType MyPartnerBasic::getEndType()
+EndType MyPalletizerBasic::getEndType()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1609,7 +1609,7 @@ EndType MyPartnerBasic::getEndType()
 	return ERROR_END;
 }
 
-void MyPartnerBasic::setDigitalOutput(byte pin_no, byte pin_state)
+void MyPalletizerBasic::setDigitalOutput(byte pin_no, byte pin_state)
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1620,7 +1620,7 @@ void MyPartnerBasic::setDigitalOutput(byte pin_no, byte pin_state)
 	Serial2.write(footer);
 }
 
-int MyPartnerBasic::getDigitalInput(byte pin_no)
+int MyPalletizerBasic::getDigitalInput(byte pin_no)
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1654,7 +1654,7 @@ int MyPartnerBasic::getDigitalInput(byte pin_no)
 }
 
 /*
-void MyPartnerBasic::setPWMMode(int freq, byte pin_no, byte channel)
+void MyPalletizerBasic::setPWMMode(int freq, byte pin_no, byte channel)
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1673,7 +1673,7 @@ void MyPartnerBasic::setPWMMode(int freq, byte pin_no, byte channel)
 	Serial2.write(footer);
 }*/
 
-void MyPartnerBasic::setPWMOutput(byte pin_no, int freq,  byte pin_write)
+void MyPalletizerBasic::setPWMOutput(byte pin_no, int freq,  byte pin_write)
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1692,7 +1692,7 @@ void MyPartnerBasic::setPWMOutput(byte pin_no, int freq,  byte pin_write)
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::releaseServo(byte servo_no)
+void MyPalletizerBasic::releaseServo(byte servo_no)
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1702,7 +1702,7 @@ void MyPartnerBasic::releaseServo(byte servo_no)
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::focusServo(byte servo_no)
+void MyPalletizerBasic::focusServo(byte servo_no)
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1712,7 +1712,7 @@ void MyPartnerBasic::focusServo(byte servo_no)
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::setGripperState(byte mode, int sp)
+void MyPalletizerBasic::setGripperState(byte mode, int sp)
 {
 	if (sp > 100) {
 		sp = 100;
@@ -1726,7 +1726,7 @@ void MyPartnerBasic::setGripperState(byte mode, int sp)
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::setGripperValue(int data, int sp)
+void MyPalletizerBasic::setGripperValue(int data, int sp)
 {
 	if (data > 100) {
 		data = 100;
@@ -1743,7 +1743,7 @@ void MyPartnerBasic::setGripperValue(int data, int sp)
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::setGripperIni()
+void MyPalletizerBasic::setGripperIni()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1752,7 +1752,7 @@ void MyPartnerBasic::setGripperIni()
 	Serial2.write(footer);
 }
 
-int MyPartnerBasic::getGripperValue()
+int MyPalletizerBasic::getGripperValue()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1784,7 +1784,7 @@ int MyPartnerBasic::getGripperValue()
 	return -1;
 }
 
-bool MyPartnerBasic::isGripperMoving()
+bool MyPalletizerBasic::isGripperMoving()
 {
 	Serial2.write(header);
 	Serial2.write(header);
@@ -1816,7 +1816,7 @@ bool MyPartnerBasic::isGripperMoving()
 }
 
 
-void MyPartnerBasic::moveCCoords(MyPartnerCoords end_coord, int radius, byte direction, int speed) //direction:  0-clockwise,1-anticlockwise
+void MyPalletizerBasic::moveCCoords(MyPalletizerCoords end_coord, int radius, byte direction, int speed) //direction:  0-clockwise,1-anticlockwise
 {
 	// end_coord
 	byte end_x_low = lowByte(static_cast<int>(end_coord[0] * 10));
@@ -1856,7 +1856,7 @@ void MyPartnerBasic::moveCCoords(MyPartnerCoords end_coord, int radius, byte dir
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::moveCCoords(MyPartnerCoords center_coord, byte direction, int speed) //direction:  0-clockwise,1-anticlockwise
+void MyPalletizerBasic::moveCCoords(MyPalletizerCoords center_coord, byte direction, int speed) //direction:  0-clockwise,1-anticlockwise
 {
 	// middle_coord
 	byte center_x_low = lowByte(static_cast<int>(center_coord[0] * 10));
@@ -1890,7 +1890,7 @@ void MyPartnerBasic::moveCCoords(MyPartnerCoords center_coord, byte direction, i
 	Serial2.write(footer);
 }
 
-void MyPartnerBasic::moveLCoords(MyPartnerCoords end_coord, int speed)
+void MyPalletizerBasic::moveLCoords(MyPalletizerCoords end_coord, int speed)
 {
 	// end_coord
 	byte end_x_low = lowByte(static_cast<int>(end_coord[0] * 10));

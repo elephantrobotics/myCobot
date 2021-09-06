@@ -1,6 +1,6 @@
 #include "transponder.h"
 
-// MyPartnerBasic myCobot;
+// MyPalletizerBasic myCobot;
 
 // #define 
 typedef  unsigned char u8;
@@ -18,7 +18,7 @@ void Transponder::init() {
   info();
 }
   
-void Transponder::run(MyPartnerBasic &myCobot) {
+void Transponder::run(MyPalletizerBasic &myCobot) {
   init();
   EXIT = false;
   while (!EXIT)
@@ -29,7 +29,7 @@ void Transponder::run(MyPartnerBasic &myCobot) {
   
 }
 
-bool Transponder::checkHeader(MyPartnerBasic &myCobot)
+bool Transponder::checkHeader(MyPalletizerBasic &myCobot)
 {
   u8 bDat;
   u8 bBuf[2] = { 0, 0 };
@@ -50,7 +50,7 @@ bool Transponder::checkHeader(MyPartnerBasic &myCobot)
   return 1;
 }
 
-int Transponder::readSerial(MyPartnerBasic &myCobot, unsigned char* nDat, int nLen)
+int Transponder::readSerial(MyPalletizerBasic &myCobot, unsigned char* nDat, int nLen)
 {
 
   int Size = 0;
@@ -100,7 +100,7 @@ void Transponder::rFlushSerial()
     ;
 }
 
-int Transponder::readData(MyPartnerBasic &myCobot)
+int Transponder::readData(MyPalletizerBasic &myCobot)
 {
   rFlushSerial();
   if (!Transponder::checkHeader(myCobot))
@@ -168,7 +168,7 @@ int Transponder::readData(MyPartnerBasic &myCobot)
 
 }
 
-void Transponder::connect_ATOM(MyPartnerBasic &myCobot){
+void Transponder::connect_ATOM(MyPalletizerBasic &myCobot){
   M5.Lcd.clear(BLACK);
   delay(50);
   M5.Lcd.setTextColor(RED);

@@ -23,7 +23,7 @@ void Connect::info(){
   M5.Lcd.println("Press C - Exit");
 } 
 
-void Connect::run(MyPartnerBasic &myCobot){
+void Connect::run(MyPalletizerBasic &myCobot){
     info();
     sm.pSerial = &Serial2;
     while (1)
@@ -45,7 +45,7 @@ void Connect::run(MyPartnerBasic &myCobot){
 }
 }
 
-void Connect::testServo(MyPartnerBasic &myCobot){
+void Connect::testServo(MyPalletizerBasic &myCobot){
     M5.Lcd.clear(BLACK);
     delay(50);
     M5.Lcd.setTextSize(3);
@@ -88,7 +88,7 @@ void Connect::testServo(MyPartnerBasic &myCobot){
 }
 
 
-void Connect::ReadConfig(MyPartnerBasic &myCobot){
+void Connect::ReadConfig(MyPalletizerBasic &myCobot){
   char s[10];
   M5.Lcd.clear(BLACK);
   delay(50);

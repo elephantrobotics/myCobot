@@ -1,4 +1,4 @@
-#include <MyPartnerBasic.h>
+#include <MyPalletizerBasic.h>
 #include <vector>
 #include <string>
 #include "transponder.h"
@@ -12,7 +12,7 @@
 extern const unsigned char mycobot_start_PIC[29523];
 
 
-MyPartnerBasic myCobot;
+MyPalletizerBasic myCobot;
 
 static int state = 0;
 static int display_start_state = 0;
@@ -24,7 +24,7 @@ std::map<int, std::string> menuMap;
 
 void setup(){
   myCobot.setup();                                      
-  myCobot.powerOn();                                    //启动机械臂
+  //myCobot.powerOn();                                    //启动机械臂
   delay(50);
   DisplayStartUp();
   M5.Lcd.clear(BLACK);
@@ -78,7 +78,7 @@ void displayScreenProtect()
   }
 }
 
-void program_selection(MyPartnerBasic &myCobot, int state){
+void program_selection(MyPalletizerBasic &myCobot, int state){
   Factory *factory = Factory::getFactoryInstance();
   ServerBase *server = factory->getServerInstance(state); 
   if (server == nullptr) {

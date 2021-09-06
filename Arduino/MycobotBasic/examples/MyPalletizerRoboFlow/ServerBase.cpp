@@ -1,5 +1,5 @@
 #include "ServerBase.h"
-#include <MyPartnerBasic.h>
+#include <MyPalletizerBasic.h>
 ServerBase::ServerBase(){
     //todo
 }

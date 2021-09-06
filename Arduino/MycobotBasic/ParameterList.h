@@ -47,15 +47,15 @@ namespace myCobotDefine {
 	using Encoders = std::array<float, Joints>;
 
 
-	//MyPartner data struct
-	enum MyPartnerAxis : int { P_X = 0, P_Y, P_Z, P_THETA };
-	enum MyPartnerJoint : int { P_J1 = 0, P_J2, P_J3, P_J4 };
-	constexpr const int MyPartnerAxesNum = 4;
-	constexpr const int MyPartnerJointsNum = 4;
-	using MyPartnerCoords = std::array<float, MyPartnerAxesNum>;
-	using MyPartnerAngles = std::array<float, MyPartnerJointsNum>;
+	//MyPalletizer data struct
+	enum MyPalletizerAxis : int { P_X = 0, P_Y, P_Z, P_THETA };
+	enum MyPalletizerJoint : int { P_J1 = 0, P_J2, P_J3, P_J4 };
+	constexpr const int MyPalletizerAxesNum = 4;
+	constexpr const int MyPalletizerJointsNum = 4;
+	using MyPalletizerCoords = std::array<float, MyPalletizerAxesNum>;
+	using MyPalletizerAngles = std::array<float, MyPalletizerJointsNum>;
 
-	using MyPartnerEncoders = std::array<float, MyPartnerJointsNum>;
+	using MyPalletizerEncoders = std::array<float, MyPalletizerJointsNum>;
 
 	// servo speed
 	const float maximum_large_servo_speed = 1000;	//2000?

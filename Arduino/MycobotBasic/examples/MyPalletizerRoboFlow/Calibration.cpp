@@ -2,7 +2,7 @@
 
 int calibrate_servo_no = 1;
 
-void Calibration::run(MyPartnerBasic &myCobot){
+void Calibration::run(MyPalletizerBasic &myCobot){
   M5.Lcd.setTextSize(2);
   // EEPROM.begin(EEPROM_SIZE);//new
   myCobot.setLEDRGB(255, 255, 255);
@@ -68,7 +68,7 @@ void Calibration::info()
   M5.update(); 
 } 
 
-void Calibration::init(MyPartnerBasic &myCobot)
+void Calibration::init(MyPalletizerBasic &myCobot)
 {
   M5.Lcd.clear(BLACK);
   delay(50);
@@ -126,7 +126,7 @@ void Calibration::init(MyPartnerBasic &myCobot)
   calibrate_servo_no ++;
 }
 
-void Calibration::test(MyPartnerBasic &myCobot)
+void Calibration::test(MyPalletizerBasic &myCobot)
 {
   M5.Lcd.clear(BLACK);
   delay(50);
@@ -174,7 +174,7 @@ void Calibration::test(MyPartnerBasic &myCobot)
   }
 }
 
-void Calibration::reset(MyPartnerBasic &myCobot)
+void Calibration::reset(MyPalletizerBasic &myCobot)
 {
   M5.Lcd.clear(BLACK);
   delay(50);
