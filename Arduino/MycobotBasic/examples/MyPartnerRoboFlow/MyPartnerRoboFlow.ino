@@ -24,7 +24,7 @@ std::map<int, std::string> menuMap;
 
 void setup(){
   myCobot.setup();                                      
-  //myCobot.powerOn();                                    //启动机械臂
+  myCobot.powerOn();                                    //启动机械臂
   delay(50);
   DisplayStartUp();
   M5.Lcd.clear(BLACK);

@@ -451,6 +451,7 @@ void MainControl::record(MyPartnerBasic &myCobot)  // is stop
   // record mode : 1- record to ram;  2- record to flash
   rec_data_len = 0;
   MyPartnerAngles _data;
+  delay(20);
   int _encoder = myCobot.getEncoder(7);
   delay(35);
   for (int data_index = 0; data_index <data_len_max ; data_index ++) {
