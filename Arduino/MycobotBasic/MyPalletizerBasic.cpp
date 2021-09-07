@@ -32,6 +32,7 @@ bool MyPalletizerBasic::checkHeader()
 
   while(1){
     if(!readSerial(&bDat, 1)){
+	Serial.println("can't get serial data");
       return 0;      
     }
     bBuf[1] = bBuf[0];
@@ -172,10 +173,8 @@ int MyPalletizerBasic::getAtomVersion()
 void* MyPalletizerBasic::readData()
 {
 	rFlushSerial();
-	Serial.println("test0000000000");
 	if (!checkHeader())
 		return nullptr;
-	Serial.println("test111111111");
 	byte data_len[1];
 	byte r_data_3[3], r_data_4[4], r_data_10[10];
 
