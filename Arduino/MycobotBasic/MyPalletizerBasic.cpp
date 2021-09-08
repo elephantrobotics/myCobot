@@ -1815,7 +1815,7 @@ bool MyPalletizerBasic::isGripperMoving()
 }
 
 
-void MyPalletizerBasic::moveCCoords(MyPalletizerCoords end_coord, int radius, byte direction, int speed) //direction:  0-clockwise,1-anticlockwise
+void MyPalletizerBasic::moveCCoords(MyPalletizerCoords end_coord, int radius, int direction, int speed) //direction:  0-clockwise,1-anticlockwise
 {
 	// end_coord
 	byte end_x_low = lowByte(static_cast<int>(end_coord[0] * 10));
@@ -1855,7 +1855,7 @@ void MyPalletizerBasic::moveCCoords(MyPalletizerCoords end_coord, int radius, by
 	Serial2.write(footer);
 }
 
-void MyPalletizerBasic::moveCCoords(MyPalletizerCoords center_coord, byte direction, int speed) //direction:  0-clockwise,1-anticlockwise
+void MyPalletizerBasic::moveCCoords(MyPalletizerCoords center_coord, int direction, int speed) //direction:  0-clockwise,1-anticlockwise
 {
 	// middle_coord
 	byte center_x_low = lowByte(static_cast<int>(center_coord[0] * 10));

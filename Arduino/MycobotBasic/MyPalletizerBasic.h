@@ -59,9 +59,9 @@ public:
 	void writeCoords(MyPalletizerCoords coords, int speed);
 	int isInPosition(MyPalletizerCoords coord, bool is_linear);
 	bool checkRunning();
-	void moveCCoords(MyPalletizerCoords center_coord, byte direction,int speed = 0.2);
-	void moveCCoords(MyPalletizerCoords end_coord, int radius, byte direction, int speed = 0.2);
-	void moveLCoords(MyPalletizerCoords end_coord, int speed = 0.2);
+	void moveCCoords(MyPalletizerCoords center_coord, int direction,int speed);
+	void moveCCoords(MyPalletizerCoords end_coord, int radius, int direction, int speed);
+	void moveLCoords(MyPalletizerCoords end_coord, int speed);
 
 
 
