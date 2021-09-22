@@ -2,7 +2,7 @@
 #define Information_h
 
 #include "MyPalletizerBasic.h"
-#include "SCServo.h"
+//#include "SCServo.h"
 #include "config.h"
 #include "ServerBase.h"
 
