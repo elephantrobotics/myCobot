@@ -1,7 +1,5 @@
 #include "Information.h"
 
-SMSBL sm;
-
 void Connect::info(){
   M5.Lcd.clear(BLACK);
   M5.Lcd.setTextColor(BLACK);
@@ -25,7 +23,6 @@ void Connect::info(){
 
 void Connect::run(MyCobotBasic &myCobot){
     info();
-    sm.pSerial = &Serial2;
     while (1)
     {
         // put your main code here, to run repeatedly:
@@ -73,7 +70,8 @@ void Connect::testServo(MyCobotBasic &myCobot){
       M5.Lcd.print("servo ");
       M5.Lcd.print(i);
       M5.Lcd.print(" - ");
-      if(sm.FeedBack(i) != -1){
+      int servo_state = myCobot.isServoEnabled(i);
+      if(servo_state == 1){
         M5.Lcd.setTextColor(GREEN);
       M5.Lcd.println("ok");
       }else{
