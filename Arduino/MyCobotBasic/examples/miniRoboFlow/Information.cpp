@@ -54,14 +54,24 @@ void Connect::testServo(MyCobotBasic &myCobot){
     M5.Lcd.setTextColor(WHITE);
     M5.Lcd.drawFastHLine(0,50,320,GREY);
     M5.Lcd.setCursor(0, 70);
-    int state = myCobot.isPoweredOn();
-    M5.Lcd.print("atom - ");
-    if(state == 1){
-    M5.Lcd.setTextColor(GREEN);
-    M5.Lcd.println("ok");
+    int m = 0;
+    M5.Lcd.print("atom - ");	
+	for(int c=1; c<4; c++){
+      int state = myCobot.isPoweredOn();  
+      delay(20);
+      if(state == 1){
+        m = m+1;
+      }else{
+        m = m;
+      }
+    }
+    if(m >= 2){
+      M5.Lcd.setTextColor(GREEN);
+      M5.Lcd.println("ok");
     }else{
-    M5.Lcd.setTextColor(RED);
-    M5.Lcd.println("no");
+      M5.Lcd.setTextColor(RED);
+      M5.Lcd.println("no");
+      delay(50);
     }
     M5.Lcd.setTextSize(2);
     M5.Lcd.setTextColor(WHITE);
