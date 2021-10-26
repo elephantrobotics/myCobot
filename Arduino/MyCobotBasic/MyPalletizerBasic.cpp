@@ -208,12 +208,7 @@ void* MyPalletizerBasic::readData()
 				*pSpeed = r_data_3[1];
 				return pSpeed;
 			}
-			case IS_SERVO_ENABLED:
-			{
-				bool* pServoState = new bool;
-				*pServoState = bool(r_data_3[1]);
-				return pServoState;
-			}
+			
 			case IS_ALL_SERVO_ENABLED:
 			{
 				bool* pServoState = new bool;
@@ -294,6 +289,13 @@ void* MyPalletizerBasic::readData()
 		readSerial(r_data_4, 4);
 		switch (int(r_data_4[0]))
 		{
+			case IS_SERVO_ENABLED:
+			{
+				bool* pServoState = new bool;
+				*pServoState = bool(r_data_4[2]);
+				return pServoState;
+			}
+			
 			case GET_FEED_OVERRIDE:
 			{
 				float* pfeed_override = new float;
