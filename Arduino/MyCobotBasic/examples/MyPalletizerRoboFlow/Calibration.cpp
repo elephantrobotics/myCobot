@@ -146,13 +146,22 @@ void Calibration::test(MyPalletizerBasic &myCobot)
         M5.Lcd.print("Move servo -> ");  
         M5.Lcd.println(i);
       }
-
-      myCobot.setEncoder(i, 1848);
-      delay(2500);
-      myCobot.setEncoder(i, 2248);
-      delay(3000);
-      myCobot.setEncoder(i, 2048);
-      delay(2500);
+	  if (i == 1 || i == 4)
+      {
+        myCobot.setEncoder(i,1500);
+        delay(2500);
+        myCobot.setEncoder(i, 2500);
+        delay(3000);
+        myCobot.setEncoder(i, 2048);
+        delay(2500);              
+      }
+      else 
+      {
+        myCobot.setEncoder(i, 1600);
+        delay(2500);
+        myCobot.setEncoder(i, 2048);
+        delay(2500);
+      }       
     }
     Calibration::info();
     delay(2000);
