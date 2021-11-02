@@ -27,10 +27,20 @@ void setup(){
   //myCobot.powerOn();                                    //启动机械臂
   delay(50);
   DisplayStartUp();
+  EEPROM.begin(EEPROM_SIZE);                            //EEPROM_SIZE=64    
+  if (EEPROM.read(state_addr))
+   {
+     state = EEPROM.read(state_addr) - 1;                //写数据
+     program_selection(myCobot, state);
+   }else{
+     EEPROM.write(state_addr, 0); //写数据
+   }
+  EEPROM.commit();                                      //保存更改的数据
   M5.Lcd.clear(BLACK);
   menu_init();
   DisplayAll();
   menu_choice();
+  DisplayState(display_start_state);
   t_begin = millis();
 }
 
