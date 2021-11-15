@@ -62,9 +62,9 @@ void loop(){
     menu_choice();
   }
   if (M5.BtnC.wasReleased()) {  
-    // EEPROM.begin(EEPROM_SIZE); //申请操作到地址4095,size=目标地址+1
-    // EEPROM.write(state_addr, state + 1); //写数据
-    // EEPROM.commit(); //保存更改的数据    
+     EEPROM.begin(EEPROM_SIZE); //申请操作到地址4095,size=目标地址+1
+     EEPROM.write(state_addr, state + 1); //写数据
+     EEPROM.commit(); //保存更改的数据    
     program_selection(myCobot, state);
     M5.Lcd.clear(BLACK);
     t_begin = millis();
