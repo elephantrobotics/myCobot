@@ -143,8 +143,8 @@ int MyCobotBasic::getAtomVersion()
 {
 	Serial2.write(header);
 	Serial2.write(header);
-	Serial2.write(GET_SYSTEM_VERSION_LEN);
-	Serial2.write(GET_SYSTEM_VERSION);
+	Serial2.write(GET_ATOM_VERSION_LEN);
+	Serial2.write(GET_ATOM_VERSION);
 	Serial2.write(footer);
 
 	unsigned long t_begin = millis();
@@ -169,6 +169,38 @@ int MyCobotBasic::getAtomVersion()
 	}
 
 }
+
+int MyCobotBasic::getRobotVersion()
+{
+	Serial2.write(header);
+	Serial2.write(header);
+	Serial2.write(GET_ROBOT_VERSION_LEN);
+	Serial2.write(GET_ROBOT_VERSION);
+	Serial2.write(footer);
+
+	unsigned long t_begin = millis();
+	void* tempPtr = nullptr;
+	int* pReturnRobotVersion = nullptr;
+	int returnRobotVersion;
+
+	while (true)
+	{
+		if (millis() - t_begin > 40)
+			break;
+		tempPtr = readData();
+		if (tempPtr == nullptr)
+			continue;
+		else
+		{
+			pReturnRobotVersion = (int*)tempPtr;
+			returnRobotVersion = *pReturnRobotVersion;
+			delete pReturnRobotVersion;
+			return returnRobotVersion;
+		}
+	}
+
+}
+
 void* MyCobotBasic::readData()
 {
 	rFlushSerial();
@@ -276,7 +308,7 @@ void* MyCobotBasic::readData()
 				*pVersion = r_data_3[1];
 				return pVersion;
 			}
-			case GET_SYSTEM_VERSION:
+			case GET_ATOM_VERSION:
 			{
 				int* pVersion = new int;
 				*pVersion = r_data_3[1];

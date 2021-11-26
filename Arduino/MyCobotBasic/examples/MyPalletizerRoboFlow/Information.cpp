@@ -16,9 +16,9 @@ void Connect::info(){
   M5.Lcd.setCursor(0, 100);
   M5.Lcd.setTextColor(WHITE);
   M5.Lcd.setTextSize(2);
-  M5.Lcd.println("Press A - Servos motor");
+  M5.Lcd.println("Press A - Servos Motor");
   M5.Lcd.println();
-  M5.Lcd.println("Press B - Firmware");
+  M5.Lcd.println("Press B - Firmware Version");
   M5.Lcd.println();
   M5.Lcd.println("Press C - Exit");
 } 
@@ -102,32 +102,44 @@ void Connect::testServo(MyPalletizerBasic &myCobot){
 
 void Connect::ReadConfig(MyPalletizerBasic &myCobot){
   char s[10];
+  char t[10];
+  char r[10];
   M5.Lcd.clear(BLACK);
   delay(50);
 
   M5.Lcd.setTextSize(3);
   M5.Lcd.setCursor(0, 10);
   M5.Lcd.setTextColor(RED);
-  M5.Lcd.println("connect test");
+  M5.Lcd.println("Firmware Version");
   M5.Lcd.setTextSize(2);
   M5.Lcd.setTextColor(WHITE);
   M5.Lcd.drawFastHLine(0,50,320,GREY);
   M5.Lcd.setTextSize(2);
   M5.Lcd.setCursor(0, 70);
-  M5.Lcd.printf("robot version :");
+  M5.Lcd.printf("Atom  :");
   int version = myCobot.getAtomVersion();
   sprintf(s,"V%.2f", version/10.0);
-  M5.Lcd.setCursor(200, 70);
+  M5.Lcd.setCursor(100, 70);
   M5.Lcd.setTextColor(RED);
   M5.Lcd.println(s);
 
   M5.Lcd.setTextColor(WHITE);
   M5.Lcd.setCursor(0, 100);
-  M5.Lcd.println("basic version :");
+  M5.Lcd.println("Basic :");
 
-  M5.Lcd.setCursor(200, 100);
+  sprintf(t, "V%.2f", BASIC_VERSION / 10.0);
+  M5.Lcd.setCursor(100, 100);
   M5.Lcd.setTextColor(RED);
-  M5.Lcd.println("V1.0");
+  M5.Lcd.println(t);
+
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.setCursor(0, 130);
+  M5.Lcd.println("Robot :");
+  int RobotVersion = myCobot.getRobotVersion();
+  sprintf(r, "V%.2f", RobotVersion / 100.0);
+  M5.Lcd.setCursor(100, 130);
+  M5.Lcd.setTextColor(RED);
+  M5.Lcd.println(r);
   M5.update();
   delay(3000);
   info();

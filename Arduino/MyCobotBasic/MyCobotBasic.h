@@ -27,6 +27,8 @@
 
 #define angle_to_encoder	11.3777777
 #define encoder_cal_point 	2048
+
+#define BASIC_VERSION       10     
 using namespace myCobotDefine;
 using namespace roboticMessages;
 
@@ -45,6 +47,7 @@ public:
 	void powerOff();
 	bool isPoweredOn();
 	int getAtomVersion();
+	int getRobotVersion();
 
 
 	// MDI mode and operation
