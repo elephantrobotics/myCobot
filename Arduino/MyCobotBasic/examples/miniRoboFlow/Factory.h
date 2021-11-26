@@ -6,6 +6,7 @@
 #include "Calibration.h"
 #include "transponder.h"
 #include "Information.h"
+#include "PlayPos.h"
                    
 
 typedef ServerBase *(*ServerFunction)();

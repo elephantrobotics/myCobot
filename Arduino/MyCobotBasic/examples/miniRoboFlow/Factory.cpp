@@ -7,6 +7,7 @@ Factory::Factory(){
     addServer(CALIBRATION_INDEX, &Calibration::createInstance);
     addServer(TRANSPONDER_INDEX, &Transponder::createInstance);
     addServer(CONNECT_INDEX, &Connect::createInstance);
+    addServer(PLAYPOS_INDEX, &PlayPos::createInstance);
 }
 Factory::~Factory(){
 //todo

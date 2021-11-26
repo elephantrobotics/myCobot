@@ -7,7 +7,8 @@ enum FuncIndex: int {
     MAINCONTROL_INDEX = 0,
     CALIBRATION_INDEX,
     TRANSPONDER_INDEX,
-    CONNECT_INDEX
+    CONNECT_INDEX,
+    PLAYPOS_INDEX,
 };
 
 #define lan 1

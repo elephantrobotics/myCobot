@@ -5,6 +5,7 @@
 #include "MainControl.h"
 #include "Calibration.h"
 #include "Information.h"
+#include "PlayPos.h"
 #include "config.h"
 #include "Factory.h"
 #include "ServerBase.h"
@@ -95,6 +96,7 @@ void menu_init()
   menuMap.insert(std::make_pair(CALIBRATION_INDEX, "Calibration"));
   menuMap.insert(std::make_pair(TRANSPONDER_INDEX, "Transponder"));
   menuMap.insert(std::make_pair(CONNECT_INDEX, "Information"));
+  menuMap.insert(std::make_pair(PLAYPOS_INDEX, "Playpos"));
 
 }
 
