@@ -1,6 +1,7 @@
 #include <MyCobotBasic.h>
 #include <vector>
 #include <string>
+#include <driver/adc.h>
 #include "transponder.h"
 #include "MainControl.h"
 #include "Calibration.h"
@@ -11,7 +12,6 @@
 
 extern const unsigned char mycobot_start_PIC[29523];
 
-
 MyCobotBasic myCobot;
 
 static int state = 0;
@@ -21,81 +21,27 @@ unsigned long t_begin = 0;
 // bool EXIT = false;
 int y_pos[] = {70, 95, 120, 145};
 std::map<int, std::string> menuMap;
+bool state_on{false};
 
-void setup(){
-  myCobot.setup();                                      
-  //myCobot.powerOn();                                    //启动机械臂
-  delay(50);
-  DisplayStartUp();
-  M5.Lcd.clear(BLACK);
-  menu_init();
-  DisplayAll();
-  menu_choice();
-  t_begin = millis();
-}
-
-void loop(){
-  
-  M5.update(); 
-
-  if ((millis() - t_begin) > 60000) {
-    displayScreenProtect();
-  }
-  if (M5.BtnA.wasReleased()) {
-    state += 1;
-    t_begin = millis();
-    menu_choice();
-    } 
-  if (M5.BtnB.wasReleased()) {  
-    state -= 1;
-    t_begin = millis();
-    menu_choice();
-  }
-  if (M5.BtnC.wasReleased()) {  
-    // EEPROM.begin(EEPROM_SIZE); //申请操作到地址4095,size=目标地址+1
-    // EEPROM.write(state_addr, state + 1); //写数据
-    // EEPROM.commit(); //保存更改的数据    
-    program_selection(myCobot, state);
-    M5.Lcd.clear(BLACK);
-    t_begin = millis();
-    DisplayAll();
-    menu_choice();
-  } 
-}
-
-void displayScreenProtect()
+void DisplayStartUp() 
 {
   M5.Lcd.drawJpg(mycobot_start_PIC, sizeof(mycobot_start_PIC), 0, 0, 320, 240);
-  while(1) {
-    M5.update();
-    if(M5.BtnA.wasReleased()||M5.BtnB.wasReleased()||M5.BtnC.wasReleased()) {      
-      M5.Lcd.clear(BLACK);
-      DisplayAll();
-      t_begin = millis();
-      M5.update();
-      break;
-    }
-  }
+  //M5.Lcd.drawJpg(ToDown, sizeof(ToDown), 0, 0, 12, 20);  
+  //M5.Lcd.pushImage(0, 0, 320, 240, (uint16_t *)mycobot_start_PIC);
+  delay(2000);
 }
 
-void program_selection(MyCobotBasic &myCobot, int state){
-  Factory *factory = Factory::getFactoryInstance();
-  ServerBase *server = factory->getServerInstance(state); 
-  if (server == nullptr) {
-    Serial.println("there is no server");
+void DisplayState(int display_start_state) {
+  if (display_start_state > menuMap.size() - 4) {
     return;
   }
-  server->run(myCobot);
-
-}
-
-void menu_init()
-{
-  menuMap.insert(std::make_pair(MAINCONTROL_INDEX, "Maincontrol"));
-  menuMap.insert(std::make_pair(CALIBRATION_INDEX, "Calibration"));
-  menuMap.insert(std::make_pair(TRANSPONDER_INDEX, "Transponder"));
-  menuMap.insert(std::make_pair(CONNECT_INDEX, "Information"));
-
+  M5.Lcd.fillRect(26, 70, 200, 90, BLACK);
+  for(int i = 0; i < 4; i++) {
+      M5.Lcd.setTextSize(2);
+      M5.Lcd.setCursor(30,y_pos[i]);
+      M5.Lcd.setTextColor(WHITE);
+      M5.Lcd.print(menuMap[display_start_state + i].c_str());
+  }
 }
 
 void menu_choice()
@@ -132,25 +78,105 @@ void menu_choice()
   }
 
 }
+
+void setup(){
+  adc_power_acquire();
+  myCobot.setup();                                      
+  //myCobot.powerOn();                                    //启动机械臂
+  delay(50);
+  Serial.begin(115200);
+  delay(10);
+  if (!EEPROM.begin(EEPROM_SIZE))
+  {
+    Serial.println("failed to initialise EEPROM"); delay(1000000);
+  }
+  Serial.print("read data==");
+  Serial.println(byte(EEPROM.read(state_addr)));
+  //两个功能下打开串口有用：wlan、uart
+  if(byte(EEPROM.read(state_addr)) == 0 || byte(EEPROM.read(state_addr)) == 1) {
+    state = 2;
+    state_on = true;
+  } 
+  DisplayStartUp();
+  M5.Lcd.clear(BLACK);
+  menu_init();
+  DisplayAll();
+  menu_choice();
+  t_begin = millis();
+}
+
+void loop()
+{  
+  M5.update(); 
+  /*if ((millis() - t_begin) > 60000) {
+    displayScreenProtect();
+  }*/
+  if (M5.BtnA.wasReleased()) {
+    state += 1;
+    t_begin = millis();
+    menu_choice();
+    } 
+  if (M5.BtnB.wasReleased()) {
+    state -= 1;
+    t_begin = millis();
+    menu_choice();
+  }
+  if (M5.BtnC.wasReleased() || state_on) {  
+    /*EEPROM.begin(EEPROM_SIZE); //申请操作到地址4095,size=目标地址+1
+    EEPROM.write(state_addr, state + 1); //写数据
+    EEPROM.commit(); //保存更改的数据*/   
+    state_on = false; 
+    program_selection(myCobot, state);
+    M5.Lcd.clear(BLACK);
+    t_begin = millis();
+    DisplayAll();
+    menu_choice();
+  } 
+  delay(200);
+}
+
+void displayScreenProtect()
+{
+  M5.Lcd.drawJpg(mycobot_start_PIC, sizeof(mycobot_start_PIC), 0, 0, 320, 240);
+  while(1) {
+    M5.update();
+    if(M5.BtnA.wasReleased()||M5.BtnB.wasReleased()||M5.BtnC.wasReleased()) {      
+      M5.Lcd.clear(BLACK);
+      DisplayAll();
+      t_begin = millis();
+      M5.update();
+      break;
+    }
+  }
+}
+
+void program_selection(MyCobotBasic &myCobot, int state)
+{
+  Factory *factory = Factory::getFactoryInstance();
+  ServerBase *server = factory->getServerInstance(state); 
+  if (server == nullptr) {
+    Serial.println("there is no server");
+    return;
+  }
+  server->run(myCobot);
+
+}
+
+void menu_init()
+{
+  menuMap.insert(std::make_pair(MAINCONTROL_INDEX, "Maincontrol"));
+  menuMap.insert(std::make_pair(CALIBRATION_INDEX, "Calibration"));
+  menuMap.insert(std::make_pair(TRANSPONDER_INDEX, "Transponder"));
+  menuMap.insert(std::make_pair(CONNECT_INDEX, "Information"));
+
+}
+
 void DisplayPos(int display_pos) {
   M5.Lcd.fillRect(0, 70, 26, 90, BLACK);
   M5.Lcd.setTextSize(2);
   M5.Lcd.setCursor(0,y_pos[display_pos]);
   M5.Lcd.setTextColor(WHITE);
   M5.Lcd.print(" >");
-}
-
-void DisplayState(int display_start_state) {
-  if (display_start_state > menuMap.size() - 4) {
-    return;
-  }
-  M5.Lcd.fillRect(26, 70, 200, 90, BLACK);
-  for(int i = 0; i < 4; i++) {
-      M5.Lcd.setTextSize(2);
-      M5.Lcd.setCursor(30,y_pos[i]);
-      M5.Lcd.setTextColor(WHITE);
-      M5.Lcd.print(menuMap[display_start_state + i].c_str());
-  }
 }
 
 void DisplayAll() {
@@ -180,13 +206,4 @@ void DisplayAll() {
 
   DisplayState(display_start_state);
   DisplayPos(display_pos);
-}
-
-
-void DisplayStartUp() 
-{
-  M5.Lcd.drawJpg(mycobot_start_PIC, sizeof(mycobot_start_PIC), 0, 0, 320, 240);
-  //M5.Lcd.drawJpg(ToDown, sizeof(ToDown), 0, 0, 12, 20);  
-  //M5.Lcd.pushImage(0, 0, 320, 240, (uint16_t *)mycobot_start_PIC);
-  delay(2000);
 }
