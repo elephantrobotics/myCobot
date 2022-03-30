@@ -6,7 +6,8 @@
 #include "config.h"
 #include "ServerBase.h"
 
-class Connect: public ServerBase{
+class Connect: public ServerBase
+{
 private:
     /* data */
     void info();
@@ -14,7 +15,10 @@ private:
     void ReadConfig(MyPalletizerBasic &myCobot);
 public:
     void run(MyPalletizerBasic &myCobot);
-    static ServerBase* createInstance() {return new Connect();}
+    static ServerBase *createInstance()
+    {
+        return new Connect();
+    }
 };
 
 #endif

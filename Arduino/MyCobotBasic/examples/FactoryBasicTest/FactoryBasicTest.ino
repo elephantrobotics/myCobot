@@ -6,29 +6,30 @@ extern const unsigned char gImage_logoM5[];
 extern const unsigned char m5stack_startup_music[];
 
 #ifndef min
-  #define min(a,b) (((a) < (b)) ? (a) : (b))
+#define min(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
 MPU9250 IMU;
 
-void startupLogo() {
+void startupLogo()
+{
     static uint8_t brightness, pre_brightness;
-    uint32_t length = strlen((char*)m5stack_startup_music);
+    uint32_t length = strlen((char *)m5stack_startup_music);
     M5.Lcd.setBrightness(0);
     M5.Lcd.pushImage(0, 0, 320, 240, (uint16_t *)gImage_logoM5);
-    for(int i=0; i<length; i++) {
-        dacWrite(SPEAKER_PIN, m5stack_startup_music[i]>>2);
+    for (int i = 0; i < length; i++) {
+        dacWrite(SPEAKER_PIN, m5stack_startup_music[i] >> 2);
         delayMicroseconds(40);
-        brightness = (i/157);
-        if(pre_brightness != brightness) {
+        brightness = (i / 157);
+        if (pre_brightness != brightness) {
             pre_brightness = brightness;
             M5.Lcd.setBrightness(brightness);
         }
     }
 
-    for(int i=255; i>=0; i--) {
+    for (int i = 255; i >= 0; i--) {
         M5.Lcd.setBrightness(i);
-        if(i<=32) {
+        if (i <= 32) {
             dacWrite(SPEAKER_PIN, i);
         }
         delay(2);
@@ -39,31 +40,32 @@ void startupLogo() {
 }
 
 //TF card test
-void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
+void listDir(fs::FS &fs, const char *dirname, uint8_t levels)
+{
     Serial.printf("Listing directory: %s\n", dirname);
     M5.Lcd.printf("Listing directory: %s\n", dirname);
 
     File root = fs.open(dirname);
-    if(!root){
+    if (!root) {
         Serial.println("Failed to open directory");
         M5.Lcd.println("Failed to open directory");
         return;
     }
-    if(!root.isDirectory()){
+    if (!root.isDirectory()) {
         Serial.println("Not a directory");
         M5.Lcd.println("Not a directory");
         return;
     }
 
     File file = root.openNextFile();
-    while(file){
-        if(file.isDirectory()){
+    while (file) {
+        if (file.isDirectory()) {
             Serial.print("  DIR : ");
             M5.Lcd.print("  DIR : ");
             Serial.println(file.name());
             M5.Lcd.println(file.name());
-            if(levels){
-                listDir(fs, file.name(), levels -1);
+            if (levels) {
+                listDir(fs, file.name(), levels - 1);
             }
         } else {
             Serial.print("  FILE: ");
@@ -79,12 +81,13 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
     }
 }
 
-void readFile(fs::FS &fs, const char * path) {
+void readFile(fs::FS &fs, const char *path)
+{
     Serial.printf("Reading file: %s\n", path);
     M5.Lcd.printf("Reading file: %s\n", path);
 
     File file = fs.open(path);
-    if(!file){
+    if (!file) {
         Serial.println("Failed to open file for reading");
         M5.Lcd.println("Failed to open file for reading");
         return;
@@ -92,24 +95,25 @@ void readFile(fs::FS &fs, const char * path) {
 
     Serial.print("Read from file: ");
     M5.Lcd.print("Read from file: ");
-    while(file.available()){
+    while (file.available()) {
         int ch = file.read();
         Serial.write(ch);
         M5.Lcd.write(ch);
     }
 }
 
-void writeFile(fs::FS &fs, const char * path, const char * message){
+void writeFile(fs::FS &fs, const char *path, const char *message)
+{
     Serial.printf("Writing file: %s\n", path);
     M5.Lcd.printf("Writing file: %s\n", path);
 
     File file = fs.open(path, FILE_WRITE);
-    if(!file){
+    if (!file) {
         Serial.println("Failed to open file for writing");
         M5.Lcd.println("Failed to open file for writing");
         return;
     }
-    if(file.print(message)){
+    if (file.print(message)) {
         Serial.println("File written");
         M5.Lcd.println("File written");
     } else {
@@ -118,22 +122,24 @@ void writeFile(fs::FS &fs, const char * path, const char * message){
     }
 }
 
-void buttons_test() {
-    if(M5.BtnA.wasPressed()) {
+void buttons_test()
+{
+    if (M5.BtnA.wasPressed()) {
         M5.Lcd.printf("A");
         Serial.printf("A");
     }
-    if(M5.BtnB.wasPressed()) {
+    if (M5.BtnB.wasPressed()) {
         M5.Lcd.printf("B");
         Serial.printf("B");
-    } 
-    if(M5.BtnC.wasPressed()) {
+    }
+    if (M5.BtnC.wasPressed()) {
         M5.Lcd.printf("C");
         Serial.printf("C");
-    } 
+    }
 }
 
-void wifi_test() {
+void wifi_test()
+{
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
     delay(100);
@@ -167,8 +173,8 @@ void wifi_test() {
             M5.Lcd.print(WiFi.RSSI(i));
             Serial.print(")");
             M5.Lcd.print(")");
-            Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
-            M5.Lcd.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
+            Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
+            M5.Lcd.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
             delay(5);
         }
     }
@@ -181,8 +187,8 @@ bool gpio_test_flg = 0;
 void GPIO_test() {
     // uint8_t gpio_table[] = {23,19,18,3,16,21,2,12,15,26,1,17,22,5,13,0,34};
     uint8_t gpio_table[] = {12,2,21,16,3,18,19,23,15,0,13,5,22,17,1,26,25};
-    
-    // while(1) 
+
+    // while(1)
     {
         for (int i = 0; i<=sizeof(gpio_table) / sizeof(gpio_table[0]); i++) {
             pinMode(gpio_table[i], OUTPUT);
@@ -300,8 +306,7 @@ unsigned long testRects(uint16_t color)
     M5.Lcd.fillScreen(TFT_BLACK);
     n = min(M5.Lcd.width(), M5.Lcd.height());
     start = micros();
-    for (i = 2; i < n; i += 6)
-    {
+    for (i = 2; i < n; i += 6) {
         i2 = i / 2;
         M5.Lcd.drawRect(cx - i2, cy - i2, i, i, color);
     }
@@ -318,8 +323,7 @@ unsigned long testFilledRects(uint16_t color1, uint16_t color2)
 
     M5.Lcd.fillScreen(TFT_BLACK);
     n = min(M5.Lcd.width(), M5.Lcd.height());
-    for (i = n - 1; i > 0; i -= 6)
-    {
+    for (i = n - 1; i > 0; i -= 6) {
         i2 = i / 2;
         start = micros();
         M5.Lcd.fillRect(cx - i2, cy - i2, i, i, color1);
@@ -338,10 +342,8 @@ unsigned long testFilledCircles(uint8_t radius, uint16_t color)
 
     M5.Lcd.fillScreen(TFT_BLACK);
     start = micros();
-    for (x = radius; x < w; x += r2)
-    {
-        for (y = radius; y < h; y += r2)
-        {
+    for (x = radius; x < w; x += r2) {
+        for (y = radius; y < h; y += r2) {
             M5.Lcd.fillCircle(x, y, radius, color);
         }
     }
@@ -359,10 +361,8 @@ unsigned long testCircles(uint8_t radius, uint16_t color)
     // Screen is not cleared for this one -- this is
     // intentional and does not affect the reported time.
     start = micros();
-    for (x = 0; x < w; x += r2)
-    {
-        for (y = 0; y < h; y += r2)
-        {
+    for (x = 0; x < w; x += r2) {
+        for (y = 0; y < h; y += r2) {
             M5.Lcd.drawCircle(x, y, radius, color);
         }
     }
@@ -379,8 +379,7 @@ unsigned long testTriangles()
     M5.Lcd.fillScreen(TFT_BLACK);
     n = min(cx, cy);
     start = micros();
-    for (i = 0; i < n; i += 5)
-    {
+    for (i = 0; i < n; i += 5) {
         M5.Lcd.drawTriangle(
             cx, cy - i,     // peak
             cx - i, cy + i, // bottom left
@@ -399,8 +398,7 @@ unsigned long testFilledTriangles()
 
     M5.Lcd.fillScreen(TFT_BLACK);
     start = micros();
-    for (i = min(cx, cy); i > 10; i -= 5)
-    {
+    for (i = min(cx, cy); i > 10; i -= 5) {
         start = micros();
         M5.Lcd.fillTriangle(cx, cy - i, cx - i, cy + i, cx + i, cy + i,
                             M5.Lcd.color565(0, i, i));
@@ -422,8 +420,7 @@ unsigned long testRoundRects()
     M5.Lcd.fillScreen(TFT_BLACK);
     w = min(M5.Lcd.width(), M5.Lcd.height());
     start = micros();
-    for (i = 0; i < w; i += 6)
-    {
+    for (i = 0; i < w; i += 6) {
         i2 = i / 2;
         M5.Lcd.drawRoundRect(cx - i2, cy - i2, i, i, i / 8, M5.Lcd.color565(i, 0, 0));
     }
@@ -440,8 +437,7 @@ unsigned long testFilledRoundRects()
 
     M5.Lcd.fillScreen(TFT_BLACK);
     start = micros();
-    for (i = min(M5.Lcd.width(), M5.Lcd.height()); i > 20; i -= 6)
-    {
+    for (i = min(M5.Lcd.width(), M5.Lcd.height()); i > 20; i -= 6) {
         i2 = i / 2;
         M5.Lcd.fillRoundRect(cx - i2, cy - i2, i, i, i / 8, M5.Lcd.color565(0, i, 0));
     }
@@ -450,9 +446,10 @@ unsigned long testFilledRoundRects()
 }
 
 // the setup routine runs once when M5Stack starts up
-void setup() {
-    
-    //gpio test 
+void setup()
+{
+
+    //gpio test
     // pinMode(BUTTON_A_PIN, INPUT_PULLUP);
     // if(digitalRead(BUTTON_A_PIN) == 0) {
     //     gpio_test_flg = 1;
@@ -471,7 +468,7 @@ void setup() {
       If used battery, please call this function in your project
     */
     M5.Power.begin();
-    
+
     // dac test
     // if (gpio_test_flg)
     // {
@@ -575,12 +572,14 @@ void setup() {
     Serial.println(F("Done!"));
     yield();
 
-    //rand draw 
+    //rand draw
     int i = 250;
-    while(--i) {
-        M5.Lcd.fillTriangle(random(M5.Lcd.width()-1), random(M5.Lcd.height()-1), random(M5.Lcd.width()-1), random(M5.Lcd.height()-1), random(M5.Lcd.width()-1), random(M5.Lcd.height()-1), random(0xfffe));
+    while (--i) {
+        M5.Lcd.fillTriangle(random(M5.Lcd.width() - 1), random(M5.Lcd.height() - 1),
+                            random(M5.Lcd.width() - 1), random(M5.Lcd.height() - 1),
+                            random(M5.Lcd.width() - 1), random(M5.Lcd.height() - 1), random(0xfffe));
     }
-    for(int i=255; i>=0; i--) {
+    for (int i = 255; i >= 0; i--) {
         M5.Lcd.setBrightness(i);
         delay(2);
     }
@@ -588,20 +587,28 @@ void setup() {
     //wifi test
     M5.Lcd.setCursor(0, 10);
     M5.Lcd.fillScreen(BLACK);
-    for(int i=0; i<200; i++) {
+    for (int i = 0; i < 200; i++) {
         M5.Lcd.setBrightness(i);
         delay(2);
     }
 
     byte c = IMU.readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
-    Serial.print("MPU9250 "); Serial.print("I AM "); Serial.print(c, HEX);
-    Serial.print(" I should be "); Serial.println(0x71, HEX);
+    Serial.print("MPU9250 ");
+    Serial.print("I AM ");
+    Serial.print(c, HEX);
+    Serial.print(" I should be ");
+    Serial.println(0x71, HEX);
     Serial.println("");
-    M5.Lcd.setCursor(20,0); M5.Lcd.print("MPU9250");
-    M5.Lcd.setCursor(0,10); M5.Lcd.print("I AM");
-    M5.Lcd.setCursor(0,20); M5.Lcd.print(c, HEX);
-    M5.Lcd.setCursor(0,30); M5.Lcd.print("I Should Be");
-    M5.Lcd.setCursor(0,40); M5.Lcd.println(0x71, HEX);
+    M5.Lcd.setCursor(20, 0);
+    M5.Lcd.print("MPU9250");
+    M5.Lcd.setCursor(0, 10);
+    M5.Lcd.print("I AM");
+    M5.Lcd.setCursor(0, 20);
+    M5.Lcd.print(c, HEX);
+    M5.Lcd.setCursor(0, 30);
+    M5.Lcd.print("I Should Be");
+    M5.Lcd.setCursor(0, 40);
+    M5.Lcd.println(0x71, HEX);
     M5.Lcd.println();
     delay(100);
 
@@ -613,15 +620,23 @@ void setup() {
     // Read the WHO_AM_I register of the magnetometer, this is a good test of
     // communication
     byte d = IMU.readByte(AK8963_ADDRESS, WHO_AM_I_AK8963);
-    Serial.print("AK8963 "); Serial.print("I AM "); Serial.print(d, HEX);
-    Serial.print(" I should be "); Serial.println(0x48, HEX);
+    Serial.print("AK8963 ");
+    Serial.print("I AM ");
+    Serial.print(d, HEX);
+    Serial.print(" I should be ");
+    Serial.println(0x48, HEX);
 
     // M5.Lcd.fillScreen(BLACK);
-    M5.Lcd.setCursor(20,100); M5.Lcd.print("AK8963");
-    M5.Lcd.setCursor(0,110); M5.Lcd.print("I AM");
-    M5.Lcd.setCursor(0,120); M5.Lcd.print(d, HEX);
-    M5.Lcd.setCursor(0,130); M5.Lcd.print("I Should Be");
-    M5.Lcd.setCursor(0,140); M5.Lcd.print(0x48, HEX);
+    M5.Lcd.setCursor(20, 100);
+    M5.Lcd.print("AK8963");
+    M5.Lcd.setCursor(0, 110);
+    M5.Lcd.print("I AM");
+    M5.Lcd.setCursor(0, 120);
+    M5.Lcd.print(d, HEX);
+    M5.Lcd.setCursor(0, 130);
+    M5.Lcd.print("I Should Be");
+    M5.Lcd.setCursor(0, 140);
+    M5.Lcd.print(0x48, HEX);
     delay(1000);
 
     M5.Lcd.setCursor(0, 0);
@@ -647,7 +662,8 @@ void setup() {
 }
 
 // the loop routine runs over and over again forever
-void loop(){
+void loop()
+{
     buttons_test();
     M5.update();
 }

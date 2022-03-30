@@ -1,8 +1,10 @@
 #include "ServerBase.h"
 #include <MyPalletizerBasic.h>
-ServerBase::ServerBase(){
+ServerBase::ServerBase()
+{
     //todo
 }
-ServerBase::~ServerBase(){
+ServerBase::~ServerBase()
+{
     //todo
 }

@@ -6,17 +6,21 @@
 #include "Calibration.h"
 #include "transponder.h"
 #include "Information.h"
-                   
+
 
 typedef ServerBase *(*ServerFunction)();
-class Factory{
+class Factory
+{
 public:
     Factory();
     ~Factory();
     void addServer(int index, ServerFunction instanceServer);
     int deleteServer(int index);
-    ServerBase* getServerInstance(int index);
-    static Factory* getFactoryInstance(){return new Factory();}
+    ServerBase *getServerInstance(int index);
+    static Factory *getFactoryInstance()
+    {
+        return new Factory();
+    }
 public:
     std::map<int, ServerFunction> mFactoryMap;
 };

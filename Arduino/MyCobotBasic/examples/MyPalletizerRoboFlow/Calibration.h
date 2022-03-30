@@ -6,7 +6,8 @@
 #include "ServerBase.h"
 
 
-class Calibration: public ServerBase{
+class Calibration: public ServerBase
+{
 private:
     void info();
     void init(MyPalletizerBasic &myCobot);
@@ -15,7 +16,10 @@ private:
     void DisplayHead(bool isClearAll);
 public:
     void run(MyPalletizerBasic &myCobot);
-    static ServerBase* createInstance() {return new Calibration();}
+    static ServerBase *createInstance()
+    {
+        return new Calibration();
+    }
 };
 
-#endif 
+#endif

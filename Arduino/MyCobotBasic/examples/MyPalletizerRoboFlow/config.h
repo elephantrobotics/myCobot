@@ -2,8 +2,11 @@
 #define Config_h
 
 #include <MyCobotLanguage.h>
+#include "DisplayTemplate.h"
 
-enum FuncIndex: int {
+#define TYPE "MyCobot"
+
+enum FuncIndex : int {
     MAINCONTROL_INDEX = 0,
     CALIBRATION_INDEX,
     TRANSPONDER_INDEX,
