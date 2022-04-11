@@ -25,7 +25,8 @@ void Connect::info()
     M5.Lcd.println("Press C - Exit");
 }
 
-void Connect::run(MyCobotBasic &myCobot)
+template <typename T>
+void Connect::run(T &myCobot)
 {
     info();
     while (1) {
@@ -49,7 +50,7 @@ void Connect::run(MyCobotBasic &myCobot)
 /*
  * Function: Get and display the connection status of atom and 6 motors
  */
-void Connect::testServo(MyCobotBasic &myCobot)
+void Connect::testServo(T &myCobot)
 {
     M5.Lcd.clear(BLACK);
     delay(50);
@@ -107,7 +108,7 @@ void Connect::testServo(MyCobotBasic &myCobot)
  * Function: Get and display the current basic firmware and the Atom version information that has been burned
  */
 
-void Connect::ReadConfig(MyCobotBasic &myCobot)
+void Connect::ReadConfig(T &myCobot)
 {
     char s[10];
     M5.Lcd.clear(BLACK);

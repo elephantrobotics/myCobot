@@ -9,6 +9,9 @@ byte IO_TIME_OUT = 25;
 int IO_REC_WRONG = -1;
 byte HEADER = 0xfe;
 byte FOOTER = 0xfa;
+int count = 0;
+int PID[6][3] = {{10, 0, 1}, {10, 0, 1}, {10, 0, 1}, {32, 32, 0}, {10, 0, 1}, {10, 0, 1}};
+int pid_hex[3] = {21, 22, 23};
 
 void setup()
 {
@@ -21,12 +24,16 @@ void setup()
     delay(500);
 
     myCobot.powerOn();
-    delay(500);
-
-
+    delay(500);   
+    
     pinMode(15, OUTPUT); // 1
     pinMode(5, OUTPUT); // 2
     pinMode(2, OUTPUT); // 2
+
+    while (!myCobot.isPoweredOn()) {
+        delay(100);
+    }
+    SetPDI(); 
 
     info();
 }
@@ -62,7 +69,6 @@ bool checkHeader()
 
 int readSerial(unsigned char* nDat, int nLen)
 {
-
   int Size = 0;
   int rec_data;
   unsigned long t_begin = millis();
@@ -178,20 +184,57 @@ void readData()
 
 void connect_ATOM()
 {
+    int m = 0;
     M5.Lcd.clear(BLACK);
     delay(50);
     M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.setTextSize(3);
-    M5.Lcd.setCursor(55, 5);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(10, 10);
     M5.Lcd.println("Connect test");
-    M5.Lcd.setCursor(10, 120);
-    int state = myCobot.isPoweredOn();
-    if (state == 1) {
+    M5.Lcd.setCursor(10, 80);
+    M5.Lcd.print("atom - ");
+    for (int c = 1; c < 4; c++) {
+        int state = myCobot.isPoweredOn();
+        delay(20);
+        if (state == 1) {
+            m = m + 1;
+        } else {
+            m = m;
+        }
+    }
+    for (int c = 1; c < 4; c++) {
+        int state = myCobot.isPoweredOn();
+        delay(20);
+        if (state == 1) {
+            m = m + 1;
+        } else {
+            m = m;
+        }
+    }
+    if (m >= 2) {
         M5.Lcd.setTextColor(GREEN);
-        M5.Lcd.println("Atom: ok");
+        M5.Lcd.println("ok");
     } else {
         M5.Lcd.setTextColor(RED);
-        M5.Lcd.println("Atom: no");
+        M5.Lcd.println("no");
+        delay(50);
+    }
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextColor(WHITE);
+    for (int i = 1; i < 7; i++) {
+        M5.Lcd.setTextColor(WHITE);
+        M5.Lcd.print("servo ");
+        M5.Lcd.print(i);
+        M5.Lcd.print(" - ");
+        int servo_state = myCobot.isServoEnabled(i);
+        if (servo_state == 1) {
+            M5.Lcd.setTextColor(GREEN);
+            M5.Lcd.println("ok");
+        } else {
+            M5.Lcd.setTextColor(RED);
+            M5.Lcd.println("no");
+        }
+        delay(50);
     }
     delay(2000);
     info();
@@ -204,7 +247,7 @@ void info()
     M5.Lcd.setTextSize(4);
     M5.Lcd.setCursor(10, 20);
     M5.Lcd.printf("myCobot");
-    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.setTextColor(YELLOW);
     M5.Lcd.setTextSize(3);
     M5.Lcd.setCursor(10, 70);
     M5.Lcd.printf("Basic Transponder");
@@ -220,8 +263,20 @@ void info()
         M5.Lcd.println(" OFF");
     }
     M5.Lcd.setTextColor(WHITE);
-//    M5.Lcd.setBrightness(8);
     M5.Lcd.setCursor(40, 215);
     M5.Lcd.setTextColor(BLUE);
     M5.Lcd.println("TEST");
+}
+
+void SetPDI()
+{
+    for (int i = 0; i + 1 < 7; i++) {
+        for (int j = 0; j < 3; j++) {
+            delay(100);
+            while (myCobot.getServoData(i+1, pid_hex[j]) != PID[i][j]) {
+                myCobot.setServoData(i+1, pid_hex[j], PID[i][j]);
+                delay(100);
+           }
+        }
+    }
 }

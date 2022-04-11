@@ -3,6 +3,10 @@
 
 MyCobotBasic myCobot;
 int baundrate = 115200;
+int PID[6][3] = {{10, 0, 1}, {10, 0, 1}, {10, 0, 1}, {32, 32, 0}, {10, 0, 1}, {10, 0, 1}};
+int pid_hex[3] = {21, 22, 23};
+
+void info();
 
 void setup() {
     Serial.begin(115200);
@@ -14,10 +18,12 @@ void setup() {
     delay(100);
     myCobot.powerOn();
     delay(100);
-    while (myCobot.getServoData(4, 13) != 85) {
-        delay(100);
-        myCobot.setServoData(4, 13, 85);
-        delay(100);
+    for (int i = 0; i + 1 < 7; i++) {
+        for (int j = 0; j < 3; j++) {
+                delay(100);
+                myCobot.setServoData(i+1, pid_hex[j], PID[i][j]);
+                delay(100);
+        }
     }
     info();
 }

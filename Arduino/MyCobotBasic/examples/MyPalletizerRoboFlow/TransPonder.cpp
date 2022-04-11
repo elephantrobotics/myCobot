@@ -1,20 +1,19 @@
-#include "transponder.h"
+#include "Transponder.h"
 
 typedef  unsigned char u8;
 WiFiServer server(9000);
 bool confirmRequestPending{false};
+xSemaphoreHandle xSemap;
 
 void Transponder::init()
 {
-    // myCobot.setup();
-    // myCobot.powerOn();
-    pinMode(15, OUTPUT); // 1
-    pinMode(5, OUTPUT); // 2
-    pinMode(35, INPUT); // 2
-    pinMode(36, INPUT); // 2
+    pinMode(15, OUTPUT);
+    pinMode(5, OUTPUT);
+    pinMode(35, INPUT);
+    pinMode(36, INPUT);
     delay(100);
-    digitalWrite(15, 1); // 1
-    digitalWrite(5, 1); // 2
+    digitalWrite(15, 1);
+    digitalWrite(5, 1);
 
     distep.y_pos = pos_y;
     distep.rect_pos1 = rect1;
@@ -34,259 +33,253 @@ void Transponder::run(MyPalletizerBasic &myCobot)
 {
     init();
     EXIT = false;
-    while (!EXIT) {
-        EventResponse(myCobot);
-    }
+    xSemap = xSemaphoreCreateMutex();
+    xTaskCreatePinnedToCore(TaskReadData, "TaskReadData", 10000, this, 1, NULL, 1);
+    EventResponse(myCobot);
 }
 
-bool Transponder::checkHeader(MyPalletizerBasic &myCobot)
+
+void Transponder::TaskReadData(void *p)
 {
-    u8 bDat;
-    u8 bBuf[2] = { 0, 0 };
-    u8 Cnt = 0;
-    while (true) {
-        if (!readSerial(myCobot, &bDat, 1)) {
-            return 0;
-        }
-        bBuf[1] = bBuf[0];
-        bBuf[0] = bDat;
-        if (bBuf[0] == HEADER && bBuf[1] == HEADER) {
-            break;
-        }
-        ++Cnt;
-        if (Cnt > 64)
-            return 0;
-    }
-    return 1;
+    Transponder *trans = reinterpret_cast<Transponder *>(p);
+    trans->readData();
 }
 
-//按钮事件的响应 --》need place run
+/*
+ * Function: Check whether the header of the serial port wifi or bluetooth return message is fe fe
+ */
+bool Transponder::checkHeader(vector<unsigned char> v_data)
+{
+    if (v_data[0] == HEADER && v_data[1] == HEADER)
+        return true;
+    return false;
+}
+
+/*
+ * Function:Handle data segmentation sticky packet problem
+ */
+bool Transponder::HandleStickyPackets(vector<unsigned char> &temp,
+                                      vector<unsigned char> &v_data)
+{
+    //Get the length of the protocol to determine the terminator fa
+    vector<unsigned char>::iterator it = temp.begin() + 2 + temp[2];
+    vector<unsigned char>::iterator it_vdata = v_data.begin() + 2 + v_data[2];
+    int len = temp.size();
+    //First judge whether the length is less than 5, the instruction length is at least 5--> process the data
+    if (len >= 5 && len <= (temp[2] + 3)) {
+        if (*it == END) {
+            temp.erase(it + 1, temp.end());
+            v_data.erase(v_data.begin(), it_vdata + 1);
+            return true;
+        }
+    } else if (len > (temp[2] + 3)) {
+        //If the data cache instruction is greater than the total command length, it is cleared
+        v_data.clear();
+    }
+    return false;
+}
+
+/*
+ * Function:Process the data returned by Atom, no need for FF FF
+ */
+bool Transponder::HandleAtomData(vector<unsigned char> &v_data)
+{
+    vector<unsigned char>::iterator it = v_data.begin();
+    for (it; it < v_data.end() - 1; it++) {
+        if (*it == HEADER && *(it + 1) == HEADER) {
+            v_data.erase(v_data.begin(), it);
+            return true;
+        }
+    }
+    return false;
+}
+
+/*
+ * Function:Response to button events
+ */
 void Transponder::EventResponse(MyPalletizerBasic &myCobot)
 {
-    M5.update();
-    if (M5.BtnA.wasReleased()) {
-        distep.state += 1;
-        distep.MenuChoice();
+    while (!EXIT) {
         M5.update();
-    } else if (M5.BtnB.wasReleased()) {
-        distep.state -= 1;
-        distep.MenuChoice();
-        M5.update();
-    } else if (M5.BtnC.wasReleased() || state_on) {
-        EEPROM.write(state_addr, byte(distep.state)); //写数据
-        Serial.print("distep.state==");
-        Serial.println(byte(distep.state));
-        EEPROM.commit(); //保存更改的数据
-        state_on = false;
-        M5.update();
-        switch (distep.state) {
-            case 0: {
-                transponder_mode = 0;
-                connect_ATOM(myCobot);
-                while (true) {
-                    readData(myCobot);
-                    if (M5.BtnC.wasReleased()) {
-                        Serial.println("c 2");
-                        info();
-                        break;
+        if (M5.BtnA.wasReleased()) {
+            distep.state += 1;
+            distep.MenuChoice();
+            M5.update();
+        } else if (M5.BtnB.wasReleased()) {
+            distep.state -= 1;
+            distep.MenuChoice();
+            M5.update();
+        } else if (M5.BtnC.wasReleased() || state_on) {
+            //write data
+            EEPROM.write(state_addr, byte(distep.state));
+            //save changed data
+            EEPROM.commit();
+            state_on = false;
+            M5.update();
+            switch ((transponder_mode = (enum MODE)distep.state)) {
+                case Uart: {
+                    connect_ATOM(myCobot);
+                    while (true) {
+                        M5.update();
+                        if (M5.BtnC.wasReleased()) {
+                            info();
+                            break;
+                        }
+                        //Sleep for 1ms per cycle to reduce the chip heating rate as much as possible
+                        delay(1);
                     }
                 }
-            }
-            break;
-            case 1: {
-                ConnectingInfo();
-                CreateWlanServer();
-                while (true) {
-                    M5.update();
-                    if (!wlan_uart) {
-                        WlanTransponder();
-                    }
-                    readData(myCobot);
-                    if (is_timeout) {
-                        TimeOutInfo();
-                        is_timeout = false;
-                        delay(500);
-                        if (!wlan_uart)
-                            ConnectedInfo();
-                        else
-                            ConnectFailedInfo(false);
-                    }
-                    //超时时无点击事件响应
-                    if (M5.BtnC.wasReleased() && !is_timeout) {
-                        info();
-                        break;
-                    } else if (M5.BtnA.wasReleased() && !is_timeout) {
-                        Serial.println("A");
-                        //如果没有使用串口，表示wifi连接成功，成功才断连，停服务
+                break;
+                case Wlan: {
+                    ConnectingInfo();
+                    CreateWlanServer();
+                    while (true) {
+                        M5.update();
                         if (!wlan_uart) {
-                            WiFi.disconnect();
-                            server.stop();
+                            WlanTransponder();
                         }
-                        ConnectingInfo();
-                        CreateWlanServer();
+                        if (is_timeout) {
+                            TimeOutInfo();
+                            is_timeout = false;
+                            delay(500);
+                            if (!wlan_uart)
+                                ConnectedInfo();
+                            else
+                                ConnectFailedInfo(false);
+                        }
+                        //No click event response on timeout
+                        if (M5.BtnC.wasReleased() && !is_timeout) {
+                            info();
+                            break;
+                        } else if (M5.BtnA.wasReleased() && !is_timeout) {
+                            if (!wlan_uart) {
+                                WiFi.disconnect();
+                                server.stop();
+                            }
+                            ConnectingInfo();
+                            CreateWlanServer();
+                        }
+                        delay(1);
                     }
                 }
-            }
-            WiFi.disconnect();
-            server.stop();
-            break;
-            default:
+                WiFi.disconnect();
+                server.stop();
                 break;
-            case 2: {
-                CreateBTServer();
-                BTWaitInfo();
-                transponder_mode = 2;
-                while (true) {
-                    m5.update();
-                    if (SerialBT.hasClient() && !loop_on) {
-                        BTConnectedInfo();
-                        esp_bt_gap_set_scan_mode(ESP_BT_NON_CONNECTABLE,
-                                                 ESP_BT_NON_DISCOVERABLE);//如果已经有连接，既不可发现也不可连接
-                        loop_on = true;
-                    } else if (!SerialBT.hasClient() && loop_on) {
-                        BTWaitInfo();
-                        esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
-                        loop_on = false;
-                    }
-                    if (confirmRequestPending) {
-                        if (M5.BtnA.wasReleased()) {
-                            Serial.println("A");
-                            SerialBT.confirmReply(true);
+                case Bt: {
+                    CreateBTServer();
+                    BTWaitInfo();
+                    while (true) {
+                        m5.update();
+                        if (SerialBT.hasClient() && !loop_on) {
+                            BTConnectedInfo();
+                            //If already connected, neither discoverable nor connectable
+                            esp_bt_gap_set_scan_mode(ESP_BT_NON_CONNECTABLE,
+                                                     ESP_BT_NON_DISCOVERABLE);
+                            loop_on = true;
+                        } else if (!SerialBT.hasClient() && loop_on) {
+                            BTWaitInfo();
+                            esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
+                            loop_on = false;
                         }
-                    }
-                    readData(myCobot);
-                    if (M5.BtnC.wasReleased()) {
-                        info();
-                        break;
+                        if (confirmRequestPending) {
+                            if (M5.BtnA.wasReleased()) {
+                                SerialBT.confirmReply(true);
+                            }
+                        }
+                        if (M5.BtnC.wasReleased()) {
+                            info();
+                            break;
+                        }
+                        delay(1);
                     }
                 }
-            }
-            SerialBT.end();
-            break;
-            case 3:
-                EXIT = true;
+                SerialBT.end();
                 break;
-        }
-    }
-}
-
-int Transponder::readSerial(MyPalletizerBasic &myCobot, unsigned char *nDat,
-                            int nLen)
-{
-    int Size = 0;
-    int rec_data;
-    unsigned long t_begin = millis();
-    unsigned long t_use;
-
-    while (true) {
-        if ((Serial.available() > 0) || (SerialBT.available() > 0) || (serverClients[0]
-                && serverClients[0].connected() && serverClients[0].available() > 0)) {
-            if (transponder_mode == 0)
-                rec_data = Serial.read();   // readSerial
-            else if (transponder_mode == 1) {
-                rec_data = serverClients[0].read();
-                Serial.print("rec_data");
-                Serial.println(rec_data);
-            } else if (transponder_mode == 2)
-                rec_data = SerialBT.read();
-            else
-                break;
-            Serial2.write(rec_data);
-            if (rec_data != IORecWrong) {
-                if (nDat)
-                    nDat[Size] = rec_data;
-                ++Size;
-                t_begin = millis();
-            }
-            if (Size >= nLen)
-                break;
-            t_use = millis() - t_begin;
-
-            if (t_use > IO_TimeOut)
-                break;
-        } else if (Serial2.available() > 0) {     // If anything comes in Serial 2
-            if (transponder_mode == 0) {
-                Serial.write(Serial2.read());    // read it and send it out Serial (USB)
-            } else if (transponder_mode == 1) {
-                size_t len = Serial2.available();
-                uint8_t sbuf[len];
-                Serial2.readBytes(sbuf, len);
-                if (serverClients[0] && serverClients[0].connected())
-                    serverClients[0].write(sbuf, len);
-            } else if (transponder_mode == 2) {
-                SerialBT.write(Serial2.read());
-            }
-        } else {
-            if (transponder_mode == 0) {
-                M5.update();
-                if (M5.BtnC.wasReleased() || (M5.BtnA.wasReleased() && wlan_uart))
+                case Exit:
+                    EXIT = true;
                     break;
-            } else if (transponder_mode == 1 || transponder_mode == 2) {
-                break;//server not only call readdata
+                default:
+                    break;
             }
         }
     }
-    return Size;
 }
-
-void Transponder::rFlushSerial()
+/*
+ * Function:Receive client request message
+ */
+void Transponder::GetUserData(vector<unsigned char> &data)
 {
-    while (Serial.read() != -1)
-        ;
-}
-
-void Transponder::SendData(int *data, int len)
-{
-    vector<int> vector;
-    vector.push_back(0xfe);
-    vector.push_back(0xfe);
-    for (int i = 0; i < len; i++) {
-        vector.push_back(data[i]);
-    }
-    vector.push_back(0xfa);
-    for (int i = 0; i < len + 3; i++) {
-        if (transponder_mode == 0) {
-            Serial.write(vector[i]);
-        } else if (transponder_mode == 1) {
-            serverClients[0].write(vector[i]);
-        } else if (transponder_mode == 2) {
-            SerialBT.write(vector[i]);
+    if (transponder_mode == Uart) {
+        while (Serial.available() > 0) {
+            data.push_back((char)Serial.read());
+        }
+    } else if (transponder_mode == Wlan) {
+        while (serverClients[0].available() > 0) {
+            data.push_back((char)serverClients[0].read());
+        }
+    } else if (transponder_mode == Bt) {
+        while (SerialBT.available() > 0) {
+            data.push_back((char)SerialBT.read());
         }
     }
+    return;
 }
 
-int Transponder::readData(MyPalletizerBasic &myCobot)
+/*
+ * Function:Overloading because the format of setting the account is not fe fe
+ */
+void Transponder::GetUserData(string &data)
 {
-    rFlushSerial();
-    if (!Transponder::checkHeader(myCobot)) {
-        return -1;
+    if (transponder_mode == Uart) {
+        while (Serial.available() > 0) {
+            data += (char)Serial.read();
+        }
+    } else if (transponder_mode == Wlan) {
+        while (serverClients[0].available() > 0) {
+            data += (char)serverClients[0].read();
+        }
+    } else if (transponder_mode == Bt) {
+        while (SerialBT.available() > 0) {
+            data += (char)SerialBT.read();
+        }
     }
+    return;
+}
 
-    u8 data_len[1];
-    u8 r_data_4[4];
-    u8 r_data_2[2];
-    u8 r_data_3[3];
-    if (Transponder::readSerial(myCobot, data_len, 1) != 1) {
-        return -1;
+/*
+ * Function:Get Atom return message
+ */
+void Transponder::GetAtomData(vector<unsigned char> &data)
+{
+    while (Serial2.available() > 0) {
+        data.push_back(Serial2.read());
     }
-    switch (static_cast<int>(data_len[0])) {
+    return;
+}
+
+/*
+ * Function:Handle some client messages that Atom doesn't handle
+ */
+bool Transponder::HandleOtherMsg(vector<unsigned char> &v_data)
+{
+    bool is_atom = true;
+    switch (v_data[2]) {
         //b0-set ssid pwd  b1 get s+p b2-port
         case 2: {
-            Transponder::readSerial(myCobot, r_data_2, 2);
-            switch (int(r_data_2[0])) {
-                case 0xc0: {
-                    int data[3] = {0x03, 0xc0, GetTOFDistance()};
-                    SendData(data, sizeof(data) / sizeof(data[0]));
+            switch (v_data[3]) {
+                case GET_TOF_DISTANCE: {
+                    GetTOFDistance();
+                    v_data[2] = 0x04;
+                    v_data.insert(v_data.end() - 1, tof.gbuf[10]);
+                    v_data.insert(v_data.end() - 1, tof.gbuf[11]);
                 }
                 break;
-                case 0xb0: {
-                    int data[2] = {0x02, 0xb0};
-                    SendData(data, sizeof(data) / sizeof(data[0]));
+                case SET_SSID_PWD: {
                     unsigned long t_begin = millis();
                     string info;
                     while (true) {
                         if ((millis() - t_begin < 200)) {
-                            info = GetWlanInfo();
+                            GetUserData(info);
                             int i = info.find(")");
                             if (i != string::npos) {
                                 is_timeout = false;
@@ -302,138 +295,226 @@ int Transponder::readData(MyPalletizerBasic &myCobot)
                                 l_index = bak_info.find_last_of(")");
                                 password = bak_info.substr(f_index + 1, l_index - f_index - 1);
                                 i_password += password;
-                                SendData(data, sizeof(data) / sizeof(data[0]));
                                 break;
                             }
-                        } else if (info == "" && (millis() - t_begin > 10000)) {
+                        } else if (info == "" && (millis() - t_begin > 200)) {
                             is_timeout = true;
                             break;
                         }
                     }
                 }
                 break;
-                case 0xb1: {
-                    int data[2] = {0x02, 0xb1};
-                    SendData(data, sizeof(data) / sizeof(data[0]));
+                case GET_SSID_PWD: {
                     string str_data = "";
-
                     if (is_first)
                         str_data = "ssid: " + ssid + " " + "password: " + password;
                     else
                         str_data = i_ssid + " " + i_password;
-                    if (transponder_mode == 0) {
-                        Serial.write(str_data.c_str(), str_data.size());
-                    } else if (transponder_mode == 1) {
-                        serverClients[0].write(str_data.c_str(), str_data.size());
-                    } else if (transponder_mode == 2) {
-                        SerialBT.write((uint8_t *)str_data.c_str(), str_data.size());
-                    }
+                    v_data.clear();//clear fe fe 02 b1 fa
+                    SendDataToUser(str_data);
                 }
                 break;
+                default:
+                    is_atom = false;
+                    break;
             }
         }
         break;
         case 4:
-            Transponder::readSerial(myCobot, r_data_4, 4);
-            switch (int(r_data_4[0])) {
-                case 0xb2: {
-                    uint8_t high_port = r_data_4[1];//fe fe 04 b2 port fa
-                    uint8_t low_port = r_data_4[2];
+            switch (v_data[3]) {
+                case SET_PORT: {
+                    uint8_t high_port = v_data[4];//fe fe 04 b2 port fa
+                    uint8_t low_port = v_data[5];
                     server_port = (high_port << 8) | low_port;
-                    int data[4] = {0x04, 0xb2, high_port, low_port};
-                    SendData(data, sizeof(data) / sizeof(data[0]));
                 }
                 break;
-                case 0xa0: {
+                case SET_BASIC_OUT: {
                     //0xfe 0xfe 0x04 0xa0 pin_no pin_data 0xfa
-                    byte pin_no = r_data_4[1];
+                    byte pin_no = v_data[4];
                     pinMode(pin_no, OUTPUT);
                     delay(5);
-                    bool pin_data = r_data_4[2];
+                    bool pin_data = v_data[5];
                     digitalWrite(pin_no, pin_data);
-                    int data[4] = {0x04, 0xa0, pin_no, pin_data};
-                    SendData(data, sizeof(data) / sizeof(data[0]));
                 }
                 break;
+                default:
+                    is_atom = false;
+                    break;
             }
             break;
         case 3:
-            Transponder::readSerial(myCobot, r_data_3, 3);
-            switch (int(r_data_3[0])) {
-                case 0xa1: {
-                    byte pin_no = r_data_3[1];
+            switch (v_data[3]) {
+                case GET_BASIC_IN: {
+                    byte pin_no = v_data[4];
                     pinMode(pin_no, INPUT);
                     delay(5);
                     bool pin_state = digitalRead(pin_no);
                     delay(5);
-                    int data[4] = {0x04, 0xa1, pin_no, pin_state};
-                    SendData(data, sizeof(data) / sizeof(data[0]));
+                    v_data[2] = 0x04;
+                    v_data.insert(v_data.end() - 1, pin_state);
                 }
                 break;
+                default:
+                    is_atom = false;
+                    break;
             }
             break;
+        default:
+            is_atom = false;
+            break;
+    }
+    return is_atom;
+}
 
-        default: {
-            //此处逻辑后面可能需要修改，兼顾server，server除2 3 4指令长度外没问题，暂时不改
-            if (transponder_mode == 0) {
-                while (Serial.available() > 0) {
-                    Serial2.write(Serial.read());
-                }
-                while (Serial2.available() > 0) {
-                    Serial.write(Serial2.read());
+/*
+ * Function：send and receive messages
+ */
+void Transponder::readData()
+{
+    vector<unsigned char> client_data;
+    vector<unsigned char> atom_data;
+    while (!EXIT) {
+        xSemaphoreTake(xSemap, portMAX_DELAY);
+
+        //Receive user messages and send them to Atom
+        GetUserData(client_data);
+        SendDataToAtom(client_data);
+
+        //Receive Atom messages and send them to user
+        GetAtomData(atom_data);
+        SendDataToUser(atom_data);
+
+        xSemaphoreGive(xSemap);
+        vTaskDelay(1);
+    }
+    vTaskDelete(NULL);
+    return;
+}
+
+void Transponder::rFlushSerial()
+{
+    while (Serial.read() != -1)
+        ;
+}
+
+/*
+ * Function: Send the message returned by Atom to the user
+ */
+void Transponder::SendDataToUser(vector<unsigned char> &v_data)
+{
+    vector<unsigned char> temp;
+    vector<unsigned char>::iterator it;
+    /* Judging whether the data is empty, not empty-->Start processing data-->Delete ffff..
+     * then,the beginning of fefe exists in the data
+     * yes-->Judging whether there is fa(At the end of the fa) in the data-->Send data
+     */
+    if (!v_data.empty()) {
+        if (HandleAtomData(v_data)) {
+            temp = v_data;
+            if (HandleStickyPackets(temp, v_data)) {
+                vector<unsigned char>::iterator it_send = temp.begin();
+                for (it_send; it_send < temp.end(); it_send++) {
+                    if (transponder_mode == Uart) {
+                        Serial.write(*it_send);
+                    } else if (transponder_mode == Wlan) {
+                        serverClients[0].write(*it_send);
+                    } else if (transponder_mode == Bt) {
+                        SerialBT.write(*it_send);
+                    }
                 }
             }
         }
-        break;
     }
-    return 0;
+    return;
 }
 
+/*
+ * Function:Overload the wifi account format, which is inconsistent with the communication protocol
+ */
+void Transponder::SendDataToUser(const string str_data)
+{
+    if (transponder_mode == Uart) {
+        Serial.write(str_data.c_str(), str_data.size());
+    } else if (transponder_mode == Wlan) {
+        serverClients[0].write(str_data.c_str(), str_data.size());
+    } else if (transponder_mode == Bt) {
+        SerialBT.write((uint8_t *)str_data.c_str(), str_data.size());
+    }
+}
+
+/*
+ * Function:Send messages from users to Atom
+ */
+void Transponder::SendDataToAtom(vector<unsigned char> &v_data)
+{
+    vector<unsigned char> temp;
+    temp = v_data;
+    vector<unsigned char>::iterator it;
+    /* Judging whether the data is empty, not empty--" Judging whether the header is fefe, whether there is an end bit fa in the data,
+      *yes-->Judging whether the message is processed by Atom, no--" Direct processing, Yes--" Send to Atom*/
+    if (!v_data.empty()) {
+        if (checkHeader(v_data) && HandleStickyPackets(temp, v_data)) {
+            if (HandleOtherMsg(temp)) {
+                SendDataToUser(temp);
+            } else {
+                vector<unsigned char>::iterator it_send = temp.begin();
+                for (it_send; it_send < temp.end(); it_send++) {
+                    Serial2.write(*it_send);
+                }
+            }
+        }
+    }
+    return;
+}
+
+/*
+ * Function:interface display template
+ */
+void Transponder::UITemplate(vector<unsigned short> color,
+                             vector<unsigned char> size, vector<short> x, vector<short> y,
+                             vector<string> msg, vector<int> line_feed)
+{
+    for (int i = 0; i < color.size(); i++) {
+        M5.Lcd.setTextColor(color[i]);
+        M5.Lcd.setTextSize(size[i]);
+        M5.Lcd.setCursor(x[i], y[i]);
+        if (line_feed[i] == 1)
+            M5.Lcd.println(msg[i].c_str());
+        else if (line_feed[i] == 0)
+            M5.Lcd.print(msg[i].c_str());
+        else if (line_feed[i] == 2)
+            M5.Lcd.printf(msg[i].c_str());
+    }
+}
+
+/*
+ * Function: Get display Atom connection status
+ */
 void Transponder::connect_ATOM(MyPalletizerBasic &myCobot)
 {
-    M5.Lcd.clear(BLACK);//黑色填充屏幕
+    M5.Lcd.clear(BLACK);
     delay(50);
-    M5.Lcd.setTextColor(RED);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setCursor(55, 20);
-    M5.Lcd.println("Connect test");
+    UITemplate({RED, WHITE, WHITE}, {2, 2, 2}, {55, 10, 230}, {20, 120, 220}, {"Connect test", "Atom: ", "Exit"}, {1, 0, 1});
     M5.Lcd.drawFastHLine(0, 70, 320, GREY);
-
-    M5.Lcd.setCursor(10, 120);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.print("Atom: ");
     M5.Lcd.setTextColor(GREEN);
+    M5.Lcd.setCursor(80, 120);
     int state = myCobot.isPoweredOn();
     if (state == 1) {
         M5.Lcd.println("ok");
     } else {
         M5.Lcd.println("no");
     }
-    M5.Lcd.setCursor(230, 220);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.println("Exit");
     M5.update();
-    //delay(1000);
-    //info();
 }
 
 void Transponder::info()
 {
-    M5.Lcd.clear(BLACK);//黑色填充屏幕
-    M5.Lcd.setTextColor(BLACK);
-    M5.Lcd.setTextColor(RED);
-    M5.Lcd.setTextSize(3);
-    M5.Lcd.setCursor(10, 10);
-    M5.Lcd.printf(TYPE);
-    M5.Lcd.setCursor(10, 40);
-    //M5.Lcd.drawFastHLine(0,70,320,GREY);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.println("Basic Transponder");
-
     string menu[4] = {"USB UART", "WLAN Server", "Bluetooth", "EXIT"};
     int num[4] = {0, 1, 2, 3};
+
+    M5.Lcd.clear(BLACK);
+    UITemplate({RED, RED}, {3, 2}, {10, 10}, {10, 40}, {TYPE, "Basic Transponder"}, {2, 1});
+
     distep.MenuInit(num, menu, 4);
     distep.MenuChoice();
 
@@ -442,6 +523,9 @@ void Transponder::info()
     delay(10);
 }
 
+/*
+ * Function: Create WLAN service
+ */
 void Transponder::CreateWlanServer()
 {
     WiFi.begin(ssid.c_str(), password.c_str());
@@ -450,7 +534,7 @@ void Transponder::CreateWlanServer()
             ip = WiFi.localIP();
             bak_ssid = ssid;
             bak_password = password;
-            transponder_mode = 1;
+//            transponder_mode = Wlan;
             wlan_uart = false;
             ConnectedInfo();
             break;
@@ -465,9 +549,10 @@ void Transponder::CreateWlanServer()
             password = bak_password;
             ConnectFailedInfo(true);
             delay(500);
-            CreateWlanServer();//重新连接上次成功的网络
+            //Reconnect to the last successful network
+            CreateWlanServer();
         } else {
-            transponder_mode = 0;
+            transponder_mode = Uart;
             wlan_uart = true;
             ConnectFailedInfo(false);
             //delay(1000);
@@ -479,6 +564,9 @@ void Transponder::CreateWlanServer()
     return;
 }
 
+/*
+ * Function: wifi connection status, number of clients, currently the service only supports one client connection
+ */
 void Transponder::WlanTransponder()
 {
     uint8_t i;
@@ -512,109 +600,61 @@ void Transponder::WlanTransponder()
     }
 }
 
-void WlanInfo()
-{
-
-}
-
+/*
+ * Function: interface display during wifi connection
+ */
 void Transponder::ConnectingInfo()
 {
-    M5.Lcd.clear(BLACK);//黑色填充屏幕
+    M5.Lcd.clear(BLACK);
     M5.Lcd.fillRect(0, 0, 320, 30, GREY);
     M5.Lcd.setBitmapColor(GREY, GREY);
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setCursor(10, 10);
-    M5.Lcd.println(ssid.c_str());
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.setBitmapColor(BLACK, BLACK);
-    M5.Lcd.setCursor(10, 80);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.print("WIFI Connecting");
+    UITemplate({WHITE, WHITE}, {2, 2}, {10, 10}, {10, 80}, {ssid, "WIFI Connecting"}, {1, 1});
 }
 
+/*
+ * Function:After the wifi connection is successful, the interface displays: wifi account wlan ip, port
+ */
 void Transponder::ConnectedInfo()
 {
-    M5.Lcd.clear(BLACK);//黑色填充屏幕
+    M5.Lcd.clear(BLACK);
     M5.Lcd.fillRect(0, 0, 320, 30, GREY);
     M5.Lcd.setBitmapColor(GREY, GREY);
-    M5.Lcd.setTextColor(GREEN);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setCursor(10, 10);
-    M5.Lcd.println(ssid.c_str());
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.setCursor(10, 80);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.print("WIFI Connected");
-    //M5.Lcd.fillRect(10, 108, 220, 60, GREY);
-    M5.Lcd.setCursor(10, 110);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.print("IP: ");
+    UITemplate({GREEN, WHITE, WHITE, WHITE, WHITE, WHITE}, {2, 2, 2, 2, 2, 2}, {10, 10, 10, 10, 20, 230},
+    {10, 80, 110, 140, 220, 220}, {ssid, "WIFI Connected", "IP: ", "Port: ", "ReConnect", "Exit"},
+    {1, 1, 0, 0, 1, 1});
     M5.Lcd.setTextColor(RED);
+    M5.Lcd.setCursor(50, 110);
     M5.Lcd.println(ip);
-    M5.Lcd.setCursor(10, 140);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.print("Port: ");
     M5.Lcd.setTextColor(RED);
+    M5.Lcd.setCursor(80, 140);
     M5.Lcd.println(server_port);
-    M5.Lcd.setCursor(20, 220);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.println("ReConnect");
-    M5.Lcd.setCursor(230, 220);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.println("Exit");
 }
 
+/*
+ * Function: wifi connection failure interface display
+ */
 void Transponder::ConnectFailedInfo(bool flag)
 {
-    M5.Lcd.clear(BLACK);//黑色填充屏幕
+    M5.Lcd.clear(BLACK);
     M5.Lcd.fillRect(0, 0, 320, 30, GREY);
     M5.Lcd.setBitmapColor(GREY, GREY);
-    M5.Lcd.setTextColor(RED);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setCursor(10, 10);
-    M5.Lcd.println(ssid.c_str());
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.setCursor(10, 80);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.print("WIFI Connect Failed");
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.setCursor(10, 110);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.print("ssid or password error");
     if (flag) {
-        M5.Lcd.setTextColor(WHITE);
-        M5.Lcd.setCursor(10, 140);
-        M5.Lcd.setTextSize(2);
-        M5.Lcd.print("Connecting last wifi");
+        UITemplate({RED, WHITE, WHITE, WHITE, WHITE, WHITE}, {2, 2, 2, 2, 2, 2}, {10, 10, 10, 10, 20, 230},
+        {10, 80, 110, 140, 220, 220}, {ssid, "WIFI Connect Failed", "ssid or password error", "Connecting last wifi", "ReConnect", "Exit"},
+        {1, 0, 0, 0, 1, 1});
+    } else {
+        UITemplate({RED, WHITE, WHITE, WHITE, WHITE}, {2, 2, 2, 2, 2}, {10, 10, 110, 20, 230},
+        {10, 80, 110, 220, 220}, {ssid, "WIFI Connect Failed", "ssid or password error", "ReConnect", "Exit"},
+        {1, 0, 0, 1, 1});
     }
-    M5.Lcd.setCursor(20, 220);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.println("ReConnect");
-    M5.Lcd.setCursor(230, 220);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.println("Exit");
 }
 
 void Transponder::TimeOutInfo()
 {
-    M5.Lcd.clear(BLACK);//黑色填充屏幕
+    M5.Lcd.clear(BLACK);
     M5.Lcd.fillRect(0, 0, 320, 30, GREY);
     M5.Lcd.setBitmapColor(GREY, GREY);
-    M5.Lcd.setTextColor(GREEN);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setCursor(10, 10);
-    M5.Lcd.println(ssid.c_str());
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.setCursor(10, 80);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.print("Input timeout(200ms)");
+    UITemplate({GREEN, WHITE}, {2, 2}, {10, 10}, {10, 80}, {ssid, "Input timeout(200ms)"}, {1, 0});
 }
 
 void Transponder::SetBaud()
@@ -622,22 +662,6 @@ void Transponder::SetBaud()
 
 }
 
-string Transponder::GetWlanInfo()
-{
-    string str = "";
-    while (Serial.available() > 0) {
-        str += (char)Serial.read();
-    }
-    while (serverClients[0].available() > 0) {
-        str += (char)serverClients[0].read();
-    }
-    while (SerialBT.available() > 0) {
-        str += (char)SerialBT.read();
-    }
-    return str;
-}
-
-//bt
 void BTConfirmRequestCallback(uint32_t numVal)
 {
     confirmRequestPending = true;
@@ -656,34 +680,35 @@ void BTAuthCompleteCallback(boolean success)
     }
 }
 
+/*
+ * Function: create a bluetooth service
+ */
 void Transponder::CreateBTServer()
 {
     SerialBT.enableSSP();
     SerialBT.onConfirmRequest(&BTConfirmRequestCallback);
     SerialBT.onAuthComplete(&BTAuthCompleteCallback);
-    SerialBT.begin(Bt_name); //Bluetooth device name
+    //Bluetooth device name
+    SerialBT.begin(Bt_name);
     Serial.println("The device started, now you can pair it with bluetooth!");
-    esp_efuse_mac_get_default(mac_addr);//获取mac地址
-    // esp_bt_dev_get_address(void);
+    //get mac address
+    esp_efuse_mac_get_default(mac_addr);
 }
 
+/*
+ * Function:After the Bluetooth is turned on, the interface is displayed
+ */
 void Transponder::BTWaitInfo()
 {
-    M5.Lcd.clear(BLACK);//黑色填充屏幕
+    M5.Lcd.clear(BLACK);
     M5.Lcd.fillRect(0, 0, 320, 30, GREY);
     M5.Lcd.setBitmapColor(GREY, GREY);
     M5.Lcd.setTextColor(WHITE);
     M5.Lcd.setTextSize(2);
     M5.Lcd.setCursor(10, 10);
     M5.Lcd.println(Bt_name.c_str());
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.setBitmapColor(BLACK, BLACK);
-    M5.Lcd.setCursor(10, 80);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.print("Bluetooth enabled");
-    M5.Lcd.setCursor(10, 130);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.print("BT Mac: ");
+    UITemplate({WHITE, WHITE, WHITE}, {2, 2, 2}, {10, 10, 230}, {80, 130, 220},
+    {"Bluetooth enabled", "BT Mac: ", "Exit"}, {0, 0, 1});
     M5.Lcd.setCursor(100, 130);
     M5.Lcd.setTextSize(2);
     for (int i = 0; i < 6; i++) {
@@ -693,44 +718,34 @@ void Transponder::BTWaitInfo()
         if (i != 5)
             M5.Lcd.print(":");
     }
-    M5.Lcd.setCursor(230, 220);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.println("Exit");
 }
 
+/*
+ * Function: Interface display during client Bluetooth connection: pairing code display
+ */
 void Transponder::BTConnectingInfo(uint32_t numVal)
 {
     M5.Lcd.fillRect(10, 110, 260, 20, BLACK);
     M5.Lcd.fillRect(10, 220, 60, 30, BLACK);
-    M5.Lcd.setCursor(20, 220);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.println("Pair");
-    M5.Lcd.setCursor(10, 110);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.print("Pairing code: ");
+    UITemplate({WHITE, WHITE}, {2, 2}, {20, 10}, {220, 110}, {"Pair", "Pairing code: "}, {1, 0});
     M5.Lcd.setCursor(200, 110);
     M5.Lcd.setTextSize(2);
     M5.Lcd.print(numVal);
 }
 
+/*
+ * Function: The client bluetooth connection is successful, and the interface is displayed
+ */
 void Transponder::BTConnectedInfo()
 {
-    M5.Lcd.clear(BLACK);//黑色填充屏幕
+    M5.Lcd.clear(BLACK);
     M5.Lcd.fillRect(0, 0, 320, 30, GREY);
     M5.Lcd.setBitmapColor(GREY, GREY);
     M5.Lcd.setTextColor(WHITE);
     M5.Lcd.setTextSize(2);
     M5.Lcd.setCursor(10, 10);
     M5.Lcd.println(Bt_name.c_str());
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.setCursor(10, 80);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.print("A client connected");
-    M5.Lcd.setCursor(10, 130);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.print("BT Mac: ");
+    UITemplate({WHITE, WHITE, WHITE}, {2, 2, 2}, {10, 10, 230}, {80, 130, 220}, {"A client connected", "BT Mac: ", "Exit"}, {0, 0, 1});
     M5.Lcd.setCursor(100, 130);
     M5.Lcd.setTextSize(2);
     for (int i = 0; i < 6; i++) {
@@ -738,29 +753,26 @@ void Transponder::BTConnectedInfo()
         if (i != 5)
             M5.Lcd.print(":");
     }
-    M5.Lcd.setCursor(230, 220);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.setTextColor(WHITE);
-    M5.Lcd.println("Exit");
 }
 
-uint16_t Transponder::GetTOFDistance()
+/*
+ * Function: Get tof distance value
+ */
+void Transponder::GetTOFDistance()
 {
-    TOF tof;
     Wire.begin();
-    uint16_t dist = 0;
-    for (int i = 0; i < 1; i++) {
-        tof.write_byte_data_at(VL53L0X_REG_SYSRANGE_START, 0x01);
-        byte val = 0;
-        int cnt = 0;
-        while (cnt < 100) { // 1 second waiting time max
-            delay(10);
-            val = tof.read_byte_data_at(VL53L0X_REG_RESULT_RANGE_STATUS);
-            if (val & 0x01) break;
-            cnt++;
+    //uint16_t dist = 0;
+    tof.write_byte_data_at(VL53L0X_REG_SYSRANGE_START, 0x01);
+    byte val = 0;
+    int cnt = 0;
+    // 1 second waiting time max
+    while (cnt < 100) {
+        delay(10);
+        val = tof.read_byte_data_at(VL53L0X_REG_RESULT_RANGE_STATUS);
+        if (val & 0x01) break;
+        if (cnt++ == 99) {
+            return;
         }
-        tof.read_block_data_at(0x14, 12);
-        dist += tof.makeuint16(tof.gbuf[11], tof.gbuf[10]);
     }
-    return dist;
+    tof.read_block_data_at(0x14, 12);
 }
