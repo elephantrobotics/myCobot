@@ -86,14 +86,11 @@ void setup()
     //start Robot
     delay(50);
     Serial.begin(115200);
-    Serial2.begin(BAUD_RATE);
-    MyCobotBasic myCobot_serial(&Serial2);
-    myCobot_serial.setup();
-    myCobot = myCobot_serial;
-    
+    myCobot.setup();
+    delay(50);
     myCobot.powerOn();
-
-    delay(10);
+    delay(500);
+    
     if (!EEPROM.begin(EEPROM_SIZE)) {
         Serial.println("failed to initialise EEPROM");
         delay(1000000);

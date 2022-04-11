@@ -414,7 +414,7 @@ void Transponder::SendDataToUser(vector<unsigned char> &v_data)
             if (HandleStickyPackets(temp, v_data)) {
                 vector<unsigned char>::iterator it_send = temp.begin();
                 for (it_send; it_send < temp.end(); it_send++) {
-                    if (transponder_mode == Uart) {
+                    if (transponder_mode == Uart) {\
                         Serial.write(*it_send);
                     } else if (transponder_mode == Wlan) {
                         serverClients[0].write(*it_send);
@@ -498,13 +498,15 @@ void Transponder::connect_ATOM(MyCobotBasic &myCobot)
     M5.Lcd.drawFastHLine(0, 70, 320, GREY);
     M5.Lcd.setTextColor(GREEN);
     M5.Lcd.setCursor(80, 120);
-    int state = myCobot.isPoweredOn();
+    xSemaphoreTake(xSemap, portMAX_DELAY);
+    int state = myCobot.isPoweredOn();//when tranponder,should mutex,otherwise,readdata will read
+    xSemaphoreGive(xSemap);
     if (state == 1) {
         M5.Lcd.println("ok");
     } else {
         M5.Lcd.println("no");
     }
-    M5.update();
+    M5.update(); 
 }
 
 void Transponder::info()

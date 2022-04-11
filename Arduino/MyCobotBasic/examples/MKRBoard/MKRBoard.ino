@@ -23,7 +23,7 @@ void setup()
         1000000);  
     delay(100);
 
-    MyCobotBasic myCobot(&Serial1);
+    MyCobotBasic myCobot;
     delay(500);
 
     myCobot.powerOn();

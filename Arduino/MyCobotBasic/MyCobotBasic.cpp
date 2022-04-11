@@ -27,7 +27,7 @@ void MyCobotBasic::setup()
     dacWrite(25, 0);  // disable mic
     delay(500);
 #endif
-    mycobot_serial.begin(1000000);
+    mycobot_serial.begin(BAUD_RATE);
 }
 
 int MyCobotBasic::readSerial(unsigned char *nDat, int& nLen)

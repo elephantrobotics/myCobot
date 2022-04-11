@@ -12,8 +12,6 @@ void setup() {
     Serial.begin(115200);
     Serial2.begin(BAUD_RATE);
     delay(100);
-    MyCobotBasic mycobot(&Serial2);
-    myCobot = mycobot;
     myCobot.setup();
     delay(100);
     myCobot.powerOn();
