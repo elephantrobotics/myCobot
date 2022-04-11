@@ -25,12 +25,14 @@ using namespace std;
 class Transponder: public ServerBase
 {
 private:
-    bool EXIT = false;
-    bool checkHeader(MyPalletizerBasic &myCobot);
+    bool checkHeader(vector<unsigned char> v_data);
+    bool HandleStickyPackets(vector<unsigned char> &temp,
+                             vector<unsigned char> &v_data);
+    bool HandleAtomData(vector<unsigned char> &v_data);
     void EventResponse(MyPalletizerBasic &myCobot);
-    int  readSerial(MyPalletizerBasic &myCobot, unsigned char *nDat, int nLen);
+    static void UITemplate(vector<unsigned short> color, vector<unsigned char> size,
+                           vector<short> x, vector<short> y, vector<string> msg, vector<int> line_feed);
     void rFlushSerial();
-    int  readData(MyPalletizerBasic &myCobot);
     void connect_ATOM(MyPalletizerBasic &myCobot);
     void info();
     void CreateWlanServer();
@@ -42,10 +44,19 @@ private:
     void BTConnectedInfo();
     void BTWaitInfo();
     void CreateBTServer();
-    void SendData(int *data, int len);
+
+    void GetUserData(string &data);
+    void GetUserData(vector<unsigned char> &data);
+    void SendDataToUser(vector<unsigned char> &v_data);
+    void SendDataToUser(const string str_data);
+    void GetAtomData(vector<unsigned char> &data);
+    void SendDataToAtom(vector<unsigned char> &v_data);
+    bool HandleOtherMsg(vector<unsigned char> &v_data);
+
     void ConnectFailedInfo(bool flag);
     void TimeOutInfo();
-    uint16_t GetTOFDistance();
+    void GetTOFDistance();
+
 public:
     void run(MyPalletizerBasic &myCobot);
     void init();
@@ -54,23 +65,31 @@ public:
         return new Transponder();
     }
     static void BTConnectingInfo(uint32_t numVal);
+
+    //task call
+    void readData();
+
+    //task
+    static void TaskReadData(void *p);
+
 private:
+    bool EXIT = false;
     bool state_on{false};
     int pos_y[4] = {70, 100, 130, 160};
     int rect1[4] = {0, 70, 26, 120};
     int rect2[4] = {26, 70, 200, 120};
     DisplayTemplate distep;
-    string ssid = "ElephantWiFi";
-    string password = "Aria6666";
+    string ssid = "EleWiFiTest";
+    string password = "ele123456";
     string bak_ssid;
     string bak_password;
     string i_ssid = "ssid: ";
     string i_password = "pssword: ";
-    bool is_first{true};//是否未输入ssid、pwd
+    //Whether ssid and pwd are not entered
+    bool is_first{true};
     uint16_t server_port = 9000;
     IPAddress ip;
     bool wifi_state = false;
-    int transponder_mode{0};
     WiFiClient serverClients[MAX_SRV_CLIENTS];
     bool wlan_uart{true};
     bool is_timeout{false};
@@ -78,10 +97,13 @@ private:
     BluetoothSerial SerialBT;
     String Bt_name = "mycobot280-m5";
     uint8_t pairedDeviceBtAddr[PAIR_MAX_DEVICES][6];
-    uint8_t mac_addr[6] = {0};//定义Mac地址存储空间
+    //Define Mac address storage space
+    uint8_t mac_addr[6] = {0};
     char bda_str[18];
     bool loop_on{false};
     bool is_paired{false};
+    TOF tof;
+    enum MODE : int {Uart = 0, Wlan = 1, Bt = 2, Exit = 3} transponder_mode;
 };
 
 #endif

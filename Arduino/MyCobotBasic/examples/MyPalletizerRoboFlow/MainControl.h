@@ -24,11 +24,12 @@ public:
         return new MainControl();
     }
 public:
-    //maincontrol 界面显示 GDataFlash--从flash中获取数据 SDataFlash--保存数据到flash
-    enum UI::int {Menu = 0, PlayMenu = 1, RecordMenu = 2, PlayRam = 11, PlayFlash = 12, RecordRam = 21, RecordFlash = 22, pause = 32,
-     RecordSave = 33, GDataFlash = 41, SDataFlash = 42, IoState = 51, NotPlay = 52, NoData = 53};
-    enum BTN::int {A = 1, B, C};//按钮
-    enum LAN::int {Chinese = 1, English};
+    //The maincontrol interface displays GDataFlash-->get data from flash SDataFlash-->save data to flash
+    enum UI : int {Menu = 0, PlayMenu = 1, RecordMenu = 2, PlayRam = 11, PlayFlash = 12, RecordRam = 21, RecordFlash = 22, pause = 32,
+                   RecordSave = 33, GDataFlash = 41, SDataFlash = 42, IoState = 51, NotPlay = 52, NoData = 53
+                  } ui = (enum UI)0;
+    //Button              
+    enum BTN : int {A = 1, B, C} btn;
 
 };
 

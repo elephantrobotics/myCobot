@@ -9,10 +9,11 @@ class Connect: public ServerBase
 {
 private:
     void info();
-    void testServo(MyCobotBasic &myCobot);
-    void ReadConfig(MyCobotBasic &myCobot);
+    template <typename T>
+    void testServo(T &myCobot);
+    void ReadConfig(T &myCobot);
 public:
-    void run(MyCobotBasic &myCobot);
+    void run(T &myCobot);
     static ServerBase *createInstance()
     {
         return new Connect();

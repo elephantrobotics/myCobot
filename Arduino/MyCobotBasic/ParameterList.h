@@ -2,15 +2,25 @@
 #define PARAMETERLIST_H
 
 //#define MyCobot_M5 "m5"  //To use non-MyCobot280-m5 robotic arms, you need to comment out this line
-#define MyCobot_Mega_Uno "mega&uno"   //if use non-mega,you need to should comment out this line
+#define MyCobot_Mega "mega"   //if use non-mega,you need to should comment out this line
+//#define MyCobot_Uno "uno"   if use non-Uno,you need to should comment out this line
+//#define MyCobot_Mkr "mkr"   //if use non-Mkr,you need to should comment out this line
 
-#if defined MyCobot_Mega_Uno
+#if defined MyCobot_Mega || defined MyCobot_Uno
 #include <hashtable-aux.h>
 #endif
 
+#if defined MyCobot_Mega || defined MyCobot_Mkr
+#define mycobot_serial Serial1
+#endif
+
+#if defined MyCobot_Uno
+#define mycobot_serial Serial
+#endif
 
 #if defined MyCobot_M5
 #include <M5Stack.h>
+#define mycobot_serial Serial2
 #endif
 
 #include <array>
@@ -112,27 +122,7 @@ namespace myCobotDefine
         float quaternion[4];
     };
 
-    // robotic joint range
-    struct JointRanges {
-        //jonit 1 range
-        float j_1_min = -165 / COEFFICIENT;
-        float j_1_max = 165 / COEFFICIENT;
-        //jonit 2 range
-        float j_2_min = -155 / COEFFICIENT;
-        float j_2_max = 155 / COEFFICIENT;
-        //jonit 3 range
-        float j_3_min = -165 / COEFFICIENT;
-        float j_3_max = 165 / COEFFICIENT;
-        //jonit 4 range
-        float j_4_min = -165 / COEFFICIENT;
-        float j_4_max = 165 / COEFFICIENT;
-        //jonit 5 range
-        float j_5_min = -165 / COEFFICIENT;
-        float j_5_max = 165 / COEFFICIENT;
-        //jonit 6 range
-        float j_6_min = -175 / COEFFICIENT;
-        float j_6_max = 175 / COEFFICIENT;
-    };
+
 
 }
 

@@ -35,7 +35,6 @@ public:
 #endif
 
     MyCobotBasic();
-    MyCobotBasic(HardwareSerial *hw_serial);
     void setup();//Enable m5 development version, not applicable to other development boards
 
     // Overall Status
@@ -156,10 +155,11 @@ public:
 
 private:
     // communication
-    bool checkHeader();  //Check if the head is fe fe
-    int readSerial(unsigned char *nDat, int nLen);  //Read serial messages
-    void *readData();  //retrieve data
+    int readSerial(unsigned char *nDat, int &nLen);  //Read serial messages
+template<typename T, typename O, typename R, typename E, typename M>
+    int readData(T& pData, O& bData, R& rData, E& eData, M& mData);  //retrieve data
     void rFlushSerial();  //Clear serial port cache
+    void DivideSerialData(unsigned char *rec_data, unsigned char *nDat, int nLen);
 
 private:
     byte itr_time = 0;
@@ -168,7 +168,11 @@ private:
     Angles error_encoders;
 
     //std::map<int, std::string> messages_map;
-    HardwareSerial *hw_serial;
+    int invalid = 0;
+    RFType r_invalid;
+    EndType e_invalid;
+    MovementType m_invalid;
+    Angles a_invalid;
 };
 
 #endif

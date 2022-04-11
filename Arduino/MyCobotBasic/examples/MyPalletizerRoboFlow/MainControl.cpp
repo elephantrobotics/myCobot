@@ -50,17 +50,18 @@ void MainControl::run(MyPalletizerBasic &myCobot)
 
 void MainControl::updateMode(MyPalletizerBasic &myCobot, byte btn_pressed)
 {
-    if (mycobot_mode == 0) {
-        switch (btn_pressed) {
-            case BTN::A:
-                mycobot_mode = 1;
-                MainControl::displayInfo(myCobot, mycobot_mode);
+    btn = (enum BTN)btn_pressed;
+    if (ui == Menu) {
+        switch (btn) {
+            case A:
+                ui = PlayMenu;
+                MainControl::displayInfo(myCobot, ui);
                 break;
-            case BTN::B:
-                mycobot_mode = 2;
-                MainControl::displayInfo(myCobot, mycobot_mode);
+            case B:
+                ui = RecordMenu;
+                MainControl::displayInfo(myCobot, ui);
                 break;
-            case BTN::C:
+            case C:
                 myCobot.setFreeMove();
                 delay(20);
                 myCobot.releaseServo(7);
@@ -68,92 +69,94 @@ void MainControl::updateMode(MyPalletizerBasic &myCobot, byte btn_pressed)
                 break;
         }
 
-    } else if (mycobot_mode == 1) {
+    } else if (ui == PlayMenu) {
         switch (btn_pressed) {
-            case BTN::A:
-                mycobot_mode = 11;
-                MainControl::displayInfo(myCobot, mycobot_mode);
-                MainControl::play(myCobot); // play loop from ram
+            case A:
+                ui = PlayRam;
+                MainControl::displayInfo(myCobot, ui);
+                // play loop from ram
+                MainControl::play(myCobot); 
 
                 break;
-            case BTN::B:
-                mycobot_mode = 12;
-                MainControl::playFromFlash(myCobot); // play loop from flash
+            case B:
+                ui = PlayFlash;
+                // play loop from flash
+                MainControl::playFromFlash(myCobot);
 
                 break;
-            case BTN::C:
-                mycobot_mode = 0;   // get back
-                MainControl::displayInfo(myCobot, mycobot_mode);
+            case C:
+                ui = Menu;  
+                // get back
+                MainControl::displayInfo(myCobot, ui);
                 break;
         }
 
     }
 
-    else if (mycobot_mode == 2) {
+    else if (ui == RecordMenu) {
 
         switch (btn_pressed) {
-            case BTN::A:
-                mycobot_mode = 21;
-                MainControl::displayInfo(myCobot, mycobot_mode);
+            case A:
+                ui = RecordRam;
+                MainControl::displayInfo(myCobot, ui);
                 MainControl::record(myCobot);
 
                 // finish record
-                MainControl::displayInfo(myCobot, 33);
+                MainControl::displayInfo(myCobot, RecordSave);
                 delay(2000);
 
                 // recover to original
-                mycobot_mode = 0;
-                MainControl::displayInfo(myCobot, mycobot_mode);
+                ui = Menu;
+                MainControl::displayInfo(myCobot, ui);
                 break;
 
-            case BTN::B:
-                mycobot_mode = 22;  // record into ram as well
-                MainControl::displayInfo(myCobot, mycobot_mode);
+            case B:
+                // record into ram as well
+                ui = RecordFlash;  
+                MainControl::displayInfo(myCobot, ui);
                 MainControl::recordIntoFlash(myCobot);
                 break;
-            case BTN::C:
-                mycobot_mode = 0;
-                MainControl::displayInfo(myCobot, mycobot_mode);
+            case C:
+                ui = Menu;
+                MainControl::displayInfo(myCobot, ui);
                 break;
         }
 
     }
 
-    else if ((mycobot_mode == 11) || (mycobot_mode == 12)) {
+    else if ((ui == PlayRam) || (ui == PlayFlash)) {
         switch (btn_pressed) {
-            case BTN::A:
+            case A:
                 Serial.println("Continue Play");
 
                 break;
-            case BTN::B:
+            case B:
                 Serial.println("Pause");
 
                 break;
-            case BTN::C:
+            case C:
                 Serial.println("Stop");
-                mycobot_mode = 0;
+                ui = Menu;
                 break;
         }
     }
 
-    else if ((mycobot_mode == 21) || (mycobot_mode == 22)) {
+    else if ((ui == RecordRam) || (ui == RecordFlash)) {
         switch (btn_pressed) {
-            case BTN::B:
+            case B:
                 Serial.println("Save and Stop");
                 break;
-            case BTN::C:
+            case C:
                 Serial.println("stop record");
                 break;
-
         }
 
-        mycobot_mode = 0;
-        MainControl::displayInfo(myCobot, mycobot_mode);
+        ui = Menu;
+        MainControl::displayInfo(myCobot, ui);
     }
-
 }
 
-void MainControl::displayInfo(MyPalletizerBasic &myCobot, byte mc_mode)
+void MainControl::displayInfo(MyPalletizerBasic &myCobot, byte ui_mode)
 {
     M5.Lcd.clear(BLACK);
     delay(50);
@@ -161,17 +164,18 @@ void MainControl::displayInfo(MyPalletizerBasic &myCobot, byte mc_mode)
     int buttom_y = 190;
     int buttom_1y = 210;
     int buttom_2y = 210;
+    ui = (enum UI)ui_mode;
 
-    switch (mc_mode) {
-        case UI::Menu: {
+    switch (ui) {
+        case Menu: {
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString("  MyCobot-拖动示教", 20, 40, 1);
                 M5.Lcd.drawString("播放", 60, buttom_y, 1);
                 M5.Lcd.drawString("录制", 160, buttom_y, 1);
                 M5.Lcd.drawString("退出", 260, buttom_y, 1);
                 M5.update();
-            } else if (lan == 1) {
+            } else if (language == English) {
                 M5.Lcd.clear(BLACK);
                 M5.Lcd.setTextColor(BLACK);
                 M5.Lcd.setTextColor(RED);
@@ -195,14 +199,14 @@ void MainControl::displayInfo(MyPalletizerBasic &myCobot, byte mc_mode)
             break;
         }
 
-        case UI::PlayMenu: {
+        case PlayMenu: {
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString(" 请选择示教路径的播放位置", 10, 40, 1);
                 M5.Lcd.drawString("缓存", 60, buttom_y, 1);
                 M5.Lcd.drawString("储存卡", 160, buttom_y, 1);
                 M5.Lcd.drawString("返回", 260, buttom_y, 1);
-            } else if (lan == 1) {
+            } else if (language == English) {
                 M5.Lcd.setCursor(20, 40);
                 M5.Lcd.print("Playing for Ram/Flash?");
                 M5.Lcd.setCursor(40, buttom_1y);
@@ -215,14 +219,14 @@ void MainControl::displayInfo(MyPalletizerBasic &myCobot, byte mc_mode)
             break;
         }
 
-        case UI::RecordMenu: {
+        case RecordMenu: {
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString(" 请选择示教视频储存路径", 20, 40, 1);
                 M5.Lcd.drawString("缓存", 60, buttom_y, 1);
                 M5.Lcd.drawString("储存卡", 160, buttom_y, 1);
                 M5.Lcd.drawString("返回", 260, buttom_y, 1);
-            } else if (lan == 1) {
+            } else if (language == English) {
                 M5.Lcd.setCursor(20, 40);
                 M5.Lcd.print("Recording to Ram/Flash?");
                 M5.Lcd.setCursor(40, buttom_1y);
@@ -235,15 +239,15 @@ void MainControl::displayInfo(MyPalletizerBasic &myCobot, byte mc_mode)
             break;
         }
 
-        case UI::PlayRam: {
+        case PlayRam: {
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString(" 正在执行缓存中的路径", 20, 40, 1);
                 M5.Lcd.drawString(" 播放中...", 20, 70, 1);
                 M5.Lcd.drawString("开始", 60, buttom_y, 1);
                 M5.Lcd.drawString("暂停", 160, buttom_y, 1);
                 M5.Lcd.drawString("结束", 260, buttom_y, 1);
-            } else if (lan == 1) {
+            } else if (language == English) {
                 M5.Lcd.setCursor(20, 40);
                 M5.Lcd.print("Play from Ram\n  Playing...");
                 M5.Lcd.setCursor(40, buttom_2y);
@@ -256,15 +260,15 @@ void MainControl::displayInfo(MyPalletizerBasic &myCobot, byte mc_mode)
             break;
         }
 
-        case UI::PlayFlash: {
+        case PlayFlash: {
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString(" 正在执行储存卡中的路径", 20, 40, 1);
                 M5.Lcd.drawString(" 播放中...", 20, 70, 1);
                 M5.Lcd.drawString("开始", 60, buttom_y, 1);
                 M5.Lcd.drawString("暂停", 160, buttom_y, 1);
                 M5.Lcd.drawString("结束", 260, buttom_y, 1);
-            } else if (lan == 1) {
+            } else if (language == English) {
                 M5.Lcd.setCursor(0, 40);
                 M5.Lcd.print(" Play from Flash/nPlaying");
                 M5.Lcd.setCursor(40, buttom_2y);
@@ -277,13 +281,13 @@ void MainControl::displayInfo(MyPalletizerBasic &myCobot, byte mc_mode)
             break;
         }
 
-        case UI::RecordRam: {
+        case RecordRam: {
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString(" 录制并存入缓存", 20, 40, 1);
                 M5.Lcd.drawString(" 录制中...", 20, 70, 1);
                 M5.Lcd.drawString(" 停止录制并保存", 5, buttom_y, 1);
-            } else if (lan == 1) {
+            } else if (language == English) {
                 M5.Lcd.setCursor(0, 40);
                 M5.Lcd.print("Record into Ram\nRecording...");
                 M5.Lcd.setCursor(5, buttom_1y);
@@ -292,14 +296,14 @@ void MainControl::displayInfo(MyPalletizerBasic &myCobot, byte mc_mode)
             break;
         }
 
-        case UI::RecordFlash: {
+        case RecordFlash: {
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString(" 录制并存入储存卡", 20, 40, 1);
                 M5.Lcd.drawString(" 录制中...", 20, 70, 1);
                 M5.Lcd.drawString(" 停止录制并保存", 5, buttom_y, 1);
             }
-            if (lan == 1) {
+            if (language == English) {
                 M5.Lcd.setCursor(0, 40);
                 M5.Lcd.print("Record into Flash\nRecording...");
                 M5.Lcd.setCursor(5, buttom_y);
@@ -309,14 +313,14 @@ void MainControl::displayInfo(MyPalletizerBasic &myCobot, byte mc_mode)
             break;
         }
 
-        case UI::pause: { // Stop recording
+        case pause: { // Stop recording
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString(" 暂停中", 20, 40, 1);
                 M5.Lcd.drawString("开始", 60, buttom_y, 1);
                 M5.Lcd.drawString("暂停", 160, buttom_y, 1);
                 M5.Lcd.drawString("结束", 260, buttom_y, 1);
-            } else if (lan == 1) {
+            } else if (language == English) {
                 M5.Lcd.setCursor(0, 40);
                 M5.Lcd.print(" Puase Now");
                 M5.Lcd.setCursor(40, buttom_2y);
@@ -329,66 +333,66 @@ void MainControl::displayInfo(MyPalletizerBasic &myCobot, byte mc_mode)
             break;
         }
 
-        case UI::RecordSave: { // Stop recording
+        case RecordSave: { // Stop recording
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString(" 保存录制", 20, 40, 1);
-            } else if (lan == 1) {
+            } else if (language == English) {
                 M5.Lcd.setCursor(0, 40);
                 M5.Lcd.print("  Saved Recording");
             }
             break;
         }
 
-        case UI::GDataFlash: { // Play from Flash
+        case GDataFlash: { // Play from Flash
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString("从储存卡中获取数据", 20, 40, 1);
-            } else if (lan == 1) {
+            } else if (language == English) {
                 M5.Lcd.setCursor(0, 40);
                 M5.Lcd.print("Getting data from Flash");
             }
             break;
         }
 
-        case UI::SDataFlash: { // Record from Flash
+        case SDataFlash: { // Record from Flash
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString("将数据保存到储存卡", 20, 40, 1);
-            } else if (lan == 1) {
+            } else if (language == English) {
                 M5.Lcd.setCursor(0, 40);
                 M5.Lcd.print("Saving Data into Flash");
             }
             break;
         }
 
-        case UI::IoState: { // loop play from sram
+        case IoState: { // loop play from sram
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString("IO口状态", 20, 40, 1);
-            } else if (lan == 1) {
+            } else if (language == English) {
                 M5.Lcd.setCursor(0, 40);
                 M5.Lcd.print("IO Pin Active!");
             }
             break;
         }
- 
-        case UI::NotPlay: { // loop play from sram
+
+        case NotPlay: { // loop play from sram
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString("数据不足，无法播放", 20, 40, 1);
-            } else if (lan == 1) {
+            } else if (language == English) {
                 M5.Lcd.setCursor(0, 40);
                 M5.Lcd.print("Data too short, not playing");
             }
             break;
         }
 
-        case UI::NoData: { // loop play from sram
+        case NoData: { // loop play from sram
             M5.Lcd.fillScreen(0);
-            if (lan == 2) {
+            if (language == Chinese) {
                 M5.Lcd.drawString("无数据", 20, 40, 1);
-            } else if (lan == 1) {
+            } else if (language == English) {
                 M5.Lcd.setCursor(0, 40);
                 M5.Lcd.print("Empty data!");
             }

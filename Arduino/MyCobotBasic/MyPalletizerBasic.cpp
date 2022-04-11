@@ -20,15 +20,13 @@ MyPalletizerBasic::MyPalletizerBasic(HardwareSerial *hw_serial)
 
 void MyPalletizerBasic::setup()
 {
-    delay(500);
 #if defined Mycobot_M5
+    delay(500);
     M5.begin(true, false, true);
     M5.Power.begin();
-
     dacWrite(25, 0);  // disable mic
-#endif
-    hw_serial->begin(BAUD_RATE);
     delay(500);
+#endif
 }
 
 
