@@ -4,22 +4,22 @@
 
   Be sure to review the myCobot GitBook!
 
-- [myCobot (Chinese)](https://www.elephantrobotics.com/docs/myCobot)
-- [myCobot (English)](https://www.elephantrobotics.com/docs/myCobot-en)
+- [myCobot (Chinese)](https://docs.elephantrobotics.com/docs/gitbook)
+- [myCobot (English)](https://docs.elephantrobotics.com/docs/gitbook-en)
 
 ## Libraries
 
 - Arduino ：
   [GIT链接](./Arduino) | 
-  [查看API](https://www.elephantrobotics.com/docs/myCobot/3-development/1.1-arduino/1.1-api.html)  | 
-  [下载依赖Library](https://www.elephantrobotics.com/software/libraries) 
+  [查看API](https://docs.elephantrobotics.com/docs/gitbook/10-ArduinoEnv/10.3-api.html)  | 
+  [下载依赖Library](https://www.elephantrobotics.com/software/libraries/libraries-20210625.zip) 
 
   - 固件需求  
     - basic：无  
-    - atom ：AtomMain V3.2  
+    - atom ：AtomMain V4.1  
 
   - 依赖库安装说明
-    - 依赖库解压后即可使用，仅需要添加开发板即可，添加方式请看[安装说明](https://www.elephantrobotics.com/docs/myCobot/2-preparation/1-background_knowledge/arduino.html)
+    - 依赖库解压后即可使用，仅需要添加开发板即可，添加方式请看[安装说明](https://docs.elephantrobotics.com/docs/gitbook/10-ArduinoEnv/10.1-arduino_download.html#1013-%E6%B7%BB%E5%8A%A0%E5%BC%80%E5%8F%91%E6%9D%BF)
     - 解压到 "C:\Users\User\Documents\Arduino" 文件夹中即可，此文件路径为默认路径，如果你正在使用Arduino，请不要覆盖，添加至已有的文件夹 Librarys 中即可。
 
 - Python ：
@@ -27,47 +27,49 @@
   [pypi: pymycobot](https://pypi.org/project/pymycobot/)  
 
   - 固件需求  
-    - basic：miniRobotV04  
-    - atom ：AtomMain V3.2  
+    - basic：miniRobot V1.0  
+    - atom ：AtomMain V4.1  
 
 - C ： [C++](https://github.com/elephantrobotics/myCobotCpp) | [C#](https://github.com/elephantrobotics/Mycobot.csharp)  
 
   - 固件需求  
-    - basic：miniRobotV04  
-    - atom ：AtomMain V3.2
+    - basic：miniRobot V1.0  
+    - atom ：AtomMain V4.1
 
 <a name="#software"></a>  <!-- Ensures prior links work -->
 
 ## Software and Firmware
 
 
-- MyStudio ：[官网下载](https://www.elephantrobotics.com/software/mystudio/v2.2/)  
+- myStudio ：[Windows 版本](https://download.elephantrobotics.com/software/mystudio/mystudio-windows/Mystudio_Setup_latest.exe) [Linux 版本](https://download.elephantrobotics.com/software/mystudio/mystudio-linux/Mystudio-latest.AppImage) [Mac 版本](https://download.elephantrobotics.com/software/mystudio/mystudio-macos/Mystudio-latest.dmg)  
   
-  官方固件烧录器，机器人使用平台,适用于mycobot系列产品。
+  官方固件烧录器，机器人使用平台,适用于myCobot系列产品。
 
 - RoboFlow ：
- [用于Mycobot](https://www.elephantrobotics.com/software/RoboFlow/myCobot/RoboFlow_3.4.0-preview7_mycobot_windows_x86_64.zip) |
- [用于Mycobot-Pro](https://www.elephantrobotics.com/software/RoboFlow/myCobotPro/3.4.0-preview/RoboFlow_3.4.0-preview7_mycobotpro_windows_x86_64.zip)  
+  - myCobot 280 ： [M5版本](https://download.elephantrobotics.com/software/RoboFlow/myCobot280/RoboFlow_windows_x86_64_mycobot280_latest.rar) [PI版本](https://download.elephantrobotics.com/software/RoboFlow/myCobot280/RoboFlow_Linux_aarch64_mycobot280_latest.tar.gz) 
+  - myCobot 320 ： [M5版本](https://download.elephantrobotics.com/software/RoboFlow/myCobot320/RoboFlow_windows_x86_64_mycobot320_latest.rar) [PI版本](https://download.elephantrobotics.com/software/RoboFlow/myCobot320/RoboFlow_linux_aarch64_mycobot320_latest.tar.gz)  
+  - myCobot Pro 600 ： [PI版本](https://download.elephantrobotics.com/software/RoboFlow/myCobotPro600/RoboFlow_3.4.0-aarch64_myCobotPro600.tar.gz) 
+  - myPalletizer 260 ： [M5版本](https://download.elephantrobotics.com/software/RoboFlow/myPalletizer/RoboFlow_windows_x86_64_mypalletizer_latest.rar) 
 
   工业机器人控制软件，适用于大象机器人开发的机器人类型设备。
   - 固件需求  
-    - basic：miniRobotV04  
-    - atom ：AtomMain V3.2
+    - basic：miniRobot V1.0  
+    - atom ：AtomMain V4.1
 
-- Myblockly ：
+- myBlockly ：
   [GIT下载](https://github.com/elephantrobotics/myCobot/releases) 
 
-    mycobot系列产品图像化控制软件，适用于
-      [mycobo-280](https://www.elephantrobotics.com/myCobot/) 和 
-      [mycobo-320](https://www.elephantrobotics.com/mycobot-pro/)
+    myCobot系列产品图像化控制软件，适用于
+      [myCobot-280](https://www.elephantrobotics.com/myCobot/) 和 
+      [myCobot-320](https://www.elephantrobotics.com/mycobot-320-m5-cn/)
       
     - 固件需求  
-    - basic：miniRobotV04  
-    - atom ：AtomMain V3.2
+    - basic：miniRobot V1.0  
+    - atom ：AtomMain V4.1
 
 - Phone Controller.app ： [GIT下载](https://github.com/elephantrobotics/myCobot/tree/main/Software/phone%20controller)  
 
-    手机控制软件，适用于 [mycobot-280-M5](https://www.elephantrobotics.com/myCobot/)
+    手机控制软件，适用于 [myCobot-280-M5](https://www.elephantrobotics.com/myCobot/)
     
     - 固件需求  
     - basic：蓝牙固件  
@@ -97,11 +99,11 @@
 - ROS ： [github: myCobotROS](https://github.com/elephantrobotics/myCobotROS.git)
 
   - 固件需求  
-    - basic：miniRobotV04  
-    - atom ：AtomMain V3.2 
+    - basic：miniRobot V1.0  
+    - atom ：AtomMain V4.1 
 
 - Moveit ： [mycobot_moveit](https://github.com/elephantrobotics/mycobot_moveit)
 
   - 固件需求  
-    - basic：miniRobotV04  
-    - atom ：AtomMain V3.2 
+    - basic：miniRobot V1.0  
+    - atom ：AtomMain V4.1 
