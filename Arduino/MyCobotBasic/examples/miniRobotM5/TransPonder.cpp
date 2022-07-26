@@ -48,10 +48,13 @@ void Transponder::TaskReadData(void *p)
 /*
  * Function: Check whether the header of the serial port wifi or bluetooth return message is fe fe
  */
-bool Transponder::checkHeader(vector<unsigned char> v_data)
+bool Transponder::checkHeader(vector<unsigned char> &v_data)
 {
     if (v_data[0] == HEADER && v_data[1] == HEADER)
         return true;
+    else {
+        v_data.erase(v_data.begin(), v_data.begin() + 1);
+    }
     return false;
 }
 
@@ -65,16 +68,13 @@ bool Transponder::HandleStickyPackets(vector<unsigned char> &temp,
     vector<unsigned char>::iterator it = temp.begin() + 2 + temp[2];
     vector<unsigned char>::iterator it_vdata = v_data.begin() + 2 + v_data[2];
     int len = temp.size();
-    //First judge whether the length is less than 5, the instruction length is at least 5--> process the data
-    if (len >= 5 && len <= (temp[2] + 3)) {
-        if (*it == END) {
-            temp.erase(it + 1, temp.end());
-            v_data.erase(v_data.begin(), it_vdata + 1);
-            return true;
-        }
-    } else if (len > (temp[2] + 3)) {
-        //If the data cache instruction is greater than the total command length, it is cleared
-        v_data.clear();
+    //now protocol,latest len is 26,like fe fe 88(88 is error)-->delete three, meanwhile need len-->latest is fa
+    if (temp[2] < 30 && *it == END) {
+        temp.erase(it + 1, temp.end());
+        v_data.erase(v_data.begin(), it_vdata + 1);
+        return true;
+    } else {
+         v_data.erase(v_data.begin() + 1, v_data.begin() + 2);
     }
     return false;
 }
@@ -118,10 +118,14 @@ void Transponder::EventResponse(MyCobotBasic &myCobot)
             M5.update();
             switch ((transponder_mode = (enum MODE)distep.state)) {
                 case Uart: {
+                    rFlushSerial();
+                    data_power = true;
                     connect_ATOM(myCobot);
                     while (true) {
                         M5.update();
                         if (M5.BtnC.wasReleased()) {
+                            myCobot.jogStop();
+                            data_power = false;
                             info();
                             break;
                         }
@@ -131,6 +135,8 @@ void Transponder::EventResponse(MyCobotBasic &myCobot)
                 }
                 break;
                 case Wlan: {
+                    rFlushSerial();
+                    data_power = true;
                     ConnectingInfo();
                     CreateWlanServer();
                     while (true) {
@@ -149,6 +155,8 @@ void Transponder::EventResponse(MyCobotBasic &myCobot)
                         }
                         //No click event response on timeout
                         if (M5.BtnC.wasReleased() && !is_timeout) {
+                            myCobot.jogStop();
+                            data_power = false;
                             info();
                             break;
                         } else if (M5.BtnA.wasReleased() && !is_timeout) {
@@ -166,6 +174,8 @@ void Transponder::EventResponse(MyCobotBasic &myCobot)
                 server.stop();
                 break;
                 case Bt: {
+                    rFlushSerial();
+                    data_power = true;
                     CreateBTServer();
                     BTWaitInfo();
                     while (true) {
@@ -187,6 +197,8 @@ void Transponder::EventResponse(MyCobotBasic &myCobot)
                             }
                         }
                         if (M5.BtnC.wasReleased()) {
+                            myCobot.jogStop();
+                            data_power = false;
                             info();
                             break;
                         }
@@ -251,6 +263,11 @@ void Transponder::GetUserData(string &data)
  */
 void Transponder::GetAtomData(vector<unsigned char> &data)
 {
+    //Controlling container size
+    if (data.size() > 200) {
+        data.clear();
+    }
+
     while (Serial2.available() > 0) {
         data.push_back(Serial2.read());
     }
@@ -288,7 +305,7 @@ bool Transponder::HandleOtherMsg(vector<unsigned char> &v_data)
                                 int f_index = info.find("'");
                                 int l_index = info.find_last_of("'");
                                 i_ssid = "ssid: ";
-                                i_password = "pssword: ";
+                                i_password = "password: ";
                                 ssid = info.substr(f_index + 1, l_index - f_index - 1);
                                 i_ssid += ssid;
                                 f_index = bak_info.find("(");
@@ -328,6 +345,7 @@ bool Transponder::HandleOtherMsg(vector<unsigned char> &v_data)
                     server_port = (high_port << 8) | low_port;
                 }
                 break;
+#if (!defined MyCobot_Pro_350)
                 case SET_BASIC_OUT: {
                     //0xfe 0xfe 0x04 0xa0 pin_no pin_data 0xfa
                     byte pin_no = v_data[4];
@@ -337,6 +355,7 @@ bool Transponder::HandleOtherMsg(vector<unsigned char> &v_data)
                     digitalWrite(pin_no, pin_data);
                 }
                 break;
+#endif
                 default:
                     is_atom = false;
                     break;
@@ -344,6 +363,7 @@ bool Transponder::HandleOtherMsg(vector<unsigned char> &v_data)
             break;
         case 3:
             switch (v_data[3]) {
+#if (!defined MyCobot_Pro_350)
                 case GET_BASIC_IN: {
                     byte pin_no = v_data[4];
                     pinMode(pin_no, INPUT);
@@ -354,6 +374,7 @@ bool Transponder::HandleOtherMsg(vector<unsigned char> &v_data)
                     v_data.insert(v_data.end() - 1, pin_state);
                 }
                 break;
+#endif
                 default:
                     is_atom = false;
                     break;
@@ -377,12 +398,14 @@ void Transponder::readData()
         xSemaphoreTake(xSemap, portMAX_DELAY);
 
         //Receive user messages and send them to Atom
-        GetUserData(client_data);
-        SendDataToAtom(client_data);
+        if (data_power) {
+            GetUserData(client_data);
+            SendDataToAtom(client_data);
 
-        //Receive Atom messages and send them to user
-        GetAtomData(atom_data);
-        SendDataToUser(atom_data);
+            //Receive Atom messages and send them to user
+            GetAtomData(atom_data);
+            SendDataToUser(atom_data);
+        }
 
         xSemaphoreGive(xSemap);
         vTaskDelay(1);
@@ -413,15 +436,13 @@ void Transponder::SendDataToUser(vector<unsigned char> &v_data)
             temp = v_data;
             if (HandleStickyPackets(temp, v_data)) {
                 vector<unsigned char>::iterator it_send = temp.begin();
-                for (it_send; it_send < temp.end(); it_send++) {
-                    if (transponder_mode == Uart) {\
-                        Serial.write(*it_send);
+                    if (transponder_mode == Uart) {
+                        Serial.write(temp.data(), (uint8_t)temp.size());
                     } else if (transponder_mode == Wlan) {
-                        serverClients[0].write(*it_send);
+                        serverClients[0].write(temp.data(), (uint8_t)temp.size());
                     } else if (transponder_mode == Bt) {
-                        SerialBT.write(*it_send);
+                        SerialBT.write(temp.data(), (uint8_t)temp.size());
                     }
-                }
             }
         }
     }
@@ -453,13 +474,15 @@ void Transponder::SendDataToAtom(vector<unsigned char> &v_data)
     /* Judging whether the data is empty, not empty--" Judging whether the header is fefe, whether there is an end bit fa in the data,
       *yes-->Judging whether the message is processed by Atom, no--" Direct processing, Yes--" Send to Atom*/
     if (!v_data.empty()) {
-        if (checkHeader(v_data) && HandleStickyPackets(temp, v_data)) {
-            if (HandleOtherMsg(temp)) {
-                SendDataToUser(temp);
-            } else {
-                vector<unsigned char>::iterator it_send = temp.begin();
-                for (it_send; it_send < temp.end(); it_send++) {
-                    Serial2.write(*it_send);
+        if (checkHeader(v_data)) {
+            if (HandleStickyPackets(temp, v_data)) {
+                if (HandleOtherMsg(temp)) {
+                    SendDataToUser(temp);
+                } else {
+                    vector<unsigned char>::iterator it_send = temp.begin();
+                    for (it_send; it_send < temp.end(); it_send++) {
+                        Serial2.write(*it_send);
+                    }
                 }
             }
         }
@@ -541,7 +564,7 @@ void Transponder::CreateWlanServer()
             ConnectedInfo();
             break;
         } else {
-            Serial.println(loops);
+            //Serial.println(loops);
             delay(1000);
         }
     }
@@ -580,11 +603,11 @@ void Transponder::WlanTransponder()
                 if (!serverClients[i] || !serverClients[i].connected()) {
                     if (serverClients[i]) serverClients[i].stop();
                     serverClients[i] = server.available();
-                    if (!serverClients[i]) Serial.println("available broken");
-                    Serial.print("New client: ");
-                    Serial.print(i);
-                    Serial.print(' ');
-                    Serial.println(serverClients[i].remoteIP());
+                    //if (!serverClients[i]) //Serial.println("available broken");
+                    //Serial.print("New client: ");
+                    //Serial.print(i);
+                    //Serial.print(' ');
+                    //Serial.println(serverClients[i].remoteIP());
                     break;
                 }
             }
@@ -594,7 +617,7 @@ void Transponder::WlanTransponder()
             }
         }
     } else {
-        Serial.println("WiFi not connected!");
+        //Serial.println("WiFi not connected!");
         for (i = 0; i < MAX_SRV_CLIENTS; i++) {
             if (serverClients[i]) serverClients[i].stop();
         }
@@ -676,9 +699,9 @@ void BTAuthCompleteCallback(boolean success)
     if (success) {
         M5.Lcd.fillRect(10, 110, 260, 20, BLACK);
         M5.Lcd.fillRect(10, 220, 60, 30, BLACK);
-        Serial.println("Pairing success!!");
+        //Serial.println("Pairing success!!");
     } else {
-        Serial.println("Pairing failed, rejected by user!!");
+        //Serial.println("Pairing failed, rejected by user!!");
     }
 }
 
@@ -692,9 +715,10 @@ void Transponder::CreateBTServer()
     SerialBT.onAuthComplete(&BTAuthCompleteCallback);
     //Bluetooth device name
     SerialBT.begin(Bt_name);
-    Serial.println("The device started, now you can pair it with bluetooth!");
+    //Serial.println("The device started, now you can pair it with bluetooth!");
     //get mac address
     esp_efuse_mac_get_default(mac_addr);
+    mac_addr[5] += 2; //last addr need +2
 }
 
 /*
@@ -714,9 +738,7 @@ void Transponder::BTWaitInfo()
     M5.Lcd.setCursor(100, 130);
     M5.Lcd.setTextSize(2);
     for (int i = 0; i < 6; i++) {
-        if (mac_addr[i] < 10)
-            M5.Lcd.print('0');
-        M5.Lcd.print(mac_addr[i] & 0xff, HEX);
+        M5.Lcd.printf("%02x", mac_addr[i]);
         if (i != 5)
             M5.Lcd.print(":");
     }
@@ -751,7 +773,7 @@ void Transponder::BTConnectedInfo()
     M5.Lcd.setCursor(100, 130);
     M5.Lcd.setTextSize(2);
     for (int i = 0; i < 6; i++) {
-        M5.Lcd.print(mac_addr[i], HEX);
+        M5.Lcd.printf("%02x", mac_addr[i]);
         if (i != 5)
             M5.Lcd.print(":");
     }

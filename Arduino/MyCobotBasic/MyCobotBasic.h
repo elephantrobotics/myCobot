@@ -6,12 +6,35 @@
 //#include <string>
 #include <MyCobotSaver.h>
 
+//默认mycobot，用哪一款机械臂，就打开注释，
+#define MyCobot "mycobot"
+//#define MyCobot_Pro "mycobot pro"
+//#define MyCobot_Pro_350
+
+// #define AYSN_COMMUNICATE  //new 280 320should comment
+
+#if defined MyCobot
+#if defined AYSN_COMMUNICATE
+#define SYSTEM_VERSION 11
+#else 
+#define SYSTEM_VERSION 21
+#endif
+#else 
+    #define SYSTEM_VERSION 21
+#endif
+
+#ifdef MyCobot
 #define BAUD_RATE           1000000      //mycobot use
+#else
+#define BAUD_RATE            115200      //mycobot-pro use
+#endif
+
+//#define BAUD_RATE           1000000      //mycobot use
 // #define BAUD_RATE            115200      //mycobot-pro use
 #define IORecWrong          -1
 #define header              0xfe
 #define footer              0xfa
-#define IO_TimeOut          30
+#define IO_TimeOut          70  //Synchronous reads, which take longer to access when a joint is faulty, but do not affect normal speed(30ms) 
 #define ITR_TIMES_MAX       4
 
 #define SEND_DATA_GAP       4
@@ -56,7 +79,7 @@ public:
     void moveCCoords(Coords middle_coord,
                      Coords end_coord);  //Pass in point and radius, draw a circle with current point and incoming point and radius
     //int isInPosition(Coords coord, bool is_linear);
-    //bool checkRunning();  //Check if moving
+    bool checkRunning();  //Check if moving
 
     // JOG mode and operation
     void jogAngle(int joint, int direction,
@@ -69,7 +92,16 @@ public:
     int getEncoder(int joint);  //Get individual potential values
     void setEncoders(Angles angleEncoders, int speed);  //Send all potential values
     Angles getEncoders();  //Get all potential values
-
+    Angles getServoSpeeds();  //get all servo speed
+    void setEncodersDrag(Angles angleEncoders, Angles speeds);
+#ifdef MyCobot_Pro_350
+    Angles getServoCurrents();  //get all currents only 320 have
+#endif
+    Angles getServoVoltages();  //get all servo voltages
+    Angles getServoStatus();    //get all servo status
+    Angles getServoTemps();    //get all servo temps
+    void setPid(Angles pids); //set pid,control robot move speed
+    Angles getPid();   //get pid,beause now type problem,angles 1-6-->p i d p i d 
 
 
     // Running Status and Settings
@@ -117,10 +149,6 @@ public:
     int getGripperValue();  //Get gripper angle
     bool isGripperMoving();  //Detect if the gripper is moving
 
-
-
-
-
     // function
     void ProgramPause();  //program pause
     void ProgramResume();  //Program recovery
@@ -164,6 +192,7 @@ template<typename T, typename O, typename R, typename E, typename M>
 private:
     byte itr_time = 0;
     Angles error_angles;
+    Angles error_speeds;
     Coords error_coords;
     Angles error_encoders;
 

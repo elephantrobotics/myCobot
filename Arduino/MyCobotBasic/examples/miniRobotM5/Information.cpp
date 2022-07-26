@@ -135,7 +135,8 @@ void Connect::ReadConfig(MyCobotBasic &myCobot)
 
     M5.Lcd.setCursor(200, 100);
     M5.Lcd.setTextColor(RED);
-    M5.Lcd.println("V2.0");
+    sprintf(s, "V%.2f", SYSTEM_VERSION / 10.0);
+    M5.Lcd.println(s);
     M5.update();
     delay(3000);
     info();

@@ -77,7 +77,21 @@ void Calibration::init(MyCobotBasic &myCobot)
     M5.Lcd.clear(BLACK);
     delay(50);
 
-    if (calibrate_servo_no > 6) {
+    /*if (calibrate_servo_no > 1 && calibrate_servo_no < 8) {
+        myCobot.focusServo(calibrate_servo_no - 1);
+        delay(100);
+    }*/
+    //由于第一次校准未成功，结束前再进行一次校准
+    if (calibrate_servo_no == 7) {
+        for (int i = 1; i< 7; i++) {
+          myCobot.setServoCalibration(i);
+          delay(100);
+          myCobot.focusServo(i);
+          delay(100);
+        }
+    }
+    
+    if (calibrate_servo_no >= 7) {
         if (language == Chinese) {
             M5.Lcd.drawString("已经设置好所有舵机", 20, 20, 1);
         }
@@ -93,7 +107,11 @@ void Calibration::init(MyCobotBasic &myCobot)
         return;
     }
 
+//    myCobot.releaseServo(calibrate_servo_no);
+//    delay(100);
+
     myCobot.setServoCalibration(calibrate_servo_no);
+    delay(100);
 
     if (language == Chinese) {
         M5.Lcd.drawString("已设置舵机", 20, 100, 1);
@@ -123,9 +141,6 @@ void Calibration::init(MyCobotBasic &myCobot)
 
     delay(100);
 
-    myCobot.setEncoder(calibrate_servo_no, 2047);
-    delay(400);
-
     calibrate_servo_no ++;
 }
 
@@ -137,7 +152,7 @@ void Calibration::test(MyCobotBasic &myCobot)
     M5.Lcd.clear(BLACK);
     delay(50);
     // move all servos
-    if (calibrate_servo_no >= 6) {
+    if (calibrate_servo_no >= 7) {
         for (int i = 1; i < 7; i ++) {
             if (language == Chinese) {
                 M5.Lcd.drawString("已设置舵机零位 ", 20, 20, 1);
@@ -194,9 +209,12 @@ void Calibration::reset(MyCobotBasic &myCobot)
         M5.Lcd.setTextColor(WHITE);
         M5.Lcd.print("Restart to calibrate!!");
     }
-    calibrate_servo_no = 0;
+    calibrate_servo_no = 1;
     //Turn off torque output
+#if (!defined MyCobot_Pro_350)
     myCobot.setFreeMove();
+    delay(100);
+#endif
     delay(1000);
     //Calibration::info();
 }

@@ -78,6 +78,13 @@
 #define CHECK_RUNNING_LEN                  2
 #define CHECK_RUNNING_RETURN_LEN           3
 
+#define SET_PID                          0x2C
+#define SET_PID_LEN                      8
+
+#define GET_PID                          0x2D
+#define GET_PID_LEN                      2
+#define GET_PID_RETURN_LEN               8
+
 // JOG mode and operation
 #define JOG_ANGLE                          0x30
 #define JOG_ANGLE_LEN                      5
@@ -105,6 +112,9 @@
 #define GET_ENCODERS                       0x3D
 #define GET_ENCODERS_LEN                   2
 #define GET_ENCODES_RETURN_LEN             14
+
+#define SET_ENCODERS_DRAG                       0x3E
+#define SET_ENCODERS_DRAG_LEN                   26
 
 // Running Status and Settings
 #define GET_SPEED                          0x40
@@ -251,6 +261,26 @@
 
 #define MOVEC_COORDS                       0x8C
 #define MOVEC_COORDS_LEN                   26
+
+#define GET_SERVO_SPEEDS                   0xe1
+#define GET_SERVO_SPEEDS_LEN                2
+#define GET_SERVO_SPEEDS_RETURN_LEN        14
+
+#define GET_SERVO_CURRENTS                  0xe2
+#define GET_SERVO_CURRENTS_LEN                2
+#define GET_SERVO_CURRENTS_RETURN_LEN        14
+
+#define GET_SERVO_VOLTAGES                   0xe3
+#define GET_SERVO_VOLTAGES_LEN                2
+#define GET_SERVO_VOLTAGES_RETURN_LEN        8
+
+#define GET_SERVO_STATUS                   0xe4
+#define GET_SERVO_STATUS_LEN               2
+#define GET_SERVO_STATUS_RETURN_LEN        8
+
+#define GET_SERVO_TEMPS                   0xe5
+#define GET_SERVO_TEMPS_LEN                2
+#define GET_SERVO_TEMPS_RETURN_LEN        8
 
 #endif // COMMUNICATEDEFINE_H_
 

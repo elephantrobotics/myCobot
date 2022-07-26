@@ -13,6 +13,8 @@ MyCobotBasic::MyCobotBasic()
         val = -1000.0;
     for (auto &val : error_coords)
         val = -1000.0;
+    for (auto &val : error_speeds)
+        val = -10000.0;
     /*for (auto val : printList)
         messages_map.insert(val);*/
 
@@ -34,41 +36,62 @@ int MyCobotBasic::readSerial(unsigned char *nDat, int& nLen)
 {
     int Size = 0;
     bool flag = false;
-    byte rec_data = 0, last_rec_data = 0;
     unsigned long t_begin = millis();
-    unsigned long t_use;
-    byte tmp = 0;
+    unsigned char data[1024];
 
     delay(5);
-    while (mycobot_serial.available() > 0) {
-        delay(5);
-        rec_data = mycobot_serial.read();
-        tmp = rec_data;
-        // check data validation
-        if (rec_data != IORecWrong) {
+    int index = 0, last_index = 0;
+    t_begin = millis();
+    while(millis() - t_begin < IO_TimeOut) {
+        // Serial.println("start");
+        delay(1); //Delay is required when there is a communication problem with the manipulator
+        while (mycobot_serial.available() > 0) {
+            // delay(1);
+            data[index] = mycobot_serial.read();
+            index++;
+        }
+        /*Serial.print("t_begin == ");
+        Serial.println(t_begin);
+        Serial.print("index == ");
+        Serial.println(index);*/
+        /*Serial.print("data == ");
+        for (int j = last_index; j < index; j++) {
+            Serial.print(data[j]);
+            Serial.print("  ");
+        }
+        Serial.println();*/
+        for (int i = last_index; i < index; i++) {
+            /*Serial.print("data[i] == ");
+            Serial.println(data[i]);*/
             if (!flag) {
-                if (rec_data == header && last_rec_data == header) {     
+                if (data[i] == header && data[i+1] == header) {
+                    /*Serial.print("have fe fe  ");
+                    Serial.println(i);*/
                     flag = true;
-                    nLen = mycobot_serial.available();
+                    nLen = data[i+2];
+                    /*Serial.print("  nLen  ");
+                    Serial.print(nLen);*/
+                    i += 1;
                     Size = 0;
                     continue;
-                }
-                last_rec_data = rec_data;
+                } 
             } else {
-                nDat[Size] = tmp;
+                nDat[Size] = data[i];
+                //Serial.print(nDat[Size]);
                 if (Size == nLen) {
+                    //Serial.println("end");
                     break;
-        }
+                }
             }
             Size++;
-            t_begin = millis();
         }
-        // check time out
-        t_use = millis() - t_begin;
-        if (t_use > IO_TimeOut) {
+        if (Size == nLen) {
+            // Serial.println("end2");
             break;
         }
+        last_index = index - 1;
     }
+    // Serial.println("ttime out");
     return Size;
 
 }
@@ -164,10 +187,12 @@ int MyCobotBasic::readData(T& pData, O& bData, R& rData, E& eData, M& mData)
 
     int len = 1024;
     byte data[1024]{0};
-    if (readSerial(data, len) == 0) 
+    if (readSerial(data, len) == 0) {
+        //Serial.println("no data");
         return -2;
+    }
     byte data_len[1];
-    byte r_data_3[3], r_data_4[4], r_data_14[14];
+    byte r_data_3[3], r_data_4[4], r_data_14[14], r_data_8[8];
     switch (static_cast<int>(data[0])) {
         case 3:
             DivideSerialData(data, r_data_3, 3);
@@ -288,7 +313,46 @@ int MyCobotBasic::readData(T& pData, O& bData, R& rData, E& eData, M& mData)
                 }
 
             }
-
+        case 8:    
+            DivideSerialData(data, r_data_8, 8);
+            switch (int(r_data_8[0])) {
+                 case GET_SERVO_VOLTAGES: {
+                     pData.at(0) = r_data_8[1];
+                     pData.at(1) = r_data_8[2];
+                     pData.at(2) = r_data_8[3];
+                     pData.at(3) = r_data_8[4];
+                     pData.at(4) = r_data_8[5];
+                     pData.at(5) = r_data_8[6];
+                     return 1;
+                 }
+                 case GET_SERVO_STATUS: {
+                     pData.at(0) = r_data_8[1];
+                     pData.at(1) = r_data_8[2];
+                     pData.at(2) = r_data_8[3];
+                     pData.at(3) = r_data_8[4];
+                     pData.at(4) = r_data_8[5];
+                     pData.at(5) = r_data_8[6];
+                     return 1;
+                 }
+                 case GET_SERVO_TEMPS: {
+                     pData.at(0) = r_data_8[1];
+                     pData.at(1) = r_data_8[2];
+                     pData.at(2) = r_data_8[3];
+                     pData.at(3) = r_data_8[4];
+                     pData.at(4) = r_data_8[5];
+                     pData.at(5) = r_data_8[6];
+                     return 1;
+                 }
+                 case GET_PID: {
+                     pData.at(0) = r_data_8[1];
+                     pData.at(1) = r_data_8[2];
+                     pData.at(2) = r_data_8[3];
+                     pData.at(3) = r_data_8[4];
+                     pData.at(4) = r_data_8[5];
+                     pData.at(5) = r_data_8[6];
+                     return 1;
+                 }
+            }
         case 14:
             DivideSerialData(data, r_data_14, 14);
            switch (int(r_data_14[0])) {
@@ -389,6 +453,60 @@ int MyCobotBasic::readData(T& pData, O& bData, R& rData, E& eData, M& mData)
                     pData.at(3) = encode_4_low + encode_4_high * 256;
                     pData.at(4) = encode_5_low + encode_5_high * 256;
                     pData.at(5) = encode_6_low + encode_6_high * 256;
+                    return 1;
+                }
+                case GET_SERVO_SPEEDS: {
+                    byte speed_1_high = r_data_14[1];
+                    byte speed_1_low = r_data_14[2];
+
+                    byte speed_2_high = r_data_14[3];
+                    byte speed_2_low = r_data_14[4];
+
+                    byte speed_3_high = r_data_14[5];
+                    byte speed_3_low = r_data_14[6];
+
+                    byte speed_4_high = r_data_14[7];
+                    byte speed_4_low = r_data_14[8];
+
+                    byte speed_5_high = r_data_14[9];
+                    byte speed_5_low = r_data_14[10];
+
+                    byte speed_6_high = r_data_14[11];
+                    byte speed_6_low = r_data_14[12];
+
+                    pData.at(0) = speed_1_low + speed_1_high * 256;
+                    pData.at(1) = speed_2_low + speed_2_high * 256;
+                    pData.at(2) = speed_3_low + speed_3_high * 256;
+                    pData.at(3) = speed_4_low + speed_4_high * 256;
+                    pData.at(4) = speed_5_low + speed_5_high * 256;
+                    pData.at(5) = speed_6_low + speed_6_high * 256;
+                    return 1;
+                }
+                case GET_SERVO_CURRENTS: {
+                    byte current_1_high = r_data_14[1];
+                    byte current_1_low = r_data_14[2];
+
+                    byte current_2_high = r_data_14[3];
+                    byte current_2_low = r_data_14[4];
+
+                    byte current_3_high = r_data_14[5];
+                    byte current_3_low = r_data_14[6];
+
+                    byte current_4_high = r_data_14[7];
+                    byte current_4_low = r_data_14[8];
+
+                    byte current_5_high = r_data_14[9];
+                    byte current_5_low = r_data_14[10];
+
+                    byte current_6_high = r_data_14[11];
+                    byte current_6_low = r_data_14[12];
+
+                    pData.at(0) = current_1_low + current_1_high * 256;
+                    pData.at(1) = current_2_low + current_2_high * 256;
+                    pData.at(2) = current_3_low + current_3_high * 256;
+                    pData.at(3) = current_4_low + current_4_high * 256;
+                    pData.at(4) = current_5_low + current_5_high * 256;
+                    pData.at(5) = current_6_low + current_6_high * 256;
                     return 1;
                 }
                 case GET_TOOL_REF: {
@@ -723,7 +841,7 @@ int MyCobotBasic::isInPosition(Coords coord, bool is_linear)
 }
 */
 
-/*
+
 bool MyCobotBasic::checkRunning()
 {
     mycobot_serial.write(header);
@@ -748,8 +866,8 @@ bool MyCobotBasic::checkRunning()
     }
     return false;
 }
-*/
-/*
+
+
 void MyCobotBasic::jogAngle(int joint, int direction, int speed)
 {
     byte joint_number = joint;
@@ -792,7 +910,7 @@ void MyCobotBasic::jogStop()
     mycobot_serial.write(JOG_STOP);
     mycobot_serial.write(footer);
 }
-*/
+
 void MyCobotBasic::setEncoder(int joint, int encoder)
 {
     byte joint_number = joint;
@@ -807,6 +925,247 @@ void MyCobotBasic::setEncoder(int joint, int encoder)
     mycobot_serial.write(encoder_high);
     mycobot_serial.write(encoder_low);
     mycobot_serial.write(footer);
+}
+
+void MyCobotBasic::setEncodersDrag(Angles angleEncoders, Angles speeds)
+{
+    byte angle_1_high = highByte(static_cast<int>(angleEncoders[0]));
+    byte angle_1_low = lowByte(static_cast<int>(angleEncoders[0]));
+    byte angle_2_high = highByte(static_cast<int>(angleEncoders[1]));
+    byte angle_2_low = lowByte(static_cast<int>(angleEncoders[1]));
+    byte angle_3_high = highByte(static_cast<int>(angleEncoders[2]));
+    byte angle_3_low = lowByte(static_cast<int>(angleEncoders[2]));
+    byte angle_4_high = highByte(static_cast<int>(angleEncoders[3]));
+    byte angle_4_low = lowByte(static_cast<int>(angleEncoders[3]));
+    byte angle_5_high = highByte(static_cast<int>(angleEncoders[4]));
+    byte angle_5_low = lowByte(static_cast<int>(angleEncoders[4]));
+    byte angle_6_high = highByte(static_cast<int>(angleEncoders[5]));
+    byte angle_6_low = lowByte(static_cast<int>(angleEncoders[5]));
+    //byte sp = speed;
+    byte speed_1_high = highByte(static_cast<int>(speeds[0]));
+    byte speed_1_low = lowByte(static_cast<int>(speeds[0]));
+    byte speed_2_high = highByte(static_cast<int>(speeds[1]));
+    byte speed_2_low = lowByte(static_cast<int>(speeds[1]));
+    byte speed_3_high = highByte(static_cast<int>(speeds[2]));
+    byte speed_3_low = lowByte(static_cast<int>(speeds[2]));
+    byte speed_4_high = highByte(static_cast<int>(speeds[3]));
+    byte speed_4_low = lowByte(static_cast<int>(speeds[3]));
+    byte speed_5_high = highByte(static_cast<int>(speeds[4]));
+    byte speed_5_low = lowByte(static_cast<int>(speeds[4]));
+    byte speed_6_high = highByte(static_cast<int>(speeds[5]));
+    byte speed_6_low = lowByte(static_cast<int>(speeds[5]));
+
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_ENCODERS_DRAG_LEN);
+    mycobot_serial.write(SET_ENCODERS_DRAG);
+    mycobot_serial.write(angle_1_high);
+    mycobot_serial.write(angle_1_low);
+    mycobot_serial.write(angle_2_high);
+    mycobot_serial.write(angle_2_low);
+    mycobot_serial.write(angle_3_high);
+    mycobot_serial.write(angle_3_low);
+    mycobot_serial.write(angle_4_high);
+    mycobot_serial.write(angle_4_low);
+    mycobot_serial.write(angle_5_high);
+    mycobot_serial.write(angle_5_low);
+    mycobot_serial.write(angle_6_high);
+    mycobot_serial.write(angle_6_low);
+    
+    mycobot_serial.write(speed_1_high);
+    mycobot_serial.write(speed_1_low);
+    mycobot_serial.write(speed_2_high);
+    mycobot_serial.write(speed_2_low);
+    mycobot_serial.write(speed_3_high);
+    mycobot_serial.write(speed_3_low);
+    mycobot_serial.write(speed_4_high);
+    mycobot_serial.write(speed_4_low);
+    mycobot_serial.write(speed_5_high);
+    mycobot_serial.write(speed_5_low);
+    mycobot_serial.write(speed_6_high);
+    mycobot_serial.write(speed_6_low);
+    //mycobot_serial.write(sp);
+    mycobot_serial.write(footer);
+}
+
+Angles MyCobotBasic::getServoSpeeds()
+{
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_SERVO_SPEEDS_LEN);
+    mycobot_serial.write(GET_SERVO_SPEEDS);
+    mycobot_serial.write(footer);
+
+    unsigned long t_begin = millis();
+    void *tempPtr = nullptr;
+    Angles *pAngles = nullptr;
+    Angles speeds;
+    
+    while (true) {
+        if (millis() - t_begin > 40) {
+            break;
+        }
+        if (readData(speeds, invalid, r_invalid, e_invalid, m_invalid) == -2) {
+            continue;
+        } else {
+            //Serial.println("have data");
+            //Serial.println(millis() - t_begin);
+            return speeds;
+        }
+    }
+    return error_speeds;
+}
+#ifdef MyCobot_Pro_350
+Angles MyCobotBasic::getServoCurrents()
+{
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_SERVO_CURRENTS_LEN);
+    mycobot_serial.write(GET_SERVO_CURRENTS);
+    mycobot_serial.write(footer);
+
+    unsigned long t_begin = millis();
+    void *tempPtr = nullptr;
+    Angles *pAngles = nullptr;
+    Angles currents;
+    
+    while (true) {
+        if (millis() - t_begin > 40) {
+            break;
+        }
+        if (readData(currents, invalid, r_invalid, e_invalid, m_invalid) == -2) {
+            continue;
+        } else {
+            //Serial.println("have data");
+            //Serial.println(millis() - t_begin);
+            return currents;
+        }
+    }
+    return error_speeds;
+}
+#endif
+Angles MyCobotBasic::getServoVoltages()
+{
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_SERVO_VOLTAGES_LEN);
+    mycobot_serial.write(GET_SERVO_VOLTAGES);
+    mycobot_serial.write(footer);
+
+    unsigned long t_begin = millis();
+    void *tempPtr = nullptr;
+    Angles *pAngles = nullptr;
+    Angles voltages;
+    
+    while (true) {
+        if (millis() - t_begin > 40) {
+            break;
+        }
+        if (readData(voltages, invalid, r_invalid, e_invalid, m_invalid) == -2) {
+            continue;
+        } else {
+            //Serial.println("have data");
+            //Serial.println(millis() - t_begin);
+            return voltages;
+        }
+    }
+    return error_speeds;
+}
+
+Angles MyCobotBasic::getServoStatus()
+{
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_SERVO_STATUS_LEN);
+    mycobot_serial.write(GET_SERVO_STATUS);
+    mycobot_serial.write(footer);
+
+    unsigned long t_begin = millis();
+    void *tempPtr = nullptr;
+    Angles *pAngles = nullptr;
+    Angles status;
+    
+    while (true) {
+        if (millis() - t_begin > 40) {
+            break;
+        }
+        if (readData(status, invalid, r_invalid, e_invalid, m_invalid) == -2) {
+            continue;
+        } else {
+            //Serial.println("have data");
+            //Serial.println(millis() - t_begin);
+            return status;
+        }
+    }
+    return error_speeds;
+}
+
+Angles MyCobotBasic::getServoTemps()
+{
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_SERVO_TEMPS_LEN);
+    mycobot_serial.write(GET_SERVO_TEMPS);
+    mycobot_serial.write(footer);
+
+    unsigned long t_begin = millis();
+    void *tempPtr = nullptr;
+    Angles *pAngles = nullptr;
+    Angles temps;
+    
+    while (true) {
+        if (millis() - t_begin > 40) {
+            break;
+        }
+        if (readData(temps, invalid, r_invalid, e_invalid, m_invalid) == -2) {
+            continue;
+        } else {
+            //Serial.println("have data");
+            //Serial.println(millis() - t_begin);
+            return temps;
+        }
+    }
+    return error_speeds;
+}
+
+void MyCobotBasic::setPid(Angles pids)
+{
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_PID_LEN);
+    mycobot_serial.write(SET_PID);
+    for (int i = 0; i < 6; i++) {
+        mycobot_serial.write(static_cast<int>(pids[i]));
+    }
+    mycobot_serial.write(footer);
+}
+
+Angles MyCobotBasic::getPid()
+{
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_PID_LEN);
+    mycobot_serial.write(GET_PID);
+    mycobot_serial.write(footer);
+
+    unsigned long t_begin = millis();
+    void *tempPtr = nullptr;
+    Angles *pAngles = nullptr;
+    Angles pids;
+    
+    while (true) {
+        if (millis() - t_begin > 40) {
+            break;
+        }
+        if (readData(pids, invalid, r_invalid, e_invalid, m_invalid) == -2) {
+            continue;
+        } else {
+            //Serial.println("have data");
+            //Serial.println(millis() - t_begin);
+            return pids;
+        }
+    }
+    return error_speeds;
 }
 
 int MyCobotBasic::getEncoder(int joint)

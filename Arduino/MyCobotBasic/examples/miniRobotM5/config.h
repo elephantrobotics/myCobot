@@ -11,6 +11,10 @@ enum FuncIndex : int {
     CALIBRATION_INDEX,
     TRANSPONDER_INDEX,
     CONNECT_INDEX
+#if defined MyCobot_Pro_350
+    ,
+    FLASH_INDEX
+#endif
 };
 
 //language settings

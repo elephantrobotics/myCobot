@@ -1,8 +1,8 @@
 #ifndef PARAMETERLIST_H
 #define PARAMETERLIST_H
 
-//#define MyCobot_M5 "m5"  //To use non-MyCobot280-m5 robotic arms, you need to comment out this line
-#define MyCobot_Mega "mega"   //if use non-mega,you need to should comment out this line
+#define MyCobot_M5 "m5"  //To use non-MyCobot280-m5 robotic arms, you need to comment out this line
+//#define MyCobot_Mega "mega"   //if use non-mega,you need to should comment out this line
 //#define MyCobot_Uno "uno"   if use non-Uno,you need to should comment out this line
 //#define MyCobot_Mkr "mkr"   //if use non-Mkr,you need to should comment out this line
 

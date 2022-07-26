@@ -5,7 +5,6 @@
 #include "config.h"
 #include "ServerBase.h"
 
-
 class MainControl: public ServerBase
 {
 private:
@@ -16,6 +15,7 @@ private:
     void playFromFlash(MyCobotBasic &myCobot);
     void recordIntoFlash(MyCobotBasic &myCobot);
     void IO(MyCobotBasic &myCobot);
+    bool IsInposition(MyCobotBasic &myCobot, Angles target_encoders, Angles move_encoders);
 public:
     void run(MyCobotBasic &myCobot);
     static ServerBase *createInstance()
@@ -30,6 +30,7 @@ public:
                   } ui = (enum UI)0;
     //Button              
     enum BTN : int {A = 1, B, C} btn;
+    bool gripper_state{false};
 };
 
 #endif

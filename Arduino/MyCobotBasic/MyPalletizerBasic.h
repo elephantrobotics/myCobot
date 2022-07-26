@@ -35,8 +35,8 @@ public:
 #if defined MyCobot_M5
     MyCobotSaver saver;
 #endif
-    MyPalletizerBasic(){}
-    MyPalletizerBasic(HardwareSerial *hw_serial);
+    //MyPalletizerBasic(){}
+    MyPalletizerBasic(/*HardwareSerial *hw_serial*/);
     void setup();
 
     // Overall Status

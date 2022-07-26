@@ -1,9 +1,11 @@
+#include <SCServo.h>
 #include <MyCobotBasic.h>
 #include <ParameterList.h>
 
 typedef  unsigned char u8;
 
 MyCobotBasic myCobot;
+SMSBL sm;
 
 byte IO_TIME_OUT = 25;
 int IO_REC_WRONG = -1;
@@ -18,6 +20,7 @@ void setup()
     Serial.begin(115200);
     Serial2.begin(BAUD_RATE);
     delay(100);
+    sm.pSerial = &Serial2;
     myCobot.setup();
     delay(500);
 
@@ -31,8 +34,6 @@ void setup()
     while (!myCobot.isPoweredOn()) {
         delay(100);
     }
-    SetPDI(); 
-
     info();
 }
 
@@ -41,8 +42,6 @@ void loop()
     readData();
     delay(5);
 }
-
-
 
 bool checkHeader()
 {
@@ -77,6 +76,10 @@ int readSerial(unsigned char* nDat, int nLen)
     M5.update();
     if (M5.BtnA.wasReleased()) {
         connect_ATOM();
+    } else if(M5.BtnC.wasReleased()) {
+        WaitInfo();
+        Set();
+        GripperInfo();
     }
     if(Serial.available()>0)
     {
@@ -264,6 +267,11 @@ void info()
     M5.Lcd.setCursor(40, 215);
     M5.Lcd.setTextColor(BLUE);
     M5.Lcd.println("TEST");
+    
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.setCursor(220, 215);
+    M5.Lcd.setTextColor(BLUE);
+    M5.Lcd.println("Set");
 }
 
 void SetPDI()
@@ -277,4 +285,56 @@ void SetPDI()
            }
         }
     }
+}
+
+// 参数设置 PDI 夹爪
+void Set()
+{
+    SetPDI(); 
+    SetGripperTorque();
+}
+
+//夹爪零位校准 最大力矩设为400
+void SetGripperTorque()
+{
+    if (sm.Ping(7) == 7) {
+        Serial.println("have");
+        sm.CalibrationOfs(7);
+        delay(10);
+        while (sm.readWord(7, 16) != 400) {
+            sm.unLockEprom(7);//打开EPROM保存功能
+            delay(5);
+            sm.writeWord(7, 16, 400); 
+            delay(50);
+            sm.LockEprom(7);//关闭EPROM保存功能
+        }
+    }
+}
+
+void GripperInfo()
+{
+    M5.Lcd.clear(BLACK);
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(10, 20);
+    M5.Lcd.print("Gripper Torque: ");
+    M5.Lcd.setTextColor(RED);
+    M5.Lcd.setTextSize(2);
+    if (sm.Ping(7) == 7) {
+        M5.Lcd.println(sm.readWord(7, 16));
+    } else {
+        M5.Lcd.println("can't found gripper");
+    }
+    delay(2000);
+    info();
+}
+
+void WaitInfo()
+{
+    M5.Lcd.clear(BLACK);
+    delay(50);
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(10, 10);
+    M5.Lcd.println("parameter setting");
 }

@@ -25,7 +25,7 @@ using namespace std;
 class Transponder: public ServerBase
 {
 private:
-    bool checkHeader(vector<unsigned char> v_data);
+    bool checkHeader(vector<unsigned char> &v_data);
     bool HandleStickyPackets(vector<unsigned char> &temp,
                              vector<unsigned char> &v_data);
     bool HandleAtomData(vector<unsigned char> &v_data);
@@ -72,6 +72,9 @@ public:
     //task
     static void TaskReadData(void *p);
 
+    //Control the data read and write between basic and user
+    bool data_power = false;
+
 private:
     bool EXIT = false;
     bool state_on{false};
@@ -79,8 +82,8 @@ private:
     int rect1[4] = {0, 70, 26, 120};
     int rect2[4] = {26, 70, 200, 120};
     DisplayTemplate distep;
-    string ssid = "EleWiFiTest";
-    string password = "ele123456";
+    string ssid = "MyCobotWiFi2.4G";
+    string password = "mycobot123";
     string bak_ssid;
     string bak_password;
     string i_ssid = "ssid: ";
@@ -95,7 +98,11 @@ private:
     bool is_timeout{false};
     //bt
     BluetoothSerial SerialBT;
+#if (!defined MyCobot_Pro_350)
     String Bt_name = "mycobot280-m5";
+#else
+    String Bt_name = "mycobot320-m5";
+#endif
     uint8_t pairedDeviceBtAddr[PAIR_MAX_DEVICES][6];
     //Define Mac address storage space
     uint8_t mac_addr[6] = {0};

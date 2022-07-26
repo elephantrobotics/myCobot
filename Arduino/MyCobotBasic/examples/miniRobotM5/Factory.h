@@ -6,7 +6,9 @@
 #include "Calibration.h"
 #include "transponder.h"
 #include "Information.h"
-
+#if defined MyCobot_Pro_350
+#include "Flash.h"
+#endif
 
 typedef ServerBase *(*ServerFunction)();
 class Factory

@@ -7,6 +7,7 @@ typedef struct {
 
 int data_len_max = 1000;
 Angles jae[1000];
+Angles speeds[1000];
 
 int girrep_data[1000];
 
@@ -64,6 +65,11 @@ void MainControl::updateMode(MyCobotBasic &myCobot, byte btn_pressed)
             case B:
                 ui = RecordMenu;
                 MainControl::displayInfo(myCobot, ui);
+                //release servo 需要等待100ms
+                for (int i = 0; i < 7; i++) {
+                    myCobot.releaseServo(i+1);
+                    delay(100);
+                }
                 break;
             case C:
                 myCobot.setFreeMove();
@@ -131,15 +137,15 @@ void MainControl::updateMode(MyCobotBasic &myCobot, byte btn_pressed)
     else if ((ui == PlayRam) || (ui == PlayFlash)) {
         switch (btn_pressed) {
             case A:
-                Serial.println("Continue Play");
+                //Serial.println("Continue Play");
 
                 break;
             case B:
-                Serial.println("Pause");
+                //Serial.println("Pause");
 
                 break;
             case C:
-                Serial.println("Stop");
+                //Serial.println("Stop");
                 ui = Menu;
                 break;
         }
@@ -148,10 +154,10 @@ void MainControl::updateMode(MyCobotBasic &myCobot, byte btn_pressed)
     else if ((ui == RecordRam) || (ui == RecordFlash)) {
         switch (btn_pressed) {
             case B:
-                Serial.println("Save and Stop");
+                //Serial.println("Save and Stop");
                 break;
             case C:
-                Serial.println("stop record");
+                //Serial.println("stop record");
                 break;
         }
 
@@ -418,42 +424,145 @@ void MainControl::displayInfo(MyCobotBasic &myCobot, byte ui_mode)
 /*
  * Function: ram track recording
  */
-
 void MainControl::record(MyCobotBasic &myCobot)
 {
     myCobot.setLEDRGB(255, 255, 0);
     // record mode : 1- record to ram;  2- record to flash
     rec_data_len = 0;
     Angles _data;
-    int _encoder = myCobot.getEncoder(7);
-    delay(35);
-    for (int data_index = 0; data_index < data_len_max ; data_index ++) {
-        M5.update();
-        for (int i = 0; i < 6; i++) {
-            jae[data_index][i] = myCobot.getEncoder(i + 1);
-            delay(REC_TIME_DELAY - SEND_DATA_GAP);
-//      Serial.print(String(jae[data_index][i]) + ", ");
-        }
-        if (_encoder > 0) {
-            girrep_data[data_index] = myCobot.getEncoder(7);
-            delay(REC_TIME_DELAY - SEND_DATA_GAP);
-        } else {
-            girrep_data[data_index] = 2048;
-            delay(20);
-        }
-
-        Serial.println(" ");
-        rec_data_len++;
-        if (M5.BtnA.wasReleased() || M5.BtnB.wasReleased()
-                || M5.BtnC.wasReleased()) break;
+    int _encoder = 0;
+    if (myCobot.isServoEnabled(7)) {
+        gripper_state = true;
+    } else {
+        gripper_state = false;
     }
+//    Serial.print("encoder == ");
+//    Serial.println(_encoder);
+    Encoders encoders;
+    Angles temp_speeds;
+    bool flag = true;
+    delay(35);
+#if defined AYSN_COMMUNICATE
+    delay(100);
+#endif
+    int data_index = 0;
+    
+    while (data_index < data_len_max) {
+        M5.update();
+        if (M5.BtnA.wasReleased() || M5.BtnB.wasReleased()
+                || M5.BtnC.wasReleased()) break;    
+        //unsigned t_begin = millis();    
+#if (!defined AYSN_COMMUNICATE) 
+        temp_speeds = myCobot.getServoSpeeds();
+        /*Serial.print("time1 = ");
+        Serial.println(millis() - t_begin);*/
+        #if defined MyCobot_Pro_350
+            delay(5);
+        #else
+            delay(20);
+        #endif    
+#endif    
+        //t_begin = millis(); 
+        encoders = myCobot.getEncoders();
+        /*Serial.print("time2 = ");
+        Serial.println(millis() - t_begin);*/
+#if defined MyCobot_Pro_350
+        delay(5);
+#else
+        delay(20);
+#endif
+        /*Serial.print("time = ");
+        Serial.println(millis() - t_begin);*/
+//        Serial.print("speed == "); 
+        for (int i = 0; i < 6; i++) {
+#if (!defined AYSN_COMMUNICATE)
+            if (temp_speeds[i] != -10000) {
+                speeds[data_index] = temp_speeds;
+//                Serial.print("speed == ");
+//                Serial.print(temp_speeds[i]);
+//                Serial.print(" ");
+            } else {
+                continue;
+            }
+#endif
+            if (encoders[i] > 0 && encoders[i] < 4096) {
+                jae[data_index] = encoders;
+//                Serial.print(" encoder ==  ");
+//                Serial.print(encoders[i]);
+//                Serial.print(" ");
+            }
+        }
+        //Serial.println();
+        if (gripper_state) {
+            //unsigned long time = millis();
+            girrep_data[data_index] = myCobot.getEncoder(7);
+#if defined MyCobot_Pro_350
+        delay(5);
+#else
+        delay(20);
+#endif
+        /*time = millis() - time;
+        Serial.println(time);*/
+//            Serial.print("_encoder ");
+//            Serial.println(_encoder);
+        }
+        rec_data_len++;
+        data_index++;
+    }
+    /*for (int i = 0; i < data_index; i++) {
+       Serial.print("speed == ");
+       for (int j = 0; j < 6; j++){
+          Serial.print(speeds[i][j]);
+          Serial.print(" ");
+          Serial.print(jae[i][j]);
+          Serial.print(" ");
+       }  
+      Serial.println();
+    }*/
+//#endif
+}
 
+/*
+ * Function: judge is in position目前无法正常使用
+ */
+bool MainControl::IsInposition(MyCobotBasic &myCobot, Angles target_encoders, Angles move_encoders)
+{
+    Angles current_encoders = myCobot.getEncoders();
+    //int EncodersEpsilon = 11;
+    //int perc[3] = {source_encoders*0.05, source_encoders*0.1, 0.2};
+    float prec[6];
+    //判断是否到达点位 误差为1°--》11电位值 移动电位值>300才做判断 0.05x-->1 20 1-->11 300
+    for (int i = 0; i < 6; i++) {
+        /*Serial.print("current_encoders == ");
+        Serial.print (current_encoders[i]);
+        Serial.print("  target_encoders == ");
+        Serial.print (target_encoders[i]);
+        Serial.print("- == ");
+        Serial.print(abs(~(int)(target_encoders[i] - current_encoders[i])));*/
+//        Serial.print("move_encoders == ");
+//        Serial.print(i);
+//        Serial.print("   ");
+//        Serial.print (move_encoders[i]);
+       if (move_encoders[i] < 300)
+          continue; 
+       else if (move_encoders[i] < 1000) 
+          prec[i] = 0.05;
+       else if (move_encoders[i] > 1000 && move_encoders[i] < 2000)
+          prec[i] = 0.10;
+        else if(move_encoders[i] > 2000 && move_encoders[i] < 3000)
+          prec[i] = 0.15;
+        else if(move_encoders[i] > 3000 && move_encoders[i] < 4096)
+          prec[i] = 0.20;
+        if(abs(~(int)(target_encoders[i] - current_encoders[i])) > move_encoders[i] * prec[i]) {
+            return 0;
+        } 
+    }
+    return 1;
 }
 
 /*
  * Function: ram track playback
  */
-
 void MainControl::play(MyCobotBasic &myCobot)  
 {
     myCobot.setLEDRGB(0, 255, 0);
@@ -465,9 +574,64 @@ void MainControl::play(MyCobotBasic &myCobot)
         // play once
         for (int index = 0 ; index < rec_data_len; index++) {
             M5.update();
+#if defined AYSN_COMMUNICATE
             myCobot.setEncoder(7, girrep_data[index]);
             delay(20);
             myCobot.setEncoders(jae[index], 100);
+#else           
+            //myCobot.setEncoders(jae[index], 100);
+            if (index == 0) {
+#if (!defined AYSN_COMMUNICATE)
+                myCobot.setEncodersDrag(jae[index], speeds[index]);
+#else
+                myCobot.setEncoders(jae[index], 100);
+#endif
+                delay(5);
+                Angles source_encoders = myCobot.getEncoders();
+                Angles move_encoders;
+                float temp_encoder = 0;
+                //float last_encoder = 0;
+                float max_encoder = 0;
+                for (int i = 0; i < 6; i++) {
+                    temp_encoder = abs(~(int)(jae[index][i] - source_encoders[i]));
+                    move_encoders[i] = temp_encoder;
+                    if (temp_encoder > max_encoder)
+                        max_encoder = temp_encoder;
+                }
+//                Serial.println(max_encoder);
+                delay(max_encoder+500);
+                /*while (!IsInposition(myCobot, jae[index], move_encoders)) {
+                    myCobot.setEncodersDrag(jae[index], speeds[index]);
+                    delay(60);
+                }*/
+            } else {
+#if (!defined AYSN_COMMUNICATE)
+                myCobot.setEncodersDrag(jae[index], speeds[index]);
+#else
+                myCobot.setEncoders(jae[index], 100);
+#endif
+#if defined MyCobot_Pro_350
+                delay(20);
+#else
+                delay(68);
+#endif
+            }
+            if (gripper_state) {
+                myCobot.setEncoder(7, girrep_data[index]);
+#if defined MyCobot_Pro_350
+                delay(20);
+#else
+                delay(35);
+#endif
+            }
+            /*for (int j = 0; j < 6; j++){
+                Serial.print(speeds[index][j]);
+                Serial.print(" ");
+                Serial.print(jae[index][j]);
+                Serial.print(" ");
+             }  
+             Serial.println();*/
+#endif          
             // check pause button
             if (M5.BtnB.wasReleased()) {
                 MainControl::displayInfo(myCobot, pause);
@@ -493,7 +657,6 @@ void MainControl::play(MyCobotBasic &myCobot)
 
             // check stop button
             if (is_stop == 1) break;
-            delay(WRITE_TIME_GAP * 6);
         }
 
         // stop button will also end loop
@@ -525,14 +688,14 @@ void MainControl::playFromFlash(MyCobotBasic &myCobot)
 
     // initialization first
     if (!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)) {
-        Serial.println("SPIFFS Mount Failed");
+        //Serial.println("SPIFFS Mount Failed");
         return;
     }
 
-    Serial.printf("Reading file: %s\r\n", FILENAME);
+    //Serial.printf("Reading file: %s\r\n", FILENAME);
     File file = SPIFFS.open(FILENAME);
     if (!file || file.isDirectory()) {
-        Serial.println("- failed to open file for reading");
+        //Serial.println("- failed to open file for reading");
         return;
     }
     String this_line = "";
@@ -580,7 +743,7 @@ void MainControl::recordIntoFlash(MyCobotBasic &myCobot)
 
     // initialize flash
     if (!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)) {
-        Serial.println("SPIFFS Mount Failed");
+        //Serial.println("SPIFFS Mount Failed");
         return;
     }
 
@@ -621,6 +784,4 @@ void MainControl::IO(MyCobotBasic &myCobot)
         ui = PlayFlash;
         MainControl::play(myCobot);
     }
-
 }
-

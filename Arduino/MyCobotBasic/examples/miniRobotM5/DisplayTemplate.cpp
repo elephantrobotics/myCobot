@@ -65,8 +65,8 @@ void DisplayTemplate::MenuChoice()
  */
 void DisplayTemplate::DisplayPos(int display_pos)
 {
-    Serial.print("pos == ");
-    Serial.println(display_pos);
+    //Serial.print("pos == ");
+    //Serial.println(display_pos);
     M5.Lcd.fillRect(rect_pos1[0], rect_pos1[1], rect_pos1[2], rect_pos1[3], BLACK);
     M5.Lcd.setTextSize(2);
     M5.Lcd.setCursor(0, y_pos[display_pos]);
@@ -79,8 +79,8 @@ void DisplayTemplate::DisplayPos(int display_pos)
  */
 void DisplayTemplate::DisplayState(int display_start_state)
 {
-    Serial.print("display_start_state === ");
-    Serial.println(display_start_state);
+    //Serial.print("display_start_state === ");
+    //Serial.println(display_start_state);
     if (display_start_state > menuMap.size() - 4) {
         return;
     }

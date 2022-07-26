@@ -8,6 +8,9 @@ Factory::Factory()
     addServer(CALIBRATION_INDEX, &Calibration::createInstance);
     addServer(TRANSPONDER_INDEX, &Transponder::createInstance);
     addServer(CONNECT_INDEX, &Connect::createInstance);
+#if defined MyCobot_Pro_350
+    addServer(FLASH_INDEX, &Flash::createInstance);
+#endif
 }
 Factory::~Factory()
 {

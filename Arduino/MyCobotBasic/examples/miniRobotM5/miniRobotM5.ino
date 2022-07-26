@@ -19,7 +19,11 @@ static int display_start_state = 0;
 static int display_pos = 0;
 unsigned long t_begin = 0;
 // bool EXIT = false;
-int y_pos[] = {70, 95, 120, 145};
+#if defined MyCobot_Pro_350
+    int y_pos[] = {70, 95, 120, 145, 170};
+#else
+    int y_pos[] = {70, 95, 120, 145};
+#endif
 std::map<int, std::string> menuMap;
 bool state_on{false};
 
@@ -36,7 +40,11 @@ void DisplayState(int display_start_state)
     if (display_start_state > menuMap.size() - 4) {
         return;
     }
+#if defined MyCobot_Pro_350
+    M5.Lcd.fillRect(26, 70, 200, 120, BLACK);
+#else
     M5.Lcd.fillRect(26, 70, 200, 90, BLACK);
+#endif
     for (int i = 0; i < 4; i++) {
         M5.Lcd.setTextSize(2);
         M5.Lcd.setCursor(30, y_pos[i]);
@@ -83,14 +91,14 @@ void menu_choice()
 void setup()
 {
     adc_power_acquire();
-    //start Robot
+//    //start Robot
     delay(50);
     Serial.begin(115200);
     myCobot.setup();
     delay(50);
     myCobot.powerOn();
     delay(500);
-    
+       
     if (!EEPROM.begin(EEPROM_SIZE)) {
         Serial.println("failed to initialise EEPROM");
         delay(1000000);
@@ -169,12 +177,19 @@ void menu_init()
     menuMap.insert(std::make_pair(CALIBRATION_INDEX, "Calibration"));
     menuMap.insert(std::make_pair(TRANSPONDER_INDEX, "Transponder"));
     menuMap.insert(std::make_pair(CONNECT_INDEX, "Information"));
+#if defined MyCobot_Pro_350
+    menuMap.insert(std::make_pair(FLASH_INDEX, "Flash"));
+#endif
 
 }
 
 void DisplayPos(int display_pos)
 {
+#if defined MyCobot_Pro_350
+    M5.Lcd.fillRect(0, 70, 26, 120, BLACK);
+#else
     M5.Lcd.fillRect(0, 70, 26, 90, BLACK);
+#endif
     M5.Lcd.setTextSize(2);
     M5.Lcd.setCursor(0, y_pos[display_pos]);
     M5.Lcd.setTextColor(WHITE);
@@ -183,6 +198,7 @@ void DisplayPos(int display_pos)
 
 void DisplayAll()
 {
+    char s[10];
     unsigned long t_begin = millis();
     M5.Lcd.setTextSize(3);
     M5.Lcd.setTextColor(RED);
@@ -192,7 +208,8 @@ void DisplayAll()
     M5.Lcd.setTextSize(2);
     M5.Lcd.setCursor(250, 30);
     M5.Lcd.setTextColor(GREY);
-    M5.Lcd.print("v2.0");
+    sprintf(s, "V%.2f", SYSTEM_VERSION / 10.0);
+    M5.Lcd.print(s);
 
     M5.Lcd.drawFastHLine(0, 45, 320, GREY);
     M5.Lcd.drawFastHLine(0, 195, 320, GREY);

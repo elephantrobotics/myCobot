@@ -6,9 +6,9 @@
  */
 #include "MyPalletizerBasic.h"
 
-MyPalletizerBasic::MyPalletizerBasic(HardwareSerial *hw_serial)
+MyPalletizerBasic::MyPalletizerBasic(/*HardwareSerial *mycobot_serial*/)
 {
-    this->hw_serial = hw_serial;
+    //this->mycobot_serial = mycobot_serial;
     for (auto &val : error_angles)
         val = -1000.0;
     for (auto &val : error_coords)
@@ -20,13 +20,14 @@ MyPalletizerBasic::MyPalletizerBasic(HardwareSerial *hw_serial)
 
 void MyPalletizerBasic::setup()
 {
-#if defined Mycobot_M5
+#if defined MyCobot_M5
     delay(500);
     M5.begin(true, false, true);
     M5.Power.begin();
     dacWrite(25, 0);  // disable mic
     delay(500);
 #endif
+    mycobot_serial.begin(BAUD_RATE);
 }
 
 
@@ -64,7 +65,7 @@ int MyPalletizerBasic::readSerial(unsigned char *nDat, int nLen)
     unsigned long t_use;
 
     while (1) {
-        rec_data = hw_serial->read();
+        rec_data = mycobot_serial.read();
         // check data validation
         if (rec_data != IORecWrong) {
             if (nDat) {
@@ -90,38 +91,38 @@ int MyPalletizerBasic::readSerial(unsigned char *nDat, int nLen)
 
 void MyPalletizerBasic::rFlushSerial()
 {
-    while (hw_serial->read() != -1)
+    while (mycobot_serial.read() != -1)
         ;
 }
 
 
 void MyPalletizerBasic::powerOn()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(POWER_ON_LEN);
-    hw_serial->write(POWER_ON);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(POWER_ON_LEN);
+    mycobot_serial.write(POWER_ON);
+    mycobot_serial.write(footer);
     delay(WRITE_SERVO_GAP);
 }
 
 void MyPalletizerBasic::powerOff()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(POWER_OFF_LEN);
-    hw_serial->write(POWER_OFF);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(POWER_OFF_LEN);
+    mycobot_serial.write(POWER_OFF);
+    mycobot_serial.write(footer);
     delay(WRITE_SERVO_GAP);
 }
 
 bool MyPalletizerBasic::isPoweredOn()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(IS_POWERED_ON_LEN);
-    hw_serial->write(IS_POWERED_ON);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(IS_POWERED_ON_LEN);
+    mycobot_serial.write(IS_POWERED_ON);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -146,11 +147,11 @@ bool MyPalletizerBasic::isPoweredOn()
 }
 int MyPalletizerBasic::getAtomVersion()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_SYSTEM_VERSION_LEN);
-    hw_serial->write(GET_SYSTEM_VERSION);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_SYSTEM_VERSION_LEN);
+    mycobot_serial.write(GET_SYSTEM_VERSION);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -419,11 +420,11 @@ void *MyPalletizerBasic::readData()
 
 MyPalletizerAngles MyPalletizerBasic::getAngles()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_ANGLES_LEN);
-    hw_serial->write(GET_ANGLES);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_ANGLES_LEN);
+    mycobot_serial.write(GET_ANGLES);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -456,15 +457,15 @@ void MyPalletizerBasic::writeAngle(int joint, float value, int speed)
 
     byte sp = speed;
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(WRITE_ANGLE_LEN);
-    hw_serial->write(WRITE_ANGLE);
-    hw_serial->write(joint_number);
-    hw_serial->write(angle_high);
-    hw_serial->write(angle_low);
-    hw_serial->write(sp);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(WRITE_ANGLE_LEN);
+    mycobot_serial.write(WRITE_ANGLE);
+    mycobot_serial.write(joint_number);
+    mycobot_serial.write(angle_high);
+    mycobot_serial.write(angle_low);
+    mycobot_serial.write(sp);
+    mycobot_serial.write(footer);
 
     delay(WRITE_SERVO_GAP);
 }
@@ -486,34 +487,34 @@ void MyPalletizerBasic::writeAngles(MyPalletizerAngles angles, int speed)
 
     byte sp = speed;
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(WRITE_ANDLES_LEN);
-    hw_serial->write(WRITE_ANGLES);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(WRITE_ANDLES_LEN);
+    mycobot_serial.write(WRITE_ANGLES);
 
-    hw_serial->write(angle_1_high);
-    hw_serial->write(angle_1_low);
-    hw_serial->write(angle_2_high);
-    hw_serial->write(angle_2_low);
-    hw_serial->write(angle_3_high);
-    hw_serial->write(angle_3_low);
-    hw_serial->write(angle_4_high);
-    hw_serial->write(angle_4_low);
+    mycobot_serial.write(angle_1_high);
+    mycobot_serial.write(angle_1_low);
+    mycobot_serial.write(angle_2_high);
+    mycobot_serial.write(angle_2_low);
+    mycobot_serial.write(angle_3_high);
+    mycobot_serial.write(angle_3_low);
+    mycobot_serial.write(angle_4_high);
+    mycobot_serial.write(angle_4_low);
 
-    hw_serial->write(sp);
+    mycobot_serial.write(sp);
 
-    hw_serial->write(footer);
+    mycobot_serial.write(footer);
     delay(WRITE_SERVO_GAP);
 }
 
 
 MyPalletizerCoords MyPalletizerBasic::getCoords()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_COORDS_LEN);
-    hw_serial->write(GET_COORDS);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_COORDS_LEN);
+    mycobot_serial.write(GET_COORDS);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -553,15 +554,15 @@ void MyPalletizerBasic::writeCoord(MyPalletizerAxis axis, float value,
 
     byte sp = byte(speed);
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(WRITE_COORD_LEN);
-    hw_serial->write(WRITE_COORD);
-    hw_serial->write(axis_number);
-    hw_serial->write(value_high);
-    hw_serial->write(value_low);
-    hw_serial->write(sp);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(WRITE_COORD_LEN);
+    mycobot_serial.write(WRITE_COORD);
+    mycobot_serial.write(axis_number);
+    mycobot_serial.write(value_high);
+    mycobot_serial.write(value_low);
+    mycobot_serial.write(sp);
+    mycobot_serial.write(footer);
     //delay(WRITE_SERVO_GAP);
 
     //receiveMessages();
@@ -584,21 +585,21 @@ void MyPalletizerBasic::writeCoords(MyPalletizerCoords coord, int speed)
     byte sp = speed;
     byte mode = 1;
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(WRITE_COORDS_LEN);
-    hw_serial->write(WRITE_COORDS);
-    hw_serial->write(coord_x_high);
-    hw_serial->write(coord_x_low);
-    hw_serial->write(coord_y_high);
-    hw_serial->write(coord_y_low);
-    hw_serial->write(coord_z_high);
-    hw_serial->write(coord_z_low);
-    hw_serial->write(coord_theta_high);
-    hw_serial->write(coord_theta_low);
-    hw_serial->write(sp);
-    hw_serial->write(mode);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(WRITE_COORDS_LEN);
+    mycobot_serial.write(WRITE_COORDS);
+    mycobot_serial.write(coord_x_high);
+    mycobot_serial.write(coord_x_low);
+    mycobot_serial.write(coord_y_high);
+    mycobot_serial.write(coord_y_low);
+    mycobot_serial.write(coord_z_high);
+    mycobot_serial.write(coord_z_low);
+    mycobot_serial.write(coord_theta_high);
+    mycobot_serial.write(coord_theta_low);
+    mycobot_serial.write(sp);
+    mycobot_serial.write(mode);
+    mycobot_serial.write(footer);
     //delay(WRITE_SERVO_GAP);
 
     //receiveMessages();
@@ -626,24 +627,24 @@ int MyPalletizerBasic::isInPosition(MyPalletizerCoords coord, bool is_linear)
 
     byte type = byte(is_linear);
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(IS_IN_POSITION_LEN);
-    hw_serial->write(IS_IN_POSITION);
-    hw_serial->write(coord_x_high);
-    hw_serial->write(coord_x_low);
-    hw_serial->write(coord_y_high);
-    hw_serial->write(coord_y_low);
-    hw_serial->write(coord_z_high);
-    hw_serial->write(coord_z_low);
-    hw_serial->write(coord_rx_high);
-    hw_serial->write(coord_rx_low);
-    hw_serial->write(coord_ry_high);
-    hw_serial->write(coord_ry_low);
-    hw_serial->write(coord_rz_high);
-    hw_serial->write(coord_rz_low);
-    hw_serial->write(type);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(IS_IN_POSITION_LEN);
+    mycobot_serial.write(IS_IN_POSITION);
+    mycobot_serial.write(coord_x_high);
+    mycobot_serial.write(coord_x_low);
+    mycobot_serial.write(coord_y_high);
+    mycobot_serial.write(coord_y_low);
+    mycobot_serial.write(coord_z_high);
+    mycobot_serial.write(coord_z_low);
+    mycobot_serial.write(coord_rx_high);
+    mycobot_serial.write(coord_rx_low);
+    mycobot_serial.write(coord_ry_high);
+    mycobot_serial.write(coord_ry_low);
+    mycobot_serial.write(coord_rz_high);
+    mycobot_serial.write(coord_rz_low);
+    mycobot_serial.write(type);
+    mycobot_serial.write(footer);
 
 
     unsigned long t_begin = millis();
@@ -669,11 +670,11 @@ int MyPalletizerBasic::isInPosition(MyPalletizerCoords coord, bool is_linear)
 
 bool MyPalletizerBasic::checkRunning()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(CHECK_RUNNING_LEN);
-    hw_serial->write(CHECK_RUNNING);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(CHECK_RUNNING_LEN);
+    mycobot_serial.write(CHECK_RUNNING);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -703,14 +704,14 @@ void MyPalletizerBasic::jogAngle(int joint, int direction, int speed)
     byte di = direction;
     byte sp = speed;
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(JOG_ANGLE_LEN);
-    hw_serial->write(JOG_ANGLE);
-    hw_serial->write(joint_number);
-    hw_serial->write(di);
-    hw_serial->write(sp);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(JOG_ANGLE_LEN);
+    mycobot_serial.write(JOG_ANGLE);
+    mycobot_serial.write(joint_number);
+    mycobot_serial.write(di);
+    mycobot_serial.write(sp);
+    mycobot_serial.write(footer);
     delay(WRITE_SERVO_GAP);
 }
 
@@ -721,24 +722,24 @@ void MyPalletizerBasic::jogCoord(MyPalletizerAxis axis, int direction,
     byte di = direction;
     byte sp = speed;
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(JOG_COORD_LEN);
-    hw_serial->write(JOG_COORD);
-    hw_serial->write(axis_number);
-    hw_serial->write(di);
-    hw_serial->write(sp);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(JOG_COORD_LEN);
+    mycobot_serial.write(JOG_COORD);
+    mycobot_serial.write(axis_number);
+    mycobot_serial.write(di);
+    mycobot_serial.write(sp);
+    mycobot_serial.write(footer);
     delay(WRITE_SERVO_GAP);
 }
 
 void MyPalletizerBasic::jogStop()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(JOG_STOP_LEN);
-    hw_serial->write(JOG_STOP);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(JOG_STOP_LEN);
+    mycobot_serial.write(JOG_STOP);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::setEncoder(int joint, int encoder)
@@ -747,25 +748,25 @@ void MyPalletizerBasic::setEncoder(int joint, int encoder)
     byte encoder_high = highByte(encoder);
     byte encoder_low = lowByte(encoder);
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_ENCODER_LEN);
-    hw_serial->write(SET_ENCODER);
-    hw_serial->write(joint_number);
-    hw_serial->write(encoder_high);
-    hw_serial->write(encoder_low);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_ENCODER_LEN);
+    mycobot_serial.write(SET_ENCODER);
+    mycobot_serial.write(joint_number);
+    mycobot_serial.write(encoder_high);
+    mycobot_serial.write(encoder_low);
+    mycobot_serial.write(footer);
 }
 
 int MyPalletizerBasic::getEncoder(int joint)
 {
     byte joint_number = joint;
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_ENCODER_LEN);
-    hw_serial->write(GET_ENCODER);
-    hw_serial->write(joint_number);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_ENCODER_LEN);
+    mycobot_serial.write(GET_ENCODER);
+    mycobot_serial.write(joint_number);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -791,11 +792,11 @@ int MyPalletizerBasic::getEncoder(int joint)
 
 MyPalletizerEncoders MyPalletizerBasic::getEncoders()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_ENCODERS_LEN);
-    hw_serial->write(GET_ENCODERS);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_ENCODERS_LEN);
+    mycobot_serial.write(GET_ENCODERS);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -833,29 +834,29 @@ void MyPalletizerBasic::setEncoders(MyPalletizerEncoders angleEncoders,
     byte angle_4_low = lowByte(static_cast<int>(angleEncoders[3]));
     byte sp = speed;
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_ENCODERS_LEN);
-    hw_serial->write(SET_ENCODERS);
-    hw_serial->write(angle_1_high);
-    hw_serial->write(angle_1_low);
-    hw_serial->write(angle_2_high);
-    hw_serial->write(angle_2_low);
-    hw_serial->write(angle_3_high);
-    hw_serial->write(angle_3_low);
-    hw_serial->write(angle_4_high);
-    hw_serial->write(angle_4_low);
-    hw_serial->write(sp);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_ENCODERS_LEN);
+    mycobot_serial.write(SET_ENCODERS);
+    mycobot_serial.write(angle_1_high);
+    mycobot_serial.write(angle_1_low);
+    mycobot_serial.write(angle_2_high);
+    mycobot_serial.write(angle_2_low);
+    mycobot_serial.write(angle_3_high);
+    mycobot_serial.write(angle_3_low);
+    mycobot_serial.write(angle_4_high);
+    mycobot_serial.write(angle_4_low);
+    mycobot_serial.write(sp);
+    mycobot_serial.write(footer);
 }
 
 int MyPalletizerBasic::getSpeed()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_SPEED_LEN);
-    hw_serial->write(GET_SPEED);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_SPEED_LEN);
+    mycobot_serial.write(GET_SPEED);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -882,21 +883,21 @@ int MyPalletizerBasic::getSpeed()
 void MyPalletizerBasic::setSpeed(int percentage)
 {
     byte speed = percentage;
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_SPEED_LEN);
-    hw_serial->write(SET_SPEED);
-    hw_serial->write(speed);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_SPEED_LEN);
+    mycobot_serial.write(SET_SPEED);
+    mycobot_serial.write(speed);
+    mycobot_serial.write(footer);
 }
 
 float MyPalletizerBasic::getFeedOverride()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_FEED_OVERRIDE_LEN);
-    hw_serial->write(GET_FEED_OVERRIDE);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_FEED_OVERRIDE_LEN);
+    mycobot_serial.write(GET_FEED_OVERRIDE);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -925,22 +926,22 @@ void MyPalletizerBasic::sendFeedOverride(float feed_override)
     byte feed_override_high = highByte(static_cast<int>(feed_override * 10));
     byte feed_override_low = lowByte(static_cast<int>(feed_override * 10));
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SEND_OVERRIDE_LEN);
-    hw_serial->write(SEND_OVERRIDE);
-    hw_serial->write(feed_override_high);
-    hw_serial->write(feed_override_low);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SEND_OVERRIDE_LEN);
+    mycobot_serial.write(SEND_OVERRIDE);
+    mycobot_serial.write(feed_override_high);
+    mycobot_serial.write(feed_override_low);
+    mycobot_serial.write(footer);
 }
 
 float MyPalletizerBasic::getAcceleration()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_ACCELERATION_LEN);
-    hw_serial->write(GET_ACCELERATION);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_ACCELERATION_LEN);
+    mycobot_serial.write(GET_ACCELERATION);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -969,24 +970,24 @@ void MyPalletizerBasic::setAcceleration(float acceleration)
     byte acceleration_high = highByte(static_cast<int>(acceleration * 10));
     byte acceleration_low = lowByte(static_cast<int>(acceleration * 10));
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_ACCELERATION_LEN);
-    hw_serial->write(SET_ACCELERATION);
-    hw_serial->write(acceleration_high);
-    hw_serial->write(acceleration_low);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_ACCELERATION_LEN);
+    mycobot_serial.write(SET_ACCELERATION);
+    mycobot_serial.write(acceleration_high);
+    mycobot_serial.write(acceleration_low);
+    mycobot_serial.write(footer);
 }
 
 float MyPalletizerBasic::getJointMin(int joint)
 {
     byte joint_number = joint;
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_JOINT_MIN_LEN);
-    hw_serial->write(GET_JOINT_MIN);
-    hw_serial->write(joint_number);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_JOINT_MIN_LEN);
+    mycobot_serial.write(GET_JOINT_MIN);
+    mycobot_serial.write(joint_number);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -1013,12 +1014,12 @@ float MyPalletizerBasic::getJointMin(int joint)
 float MyPalletizerBasic::getJointMax(int joint)
 {
     byte joint_number = joint;
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_JOINT_MAX_LEN);
-    hw_serial->write(GET_JOINT_MAX);
-    hw_serial->write(joint_number);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_JOINT_MAX_LEN);
+    mycobot_serial.write(GET_JOINT_MAX);
+    mycobot_serial.write(joint_number);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -1047,14 +1048,14 @@ void MyPalletizerBasic::setJointMin(int joint, float angle)
     byte joint_number = joint;
     byte angle_low = lowByte(static_cast<int>(angle * 10));
     byte angle_high = highByte(static_cast<int>(angle * 10));
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_JOINT_MIN_LEN);
-    hw_serial->write(SET_JOINT_MIN);
-    hw_serial->write(joint_number);
-    hw_serial->write(angle_high);
-    hw_serial->write(angle_low);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_JOINT_MIN_LEN);
+    mycobot_serial.write(SET_JOINT_MIN);
+    mycobot_serial.write(joint_number);
+    mycobot_serial.write(angle_high);
+    mycobot_serial.write(angle_low);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::setJointMax(int joint, float angle)
@@ -1062,25 +1063,25 @@ void MyPalletizerBasic::setJointMax(int joint, float angle)
     byte joint_number = joint;
     byte angle_low = lowByte(static_cast<int>(angle * 10));
     byte angle_high = highByte(static_cast<int>(angle * 10));
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_JOINT_MAX_LEN);
-    hw_serial->write(SET_JOINT_MAX);
-    hw_serial->write(joint_number);
-    hw_serial->write(angle_high);
-    hw_serial->write(angle_low);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_JOINT_MAX_LEN);
+    mycobot_serial.write(SET_JOINT_MAX);
+    mycobot_serial.write(joint_number);
+    mycobot_serial.write(angle_high);
+    mycobot_serial.write(angle_low);
+    mycobot_serial.write(footer);
 }
 
 bool MyPalletizerBasic::isServoEnabled(int joint)
 {
     byte joint_number = joint;
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(IS_SERVO_ENABLED_LEN);
-    hw_serial->write(IS_SERVO_ENABLED);
-    hw_serial->write(joint_number);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(IS_SERVO_ENABLED_LEN);
+    mycobot_serial.write(IS_SERVO_ENABLED);
+    mycobot_serial.write(joint_number);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -1105,11 +1106,11 @@ bool MyPalletizerBasic::isServoEnabled(int joint)
 
 bool MyPalletizerBasic::isAllServoEnabled()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(IS_ALL_SERVO_ENABLED_LEN);
-    hw_serial->write(IS_ALL_SERVO_ENABLED);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(IS_ALL_SERVO_ENABLED_LEN);
+    mycobot_serial.write(IS_ALL_SERVO_ENABLED);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -1135,13 +1136,13 @@ bool MyPalletizerBasic::isAllServoEnabled()
 byte MyPalletizerBasic::getServoData(int joint, byte data_id)
 {
     byte joint_number = joint;
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_SERVO_DATA_LEN);
-    hw_serial->write(GET_SERVO_DATA);
-    hw_serial->write(joint_number);
-    hw_serial->write(data_id);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_SERVO_DATA_LEN);
+    mycobot_serial.write(GET_SERVO_DATA);
+    mycobot_serial.write(joint_number);
+    mycobot_serial.write(data_id);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -1168,98 +1169,98 @@ byte MyPalletizerBasic::getServoData(int joint, byte data_id)
 void MyPalletizerBasic::setServoCalibration(int joint)
 {
     byte joint_number = joint;
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_SERVO_CALIBRATION_LEN);
-    hw_serial->write(SET_SERVO_CALIBRATION);
-    hw_serial->write(joint_number);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_SERVO_CALIBRATION_LEN);
+    mycobot_serial.write(SET_SERVO_CALIBRATION);
+    mycobot_serial.write(joint_number);
+    mycobot_serial.write(footer);
 }
 
 
 void MyPalletizerBasic::setPinMode(byte pin_no, byte pin_mode)
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_PIN_MODE_LEN);
-    hw_serial->write(SET_PIN_MODE);
-    hw_serial->write(pin_no);
-    hw_serial->write(pin_mode);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_PIN_MODE_LEN);
+    mycobot_serial.write(SET_PIN_MODE);
+    mycobot_serial.write(pin_no);
+    mycobot_serial.write(pin_mode);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::pause()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(PROGRAM_PAUSE_LEN);
-    hw_serial->write(PROGRAM_PAUSE);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(PROGRAM_PAUSE_LEN);
+    mycobot_serial.write(PROGRAM_PAUSE);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::resume()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(PROGRAM_RESUME_LEN);
-    hw_serial->write(PROGRAM_RESUME);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(PROGRAM_RESUME_LEN);
+    mycobot_serial.write(PROGRAM_RESUME);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::stop()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(TASK_STOP_LEN);
-    hw_serial->write(TASK_STOP);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(TASK_STOP_LEN);
+    mycobot_serial.write(TASK_STOP);
+    mycobot_serial.write(footer);
 }
 
 
 void MyPalletizerBasic::setLEDRGB(byte r, byte g, byte b)
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_LED_LEN);
-    hw_serial->write(SET_LED);
-    hw_serial->write(r);
-    hw_serial->write(g);
-    hw_serial->write(b);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_LED_LEN);
+    mycobot_serial.write(SET_LED);
+    mycobot_serial.write(r);
+    mycobot_serial.write(g);
+    mycobot_serial.write(b);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::setGripper(int data)
 {
     byte gripper_data = data;
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_GRIPPER_STATE_LEN);
-    hw_serial->write(SET_GRIPPER_STATE);
-    hw_serial->write(gripper_data);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_GRIPPER_STATE_LEN);
+    mycobot_serial.write(SET_GRIPPER_STATE);
+    mycobot_serial.write(gripper_data);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::setServoData(byte servo_no, byte servo_state,
                                      byte servo_data)
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_SERVO_DATA_LEN);
-    hw_serial->write(SET_SERVO_DATA);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_SERVO_DATA_LEN);
+    mycobot_serial.write(SET_SERVO_DATA);
 
-    hw_serial->write(servo_no);
-    hw_serial->write(servo_state);
-    hw_serial->write(servo_data);
-    hw_serial->write(footer);
+    mycobot_serial.write(servo_no);
+    mycobot_serial.write(servo_state);
+    mycobot_serial.write(servo_data);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::setFreeMove()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_FREE_MOVE_LEN);
-    hw_serial->write(SET_FREE_MOVE);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_FREE_MOVE_LEN);
+    mycobot_serial.write(SET_FREE_MOVE);
+    mycobot_serial.write(footer);
 }
 
 /*
@@ -1294,21 +1295,21 @@ void MyPalletizerBasic::setMovementType(MovementType movement_type)
 {
     byte mt = movement_type;
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_MOVEMENT_TYPE_LEN);
-    hw_serial->write(SET_MOVEMENT_TYPE);
-    hw_serial->write(mt);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_MOVEMENT_TYPE_LEN);
+    mycobot_serial.write(SET_MOVEMENT_TYPE);
+    mycobot_serial.write(mt);
+    mycobot_serial.write(footer);
 }
 
 MovementType MyPalletizerBasic::getMovementType()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_MOVEMENT_TYPE_LEN);
-    hw_serial->write(GET_MOVEMENT_TYPE);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_MOVEMENT_TYPE_LEN);
+    mycobot_serial.write(GET_MOVEMENT_TYPE);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -1352,23 +1353,23 @@ void MyPalletizerBasic::setToolReference(MyPalletizerCoords coord)
     byte coord_rz_low = lowByte(static_cast<int>(coord[5] * 100));
     byte coord_rz_high = highByte(static_cast<int>(coord[5] * 100));
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_TOOL_REF_LEN);
-    hw_serial->write(SET_TOOL_REF);
-    hw_serial->write(coord_x_high);
-    hw_serial->write(coord_x_low);
-    hw_serial->write(coord_y_high);
-    hw_serial->write(coord_y_low);
-    hw_serial->write(coord_z_high);
-    hw_serial->write(coord_z_low);
-    hw_serial->write(coord_rx_high);
-    hw_serial->write(coord_rx_low);
-    hw_serial->write(coord_ry_high);
-    hw_serial->write(coord_ry_low);
-    hw_serial->write(coord_rz_high);
-    hw_serial->write(coord_rz_low);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_TOOL_REF_LEN);
+    mycobot_serial.write(SET_TOOL_REF);
+    mycobot_serial.write(coord_x_high);
+    mycobot_serial.write(coord_x_low);
+    mycobot_serial.write(coord_y_high);
+    mycobot_serial.write(coord_y_low);
+    mycobot_serial.write(coord_z_high);
+    mycobot_serial.write(coord_z_low);
+    mycobot_serial.write(coord_rx_high);
+    mycobot_serial.write(coord_rx_low);
+    mycobot_serial.write(coord_ry_high);
+    mycobot_serial.write(coord_ry_low);
+    mycobot_serial.write(coord_rz_high);
+    mycobot_serial.write(coord_rz_low);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::setWorldReference(MyPalletizerCoords coord)
@@ -1391,32 +1392,32 @@ void MyPalletizerBasic::setWorldReference(MyPalletizerCoords coord)
     byte coord_rz_low = lowByte(static_cast<int>(coord[5] * 100));
     byte coord_rz_high = highByte(static_cast<int>(coord[5] * 100));
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_WORLD_REF_LEN);
-    hw_serial->write(SET_WORLD_REF);
-    hw_serial->write(coord_x_high);
-    hw_serial->write(coord_x_low);
-    hw_serial->write(coord_y_high);
-    hw_serial->write(coord_y_low);
-    hw_serial->write(coord_z_high);
-    hw_serial->write(coord_z_low);
-    hw_serial->write(coord_rx_high);
-    hw_serial->write(coord_rx_low);
-    hw_serial->write(coord_ry_high);
-    hw_serial->write(coord_ry_low);
-    hw_serial->write(coord_rz_high);
-    hw_serial->write(coord_rz_low);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_WORLD_REF_LEN);
+    mycobot_serial.write(SET_WORLD_REF);
+    mycobot_serial.write(coord_x_high);
+    mycobot_serial.write(coord_x_low);
+    mycobot_serial.write(coord_y_high);
+    mycobot_serial.write(coord_y_low);
+    mycobot_serial.write(coord_z_high);
+    mycobot_serial.write(coord_z_low);
+    mycobot_serial.write(coord_rx_high);
+    mycobot_serial.write(coord_rx_low);
+    mycobot_serial.write(coord_ry_high);
+    mycobot_serial.write(coord_ry_low);
+    mycobot_serial.write(coord_rz_high);
+    mycobot_serial.write(coord_rz_low);
+    mycobot_serial.write(footer);
 }
 
 MyPalletizerCoords MyPalletizerBasic::getToolReference()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_TOOL_REF_LEN);
-    hw_serial->write(GET_TOOL_REF);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_TOOL_REF_LEN);
+    mycobot_serial.write(GET_TOOL_REF);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -1442,11 +1443,11 @@ MyPalletizerCoords MyPalletizerBasic::getToolReference()
 
 MyPalletizerCoords MyPalletizerBasic::getWorldReference()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_WORLD_REF_LEN);
-    hw_serial->write(GET_WORLD_REF);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_WORLD_REF_LEN);
+    mycobot_serial.write(GET_WORLD_REF);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -1474,21 +1475,21 @@ void MyPalletizerBasic::setReferenceFrame(RFType rftype)
 {
     byte rt = rftype;
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_REF_FRAME_LEN);
-    hw_serial->write(SET_REF_FRAME);
-    hw_serial->write(rt);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_REF_FRAME_LEN);
+    mycobot_serial.write(SET_REF_FRAME);
+    mycobot_serial.write(rt);
+    mycobot_serial.write(footer);
 }
 
 RFType MyPalletizerBasic::getReferenceFrame()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_REF_FRAME_LEN);
-    hw_serial->write(GET_REF_FRAME);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_REF_FRAME_LEN);
+    mycobot_serial.write(GET_REF_FRAME);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -1516,21 +1517,21 @@ void MyPalletizerBasic::setEndType(EndType end_type)
 {
     byte et = end_type;
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_END_TYPE_LEN);
-    hw_serial->write(SET_END_TYPE);
-    hw_serial->write(et);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_END_TYPE_LEN);
+    mycobot_serial.write(SET_END_TYPE);
+    mycobot_serial.write(et);
+    mycobot_serial.write(footer);
 }
 
 EndType MyPalletizerBasic::getEndType()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_END_TYPE_LEN);
-    hw_serial->write(GET_END_TYPE);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_END_TYPE_LEN);
+    mycobot_serial.write(GET_END_TYPE);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -1556,23 +1557,23 @@ EndType MyPalletizerBasic::getEndType()
 
 void MyPalletizerBasic::setDigitalOutput(byte pin_no, byte pin_state)
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_DIGITAL_OUTPUT_LEN);
-    hw_serial->write(SET_DIGITAL_OUTPUT);
-    hw_serial->write(pin_no);
-    hw_serial->write(pin_state);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_DIGITAL_OUTPUT_LEN);
+    mycobot_serial.write(SET_DIGITAL_OUTPUT);
+    mycobot_serial.write(pin_no);
+    mycobot_serial.write(pin_state);
+    mycobot_serial.write(footer);
 }
 
 int MyPalletizerBasic::getDigitalInput(byte pin_no)
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_DIGITAL_INPUT_LEN);
-    hw_serial->write(GET_DIGITAL_INPUT);
-    hw_serial->write(pin_no);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_DIGITAL_INPUT_LEN);
+    mycobot_serial.write(GET_DIGITAL_INPUT);
+    mycobot_serial.write(pin_no);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -1599,60 +1600,60 @@ int MyPalletizerBasic::getDigitalInput(byte pin_no)
 /*
 void MyPalletizerBasic::setPWMMode(int freq, byte pin_no, byte channel)
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_PWM_MODE_LEN);
-    hw_serial->write(SET_PWM_MODE);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_PWM_MODE_LEN);
+    mycobot_serial.write(SET_PWM_MODE);
 
 
     byte freq_high = highByte(freq);
     byte freq_low = lowByte(freq);
 
-    hw_serial->write(freq_high);
-    hw_serial->write(freqa_low);
+    mycobot_serial.write(freq_high);
+    mycobot_serial.write(freqa_low);
 
-    hw_serial->write(pin_no);
-    hw_serial->write(channel);
-    hw_serial->write(footer);
+    mycobot_serial.write(pin_no);
+    mycobot_serial.write(channel);
+    mycobot_serial.write(footer);
 }*/
 
 void MyPalletizerBasic::setPWMOutput(byte pin_no, int freq,  byte pin_write)
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_PWM_OUTPUT_LEN);
-    hw_serial->write(SET_PWM_OUTPUT);
-    hw_serial->write(pin_no);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_PWM_OUTPUT_LEN);
+    mycobot_serial.write(SET_PWM_OUTPUT);
+    mycobot_serial.write(pin_no);
 
     byte freq_high = highByte(freq);
     byte freq_low = lowByte(freq);
 
-    hw_serial->write(freq_high);
-    hw_serial->write(freq_low);
+    mycobot_serial.write(freq_high);
+    mycobot_serial.write(freq_low);
 
 
-    hw_serial->write(pin_write);
-    hw_serial->write(footer);
+    mycobot_serial.write(pin_write);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::releaseServo(byte servo_no)
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(RELEASE_SERVO_LEN);
-    hw_serial->write(RELEASE_SERVO);
-    hw_serial->write(servo_no);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(RELEASE_SERVO_LEN);
+    mycobot_serial.write(RELEASE_SERVO);
+    mycobot_serial.write(servo_no);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::focusServo(byte servo_no)
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(FOCUS_SERVO_LEN);
-    hw_serial->write(FOCUS_SERVO);
-    hw_serial->write(servo_no);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(FOCUS_SERVO_LEN);
+    mycobot_serial.write(FOCUS_SERVO);
+    mycobot_serial.write(servo_no);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::setGripperState(byte mode, int sp)
@@ -1660,13 +1661,13 @@ void MyPalletizerBasic::setGripperState(byte mode, int sp)
     if (sp > 100) {
         sp = 100;
     }
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_GRIPPER_STATE_LEN);
-    hw_serial->write(SET_GRIPPER_STATE);
-    hw_serial->write(mode);
-    hw_serial->write(sp);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_GRIPPER_STATE_LEN);
+    mycobot_serial.write(SET_GRIPPER_STATE);
+    mycobot_serial.write(mode);
+    mycobot_serial.write(sp);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::setGripperValue(int data, int sp)
@@ -1677,31 +1678,31 @@ void MyPalletizerBasic::setGripperValue(int data, int sp)
     if (sp > 100) {
         sp = 100;
     }
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_GRIPPER_VALUE_LEN);
-    hw_serial->write(SET_GRIPPER_VALUE);
-    hw_serial->write(data);
-    hw_serial->write(sp);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_GRIPPER_VALUE_LEN);
+    mycobot_serial.write(SET_GRIPPER_VALUE);
+    mycobot_serial.write(data);
+    mycobot_serial.write(sp);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::setGripperIni()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(SET_GRIPPER_INI_LEN);
-    hw_serial->write(SET_GRIPPER_INI);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(SET_GRIPPER_INI_LEN);
+    mycobot_serial.write(SET_GRIPPER_INI);
+    mycobot_serial.write(footer);
 }
 
 int MyPalletizerBasic::getGripperValue()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(GET_GRIPPER_VALUE_LEN);
-    hw_serial->write(GET_GRIPPER_VALUE);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(GET_GRIPPER_VALUE_LEN);
+    mycobot_serial.write(GET_GRIPPER_VALUE);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -1727,11 +1728,11 @@ int MyPalletizerBasic::getGripperValue()
 
 bool MyPalletizerBasic::isGripperMoving()
 {
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(IS_GRIPPER_MOVING_LEN);
-    hw_serial->write(IS_GRIPPER_MOVING);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(IS_GRIPPER_MOVING_LEN);
+    mycobot_serial.write(IS_GRIPPER_MOVING);
+    mycobot_serial.write(footer);
 
     unsigned long t_begin = millis();
     void *tempPtr = nullptr;
@@ -1774,26 +1775,26 @@ void MyPalletizerBasic::moveCCoords(MyPalletizerCoords end_coord, int radius,
     byte radius_low = lowByte(static_cast<int>(radius * 10));
     byte radius_high = highByte(static_cast<int>(radius * 10));
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(MOVEC_COORDS_LEN);
-    hw_serial->write(MOVEC_COORDS);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(MOVEC_COORDS_LEN);
+    mycobot_serial.write(MOVEC_COORDS);
 
-    hw_serial->write(end_x_high);
-    hw_serial->write(end_x_low);
-    hw_serial->write(end_y_high);
-    hw_serial->write(end_y_low);
-    hw_serial->write(end_z_high);
-    hw_serial->write(end_z_low);
-    hw_serial->write(end_theta_high);
-    hw_serial->write(end_theta_low);
+    mycobot_serial.write(end_x_high);
+    mycobot_serial.write(end_x_low);
+    mycobot_serial.write(end_y_high);
+    mycobot_serial.write(end_y_low);
+    mycobot_serial.write(end_z_high);
+    mycobot_serial.write(end_z_low);
+    mycobot_serial.write(end_theta_high);
+    mycobot_serial.write(end_theta_low);
 
-    hw_serial->write(radius_high);
-    hw_serial->write(radius_low);
-    hw_serial->write(direction);
-    hw_serial->write(speed);
+    mycobot_serial.write(radius_high);
+    mycobot_serial.write(radius_low);
+    mycobot_serial.write(direction);
+    mycobot_serial.write(speed);
 
-    hw_serial->write(footer);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::moveCCoords(MyPalletizerCoords center_coord,
@@ -1814,21 +1815,21 @@ void MyPalletizerBasic::moveCCoords(MyPalletizerCoords center_coord,
 
 
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(MOVEC_COORDS_DEFAULT_LEN);
-    hw_serial->write(MOVEC_COORDS_DEFAULT);
-    hw_serial->write(center_x_high);
-    hw_serial->write(center_x_low);
-    hw_serial->write(center_y_high);
-    hw_serial->write(center_y_low);
-    hw_serial->write(center_z_high);
-    hw_serial->write(center_z_low);
-    hw_serial->write(center_theta_high);
-    hw_serial->write(center_theta_low);
-    hw_serial->write(direction);
-    hw_serial->write(speed);
-    hw_serial->write(footer);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(MOVEC_COORDS_DEFAULT_LEN);
+    mycobot_serial.write(MOVEC_COORDS_DEFAULT);
+    mycobot_serial.write(center_x_high);
+    mycobot_serial.write(center_x_low);
+    mycobot_serial.write(center_y_high);
+    mycobot_serial.write(center_y_low);
+    mycobot_serial.write(center_z_high);
+    mycobot_serial.write(center_z_low);
+    mycobot_serial.write(center_theta_high);
+    mycobot_serial.write(center_theta_low);
+    mycobot_serial.write(direction);
+    mycobot_serial.write(speed);
+    mycobot_serial.write(footer);
 }
 
 void MyPalletizerBasic::moveLCoords(MyPalletizerCoords end_coord, int speed)
@@ -1847,19 +1848,19 @@ void MyPalletizerBasic::moveLCoords(MyPalletizerCoords end_coord, int speed)
     byte end_theta_high = highByte(static_cast<int>(end_coord[3] * 100));
 
 
-    hw_serial->write(header);
-    hw_serial->write(header);
-    hw_serial->write(MOVEL_COORDS_LEN);
-    hw_serial->write(MOVEL_COORDS);
+    mycobot_serial.write(header);
+    mycobot_serial.write(header);
+    mycobot_serial.write(MOVEL_COORDS_LEN);
+    mycobot_serial.write(MOVEL_COORDS);
 
-    hw_serial->write(end_x_high);
-    hw_serial->write(end_x_low);
-    hw_serial->write(end_y_high);
-    hw_serial->write(end_y_low);
-    hw_serial->write(end_z_high);
-    hw_serial->write(end_z_low);
-    hw_serial->write(end_theta_high);
-    hw_serial->write(end_theta_low);
-    hw_serial->write(speed);
-    hw_serial->write(footer);
+    mycobot_serial.write(end_x_high);
+    mycobot_serial.write(end_x_low);
+    mycobot_serial.write(end_y_high);
+    mycobot_serial.write(end_y_low);
+    mycobot_serial.write(end_z_high);
+    mycobot_serial.write(end_z_low);
+    mycobot_serial.write(end_theta_high);
+    mycobot_serial.write(end_theta_low);
+    mycobot_serial.write(speed);
+    mycobot_serial.write(footer);
 }
