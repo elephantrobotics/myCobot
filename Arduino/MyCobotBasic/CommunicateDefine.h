@@ -189,7 +189,7 @@
 
 #define GET_DIGITAL_INPUT                  0x62
 #define GET_DIGITAL_INPUT_LEN              3
-#define GET_DIGITAL_INPUT_RETURN_LEN       3
+#define GET_DIGITAL_INPUT_RETURN_LEN       4
 
 #define SET_PWM_MODE                       0x63
 #define SET_PWM_MODE_LEN                   6

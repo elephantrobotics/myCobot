@@ -184,7 +184,7 @@ void *MyPalletizerBasic::readData()
     if (readSerial(data_len, 1) != 1)
         return nullptr;
 #if defined MyCobot_M5
-    Serial.printf("datalen is %d", data_len[0]);
+    // Serial.printf("datalen is %d", data_len[0]);
 #endif
     switch (static_cast<int>(data_len[0])) {
         case 3:
@@ -247,12 +247,6 @@ void *MyPalletizerBasic::readData()
                     return pMessage;
                 }
 
-                case GET_DIGITAL_INPUT: {
-                    int *returnValue = new int;
-                    *returnValue = r_data_3[1];
-                    return returnValue;
-                }
-
                 case IS_GRIPPER_MOVING: {
                     int *pState = new int;
                     *pState = r_data_3[1];
@@ -282,6 +276,12 @@ void *MyPalletizerBasic::readData()
                     bool *pServoState = new bool;
                     *pServoState = bool(r_data_4[2]);
                     return pServoState;
+                }
+
+                case GET_DIGITAL_INPUT: {
+                    int *returnValue = new int;
+                    *returnValue = r_data_4[2];
+                    return returnValue;
                 }
 
                 case GET_FEED_OVERRIDE: {

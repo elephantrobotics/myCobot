@@ -241,11 +241,6 @@ int MyCobotBasic::readData(T& pData, O& bData, R& rData, E& eData, M& mData)
                     return 1;
                 }
 
-                case GET_DIGITAL_INPUT: {
-                    bData = r_data_3[1];
-                    return 1;
-                }
-
                 case IS_GRIPPER_MOVING: {
                     bData = r_data_3[1];
                     return 1;
@@ -269,6 +264,11 @@ int MyCobotBasic::readData(T& pData, O& bData, R& rData, E& eData, M& mData)
             switch (int(r_data_4[0])) {
                 case IS_SERVO_ENABLED: {
                     bData = bool(r_data_4[2]);
+                    return 1;
+                }
+
+                case GET_DIGITAL_INPUT: {
+                    bData = r_data_4[2];
                     return 1;
                 }
 
